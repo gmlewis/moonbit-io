@@ -16,339 +16,309 @@
 
 /// Seek whence values.
 pub enum Whence {
-	SeekStart    // seek relative to the origin of the file
-	SeekCurrent  // seek relative to the current offset
-	SeekEnd      // seek relative to the end
+  SeekStart /// seek relative to the origin of the file
+  SeekCurrent /// seek relative to the current offset
+  SeekEnd /// seek relative to the end
 }
 
-// ErrShortWrite means that a write accepted fewer bytes than requested
-// but failed to return an explicit error.
-var ErrShortWrite = errors.New("short write")
+/// An IOError can be tested with equality checks.
+pub type! IOError String derive(Show, Eq)
 
-// errInvalidWrite means that a write returned an impossible count.
-var errInvalidWrite = errors.New("invalid write result")
+/// err_short_write means that a write accepted fewer bytes than requested
+/// but failed to return an explicit error.
+pub let err_short_write : IOError = IOError("short write")
 
-// ErrShortBuffer means that a read required a longer buffer than was provided.
-var ErrShortBuffer = errors.New("short buffer")
+/// err_invalid_write means that a write returned an impossible count.
+pub let err_invalid_write : IOError = IOError("invalid write result")
 
-// EOF is the error returned by Read when no more input is available.
-// (Read must return EOF itself, not an error wrapping EOF,
-// because callers will test for EOF using ==.)
-// Functions should return EOF only to signal a graceful end of input.
-// If the EOF occurs unexpectedly in a structured data stream,
-// the appropriate error is either [ErrUnexpectedEOF] or some other error
-// giving more detail.
-var EOF = errors.New("EOF")
+/// err_short_buffer means that a read required a longer buffer than was provided.
+pub let err_short_buffer : IOError = IOError("short buffer")
 
-// ErrUnexpectedEOF means that EOF was encountered in the
-// middle of reading a fixed-size block or data structure.
-var ErrUnexpectedEOF = errors.New("unexpected EOF")
+/// eof is the error returned by Read when no more input is available.
+/// (Read must return eof itself, not an error wrapping eof,
+/// because callers will test for eof using ==.)
+/// Functions should return eof only to signal a graceful end of input.
+/// If the eof occurs unexpectedly in a structured data stream,
+/// the appropriate error is either [err_unexpected_eof] or some other error
+/// giving more detail.
+pub let eof : IOError = IOError("eof")
 
-// ErrNoProgress is returned by some clients of a [Reader] when
-// many calls to Read have failed to return any data or error,
-// usually the sign of a broken [Reader] implementation.
-var ErrNoProgress = errors.New("multiple Read calls return no data or error")
+/// err_unexpected_eof means that eof was encountered in the
+/// middle of reading a fixed-size block or data structure.
+pub let err_unexpected_eof : IOError = IOError("unexpected eof")
 
-// Reader is the interface that wraps the basic Read method.
-//
-// Read reads up to len(p) bytes into p. It returns the number of bytes
-// read (0 <= n <= len(p)) and any error encountered. Even if Read
-// returns n < len(p), it may use all of p as scratch space during the call.
-// If some data is available but not len(p) bytes, Read conventionally
-// returns what is available instead of waiting for more.
-//
-// When Read encounters an error or end-of-file condition after
-// successfully reading n > 0 bytes, it returns the number of
-// bytes read. It may return the (non-nil) error from the same call
-// or return the error (and n == 0) from a subsequent call.
-// An instance of this general case is that a Reader returning
-// a non-zero number of bytes at the end of the input stream may
-// return either err == EOF or err == nil. The next Read should
-// return 0, EOF.
-//
-// Callers should always process the n > 0 bytes returned before
-// considering the error err. Doing so correctly handles I/O errors
-// that happen after reading some bytes and also both of the
-// allowed EOF behaviors.
-//
-// If len(p) == 0, Read should always return n == 0. It may return a
-// non-nil error if some error condition is known, such as EOF.
-//
-// Implementations of Read are discouraged from returning a
-// zero byte count with a nil error, except when len(p) == 0.
-// Callers should treat a return of 0 and nil as indicating that
-// nothing happened; in particular it does not indicate EOF.
-//
-// Implementations must not retain p.
-type Reader interface {
-	Read(p []byte) (n int, err error)
+/// err_no_progress is returned by some clients of a [Reader] when
+/// many calls to Read have failed to return any data or error,
+/// usually the sign of a broken [Reader] implementation.
+pub let err_no_progress : IOError = IOError(
+  "multiple Read calls return no data or error",
+)
+
+/// Reader is the interface that wraps the basic Read method.
+///
+/// Read reads up to len(p) bytes into p. It returns the number of bytes
+/// read (0 <= n <= len(p)) and any error encountered. Even if Read
+/// returns n < len(p), it may use all of p as scratch space during the call.
+/// If some data is available but not len(p) bytes, Read conventionally
+/// returns what is available instead of waiting for more.
+///
+/// When Read encounters an error or end-of-file condition after
+/// successfully reading n > 0 bytes, it returns the number of
+/// bytes read. It may return the (non-nil) error from the same call
+/// or return the error (and n == 0) from a subsequent call.
+/// An instance of this general case is that a Reader returning
+/// a non-zero number of bytes at the end of the input stream may
+/// return either err == eof or err == nil. The next Read should
+/// return 0, eof.
+///
+/// Callers should always process the n > 0 bytes returned before
+/// considering the error err. Doing so correctly handles I/O errors
+/// that happen after reading some bytes and also both of the
+/// allowed eof behaviors.
+///
+/// If len(p) == 0, Read should always return n == 0. It may return a
+/// non-nil error if some error condition is known, such as eof.
+///
+/// Implementations of Read are discouraged from returning a
+/// zero byte count with a nil error, except when len(p) == 0.
+/// Callers should treat a return of 0 and nil as indicating that
+/// nothing happened; in particular it does not indicate eof.
+///
+/// Implementations must not retain p.
+pub trait Reader {
+  read(Self, Slice[Byte]) -> (Int, IOError?)
 }
 
-// Writer is the interface that wraps the basic Write method.
-//
-// Write writes len(p) bytes from p to the underlying data stream.
-// It returns the number of bytes written from p (0 <= n <= len(p))
-// and any error encountered that caused the write to stop early.
-// Write must return a non-nil error if it returns n < len(p).
-// Write must not modify the slice data, even temporarily.
-//
-// Implementations must not retain p.
-type Writer interface {
-	Write(p []byte) (n int, err error)
+/// Writer is the interface that wraps the basic Write method.
+///
+/// Write writes len(p) bytes from p to the underlying data stream.
+/// It returns the number of bytes written from p (0 <= n <= len(p))
+/// and any error encountered that caused the write to stop early.
+/// Write must return a non-nil error if it returns n < len(p).
+/// Write must not modify the slice data, even temporarily.
+///
+/// Implementations must not retain p.
+pub trait Writer {
+  write(Self, Slice[Byte]) -> (Int, IOError?)
 }
 
-// Closer is the interface that wraps the basic Close method.
-//
-// The behavior of Close after the first call is undefined.
-// Specific implementations may document their own behavior.
-type Closer interface {
-	Close() error
+/// Closer is the interface that wraps the basic Close method.
+///
+/// The behavior of Close after the first call is undefined.
+/// Specific implementations may document their own behavior.
+pub trait Closer {
+  close(Self) -> IOError?
 }
 
-// Seeker is the interface that wraps the basic Seek method.
-//
-// Seek sets the offset for the next Read or Write to offset,
-// interpreted according to whence:
-// [SeekStart] means relative to the start of the file,
-// [SeekCurrent] means relative to the current offset, and
-// [SeekEnd] means relative to the end
-// (for example, offset = -2 specifies the penultimate byte of the file).
-// Seek returns the new offset relative to the start of the
-// file or an error, if any.
-//
-// Seeking to an offset before the start of the file is an error.
-// Seeking to any positive offset may be allowed, but if the new offset exceeds
-// the size of the underlying object the behavior of subsequent I/O operations
-// is implementation-dependent.
-type Seeker interface {
-	Seek(offset int64, whence int) (int64, error)
+/// Seeker is the interface that wraps the basic Seek method.
+///
+/// Seek sets the offset for the next Read or Write to offset,
+/// interpreted according to whence:
+/// [SeekStart] means relative to the start of the file,
+/// [SeekCurrent] means relative to the current offset, and
+/// [SeekEnd] means relative to the end
+/// (for example, offset = -2 specifies the penultimate byte of the file).
+/// Seek returns the new offset relative to the start of the
+/// file or an error, if any.
+///
+/// Seeking to an offset before the start of the file is an error.
+/// Seeking to any positive offset may be allowed, but if the new offset exceeds
+/// the size of the underlying object the behavior of subsequent I/O operations
+/// is implementation-dependent.
+pub trait Seeker {
+  seek(Self, Int64, Whence) -> (Int64, IOError?)
 }
 
-// ReadWriter is the interface that groups the basic Read and Write methods.
-type ReadWriter interface {
-	Reader
-	Writer
+/// ReadWriter is the interface that groups the basic Read and Write methods.
+pub trait ReadWriter {
+  read(Self, Slice[Byte]) -> (Int, IOError?)
+  write(Self, Slice[Byte]) -> (Int, IOError?)
 }
 
-// ReadCloser is the interface that groups the basic Read and Close methods.
-type ReadCloser interface {
-	Reader
-	Closer
+/// ReadCloser is the interface that groups the basic Read and Close methods.
+pub trait ReadCloser {
+  read(Self, Slice[Byte]) -> (Int, IOError?)
+  close(Self) -> IOError?
 }
 
-// WriteCloser is the interface that groups the basic Write and Close methods.
-type WriteCloser interface {
-	Writer
-	Closer
+/// WriteCloser is the interface that groups the basic Write and Close methods.
+pub trait WriteCloser {
+  write(Self, Slice[Byte]) -> (Int, IOError?)
+  close(Self) -> IOError?
 }
 
-// ReadWriteCloser is the interface that groups the basic Read, Write and Close methods.
-type ReadWriteCloser interface {
-	Reader
-	Writer
-	Closer
+/// ReadWriteCloser is the interface that groups the basic Read, Write and Close methods.
+pub trait ReadWriteCloser {
+  read(Self, Slice[Byte]) -> (Int, IOError?)
+  write(Self, Slice[Byte]) -> (Int, IOError?)
+  close(Self) -> IOError?
 }
 
-// ReadSeeker is the interface that groups the basic Read and Seek methods.
-type ReadSeeker interface {
-	Reader
-	Seeker
+/// ReadSeeker is the interface that groups the basic Read and Seek methods.
+pub trait ReadSeeker {
+  read(Self, Slice[Byte]) -> (Int, IOError?)
+  seek(Self, Int64, Whence) -> (Int64, IOError?)
 }
 
-// ReadSeekCloser is the interface that groups the basic Read, Seek and Close
-// methods.
-type ReadSeekCloser interface {
-	Reader
-	Seeker
-	Closer
+/// ReadSeekCloser is the interface that groups the basic Read, Seek and Close
+/// methods.
+pub trait ReadSeekCloser {
+  read(Self, Slice[Byte]) -> (Int, IOError?)
+  seek(Self, Int64, Whence) -> (Int64, IOError?)
+  close(Self) -> IOError?
 }
 
-// WriteSeeker is the interface that groups the basic Write and Seek methods.
-type WriteSeeker interface {
-	Writer
-	Seeker
+/// WriteSeeker is the interface that groups the basic Write and Seek methods.
+pub trait WriteSeeker {
+  write(Self, Slice[Byte]) -> (Int, IOError?)
+  seek(Self, Int64, Whence) -> (Int64, IOError?)
 }
 
-// ReadWriteSeeker is the interface that groups the basic Read, Write and Seek methods.
-type ReadWriteSeeker interface {
-	Reader
-	Writer
-	Seeker
+/// ReadWriteSeeker is the interface that groups the basic Read, Write and Seek methods.
+pub trait ReadWriteSeeker {
+  read(Self, Slice[Byte]) -> (Int, IOError?)
+  write(Self, Slice[Byte]) -> (Int, IOError?)
+  seek(Self, Int64, Whence) -> (Int64, IOError?)
 }
 
-// ReaderFrom is the interface that wraps the ReadFrom method.
-//
-// ReadFrom reads data from r until EOF or error.
-// The return value n is the number of bytes read.
-// Any error except EOF encountered during the read is also returned.
-//
-// The [Copy] function uses [ReaderFrom] if available.
-type ReaderFrom interface {
-	ReadFrom(r Reader) (n int64, err error)
+/// ReaderFrom is the interface that wraps the read_from method.
+///
+/// read_from reads data from r until eof or error.
+/// The return value n is the number of bytes read.
+/// Any error except eof encountered during the read is also returned.
+///
+/// The [Copy] function uses [ReaderFrom] if available.
+pub trait ReaderFrom {
+  read_from(Self, Reader) -> (Int64, IOError?)
 }
 
-// WriterTo is the interface that wraps the WriteTo method.
-//
-// WriteTo writes data to w until there's no more data to write or
-// when an error occurs. The return value n is the number of bytes
-// written. Any error encountered during the write is also returned.
-//
-// The Copy function uses WriterTo if available.
-type WriterTo interface {
-	WriteTo(w Writer) (n int64, err error)
+/// WriterTo is the interface that wraps the write_to method.
+///
+/// write_to writes data to w until there's no more data to write or
+/// when an error occurs. The return value n is the number of bytes
+/// written. Any error encountered during the write is also returned.
+///
+/// The Copy function uses WriterTo if available.
+pub trait WriterTo {
+  write_to(Self, Writer) -> (Int64, IOError?)
 }
 
-// ReaderAt is the interface that wraps the basic ReadAt method.
-//
-// ReadAt reads len(p) bytes into p starting at offset off in the
-// underlying input source. It returns the number of bytes
-// read (0 <= n <= len(p)) and any error encountered.
-//
-// When ReadAt returns n < len(p), it returns a non-nil error
-// explaining why more bytes were not returned. In this respect,
-// ReadAt is stricter than Read.
-//
-// Even if ReadAt returns n < len(p), it may use all of p as scratch
-// space during the call. If some data is available but not len(p) bytes,
-// ReadAt blocks until either all the data is available or an error occurs.
-// In this respect ReadAt is different from Read.
-//
-// If the n = len(p) bytes returned by ReadAt are at the end of the
-// input source, ReadAt may return either err == EOF or err == nil.
-//
-// If ReadAt is reading from an input source with a seek offset,
-// ReadAt should not affect nor be affected by the underlying
-// seek offset.
-//
-// Clients of ReadAt can execute parallel ReadAt calls on the
-// same input source.
-//
-// Implementations must not retain p.
-type ReaderAt interface {
-	ReadAt(p []byte, off int64) (n int, err error)
+/// ReaderAt is the interface that wraps the basic read_at method.
+///
+/// read_at reads len(p) bytes into p starting at offset off in the
+/// underlying input source. It returns the number of bytes
+/// read (0 <= n <= len(p)) and any error encountered.
+///
+/// When read_at returns n < len(p), it returns a non-nil error
+/// explaining why more bytes were not returned. In this respect,
+/// read_at is stricter than Read.
+///
+/// Even if read_at returns n < len(p), it may use all of p as scratch
+/// space during the call. If some data is available but not len(p) bytes,
+/// read_at blocks until either all the data is available or an error occurs.
+/// In this respect read_at is different from Read.
+///
+/// If the n = len(p) bytes returned by read_at are at the end of the
+/// input source, read_at may return either err == eof or err == nil.
+///
+/// If read_at is reading from an input source with a seek offset,
+/// read_at should not affect nor be affected by the underlying
+/// seek offset.
+///
+/// Clients of read_at can execute parallel read_at calls on the
+/// same input source.
+///
+/// Implementations must not retain p.
+pub trait ReaderAt {
+  read_at(Self, Slice[Byte], Int64) -> (Int, IOError?)
 }
 
-// WriterAt is the interface that wraps the basic WriteAt method.
-//
-// WriteAt writes len(p) bytes from p to the underlying data stream
-// at offset off. It returns the number of bytes written from p (0 <= n <= len(p))
-// and any error encountered that caused the write to stop early.
-// WriteAt must return a non-nil error if it returns n < len(p).
-//
-// If WriteAt is writing to a destination with a seek offset,
-// WriteAt should not affect nor be affected by the underlying
-// seek offset.
-//
-// Clients of WriteAt can execute parallel WriteAt calls on the same
-// destination if the ranges do not overlap.
-//
-// Implementations must not retain p.
-type WriterAt interface {
-	WriteAt(p []byte, off int64) (n int, err error)
+/// WriterAt is the interface that wraps the basic write_at method.
+///
+/// write_at writes len(p) bytes from p to the underlying data stream
+/// at offset off. It returns the number of bytes written from p (0 <= n <= len(p))
+/// and any error encountered that caused the write to stop early.
+/// write_at must return a non-nil error if it returns n < len(p).
+///
+/// If write_at is writing to a destination with a seek offset,
+/// write_at should not affect nor be affected by the underlying
+/// seek offset.
+///
+/// Clients of write_at can execute parallel write_at calls on the same
+/// destination if the ranges do not overlap.
+///
+/// Implementations must not retain p.
+pub trait WriterAt {
+  write_at(Self, Slice[Byte], Int64) -> (Int, IOError?)
 }
 
-// ByteReader is the interface that wraps the ReadByte method.
-//
-// ReadByte reads and returns the next byte from the input or
-// any error encountered. If ReadByte returns an error, no input
-// byte was consumed, and the returned byte value is undefined.
-//
-// ReadByte provides an efficient interface for byte-at-time
-// processing. A [Reader] that does not implement  ByteReader
-// can be wrapped using bufio.NewReader to add this method.
-type ByteReader interface {
-	ReadByte() (byte, error)
+/// ByteReader is the interface that wraps the read_byte method.
+///
+/// read_byte reads and returns the next byte from the input or
+/// any error encountered. If read_byte returns an error, no input
+/// byte was consumed, and the returned byte value is undefined.
+///
+/// read_byte provides an efficient interface for byte-at-time
+/// processing. A [Reader] that does not implement  ByteReader
+/// can be wrapped using bufio.NewReader to add this method.
+pub trait ByteReader {
+  read_byte(Self) -> (Byte, IOError?)
 }
 
-// ByteScanner is the interface that adds the UnreadByte method to the
-// basic ReadByte method.
-//
-// UnreadByte causes the next call to ReadByte to return the last byte read.
-// If the last operation was not a successful call to ReadByte, UnreadByte may
-// return an error, unread the last byte read (or the byte prior to the
-// last-unread byte), or (in implementations that support the [Seeker] interface)
-// seek to one byte before the current offset.
-type ByteScanner interface {
-	ByteReader
-	UnreadByte() error
+/// ByteScanner is the interface that adds the unread_byte method to the
+/// basic read_byte method.
+///
+/// unread_byte causes the next call to read_byte to return the last byte read.
+/// If the last operation was not a successful call to read_byte, unread_byte may
+/// return an error, unread the last byte read (or the byte prior to the
+/// last-unread byte), or (in implementations that support the [Seeker] interface)
+/// seek to one byte before the current offset.
+pub trait ByteScanner {
+  read_byte(Self) -> (Byte, IOError?)
+  unread_byte(Self) -> IOError?
 }
 
-// ByteWriter is the interface that wraps the WriteByte method.
-type ByteWriter interface {
-	WriteByte(c byte) error
+/// ByteWriter is the interface that wraps the write_byte method.
+pub trait ByteWriter {
+  write_byte(Self, Byte) -> IOError?
 }
 
-// RuneReader is the interface that wraps the ReadRune method.
-//
-// ReadRune reads a single encoded Unicode character
-// and returns the rune and its size in bytes. If no character is
-// available, err will be set.
-type RuneReader interface {
-	ReadRune() (r rune, size int, err error)
-}
-
-// RuneScanner is the interface that adds the UnreadRune method to the
-// basic ReadRune method.
-//
-// UnreadRune causes the next call to ReadRune to return the last rune read.
-// If the last operation was not a successful call to ReadRune, UnreadRune may
-// return an error, unread the last rune read (or the rune prior to the
-// last-unread rune), or (in implementations that support the [Seeker] interface)
-// seek to the start of the rune before the current offset.
-type RuneScanner interface {
-	RuneReader
-	UnreadRune() error
-}
-
-// StringWriter is the interface that wraps the WriteString method.
-type StringWriter interface {
-	WriteString(s string) (n int, err error)
-}
-
-// WriteString writes the contents of the string s to w, which accepts a slice of bytes.
-// If w implements [StringWriter], [StringWriter.WriteString] is invoked directly.
-// Otherwise, [Writer.Write] is called exactly once.
-func WriteString(w Writer, s string) (n int, err error) {
-	if sw, ok := w.(StringWriter); ok {
-		return sw.WriteString(s)
-	}
-	return w.Write([]byte(s))
-}
-
-// ReadAtLeast reads from r into buf until it has read at least min bytes.
-// It returns the number of bytes copied and an error if fewer bytes were read.
-// The error is EOF only if no bytes were read.
-// If an EOF happens after reading fewer than min bytes,
-// ReadAtLeast returns [ErrUnexpectedEOF].
-// If min is greater than the length of buf, ReadAtLeast returns [ErrShortBuffer].
-// On return, n >= min if and only if err == nil.
-// If r returns an error having read at least min bytes, the error is dropped.
-func ReadAtLeast(r Reader, buf []byte, min int) (n int, err error) {
-	if len(buf) < min {
-		return 0, ErrShortBuffer
-	}
-	for n < min && err == nil {
-		var nn int
-		nn, err = r.Read(buf[n:])
-		n += nn
-	}
-	if n >= min {
-		err = nil
-	} else if n > 0 && err == EOF {
-		err = ErrUnexpectedEOF
-	}
-	return
+/// read_at_least reads from r into buf until it has read at least min bytes.
+/// It returns the number of bytes copied and an error if fewer bytes were read.
+/// The error is eof only if no bytes were read.
+/// If an eof happens after reading fewer than min bytes,
+/// read_at_least returns [err_unexpected_eof].
+/// If min is greater than the length of buf, read_at_least returns [err_short_buffer].
+/// On return, n >= min if and only if err == nil.
+/// If r returns an error having read at least min bytes, the error is dropped.
+fn read_at_least(r : Reader, buf : Slice[Byte], min : Int) -> (Int, IOError?) {
+  let mut n = 0
+  let mut err = None
+  if buf.length() < min {
+    return (0, Some(err_short_buffer))
+  }
+  while n < min && err == None {
+    let v = r.read(buf[n:])
+    n += v.0
+    err = v.1
+  }
+  if n >= min {
+    err = None
+  } else if n > 0 && err == Some(eof) {
+    err = Some(err_unexpected_eof)
+  }
+  return (n, err)
 }
 
 // ReadFull reads exactly len(buf) bytes from r into buf.
 // It returns the number of bytes copied and an error if fewer bytes were read.
-// The error is EOF only if no bytes were read.
-// If an EOF happens after reading some but not all the bytes,
-// ReadFull returns [ErrUnexpectedEOF].
+// The error is eof only if no bytes were read.
+// If an eof happens after reading some but not all the bytes,
+// ReadFull returns [err_unexpected_eof].
 // On return, n == len(buf) if and only if err == nil.
 // If r returns an error having read at least len(buf) bytes, the error is dropped.
-func ReadFull(r Reader, buf []byte) (n int, err error) {
-	return ReadAtLeast(r, buf, len(buf))
+fn ReadFull(r Reader, buf []byte) (n int, err error) {
+	return read_at_least(r, buf, len(buf))
 }
 
 // CopyN copies n bytes (or until an error) from src to dst.
@@ -357,31 +327,31 @@ func ReadFull(r Reader, buf []byte) (n int, err error) {
 // On return, written == n if and only if err == nil.
 //
 // If dst implements [ReaderFrom], the copy is implemented using it.
-func CopyN(dst Writer, src Reader, n int64) (written int64, err error) {
+fn CopyN(dst Writer, src Reader, n int64) (written int64, err error) {
 	written, err = Copy(dst, LimitReader(src, n))
 	if written == n {
 		return n, nil
 	}
 	if written < n && err == nil {
-		// src stopped early; must have been EOF.
-		err = EOF
+		// src stopped early; must have been eof.
+		err = eof
 	}
 	return
 }
 
-// Copy copies from src to dst until either EOF is reached
+// Copy copies from src to dst until either eof is reached
 // on src or an error occurs. It returns the number of bytes
 // copied and the first error encountered while copying, if any.
 //
-// A successful Copy returns err == nil, not err == EOF.
-// Because Copy is defined to read from src until EOF, it does
-// not treat an EOF from Read as an error to be reported.
+// A successful Copy returns err == nil, not err == eof.
+// Because Copy is defined to read from src until eof, it does
+// not treat an eof from Read as an error to be reported.
 //
 // If src implements [WriterTo],
-// the copy is implemented by calling src.WriteTo(dst).
+// the copy is implemented by calling src.write_to(dst).
 // Otherwise, if dst implements [ReaderFrom],
-// the copy is implemented by calling dst.ReadFrom(src).
-func Copy(dst Writer, src Reader) (written int64, err error) {
+// the copy is implemented by calling dst.read_from(src).
+fn Copy(dst Writer, src Reader) (written int64, err error) {
 	return copyBuffer(dst, src, nil)
 }
 
@@ -392,7 +362,7 @@ func Copy(dst Writer, src Reader) (written int64, err error) {
 //
 // If either src implements [WriterTo] or dst implements [ReaderFrom],
 // buf will not be used to perform the copy.
-func CopyBuffer(dst Writer, src Reader, buf []byte) (written int64, err error) {
+fn CopyBuffer(dst Writer, src Reader, buf []byte) (written int64, err error) {
 	if buf != nil && len(buf) == 0 {
 		panic("empty buffer in CopyBuffer")
 	}
@@ -401,15 +371,15 @@ func CopyBuffer(dst Writer, src Reader, buf []byte) (written int64, err error) {
 
 // copyBuffer is the actual implementation of Copy and CopyBuffer.
 // if buf is nil, one is allocated.
-func copyBuffer(dst Writer, src Reader, buf []byte) (written int64, err error) {
-	// If the reader has a WriteTo method, use it to do the copy.
+fn copyBuffer(dst Writer, src Reader, buf []byte) (written int64, err error) {
+	// If the reader has a write_to method, use it to do the copy.
 	// Avoids an allocation and a copy.
 	if wt, ok := src.(WriterTo); ok {
-		return wt.WriteTo(dst)
+		return wt.write_to(dst)
 	}
-	// Similarly, if the writer has a ReadFrom method, use it to do the copy.
+	// Similarly, if the writer has a read_from method, use it to do the copy.
 	if rf, ok := dst.(ReaderFrom); ok {
-		return rf.ReadFrom(src)
+		return rf.read_from(src)
 	}
 	if buf == nil {
 		size := 32 * 1024
@@ -429,7 +399,7 @@ func copyBuffer(dst Writer, src Reader, buf []byte) (written int64, err error) {
 			if nw < 0 || nr < nw {
 				nw = 0
 				if ew == nil {
-					ew = errInvalidWrite
+					ew = err_invalid_write
 				}
 			}
 			written += int64(nw)
@@ -438,12 +408,12 @@ func copyBuffer(dst Writer, src Reader, buf []byte) (written int64, err error) {
 				break
 			}
 			if nr != nw {
-				err = ErrShortWrite
+				err = err_short_write
 				break
 			}
 		}
 		if er != nil {
-			if er != EOF {
+			if er != eof {
 				err = er
 			}
 			break
@@ -453,22 +423,22 @@ func copyBuffer(dst Writer, src Reader, buf []byte) (written int64, err error) {
 }
 
 // LimitReader returns a Reader that reads from r
-// but stops with EOF after n bytes.
+// but stops with eof after n bytes.
 // The underlying implementation is a *LimitedReader.
-func LimitReader(r Reader, n int64) Reader { return &LimitedReader{r, n} }
+fn LimitReader(r Reader, n int64) Reader { return &LimitedReader{r, n} }
 
 // A LimitedReader reads from R but limits the amount of
 // data returned to just N bytes. Each call to Read
 // updates N to reflect the new amount remaining.
-// Read returns EOF when N <= 0 or when the underlying R returns EOF.
+// Read returns eof when N <= 0 or when the underlying R returns eof.
 type LimitedReader struct {
 	R Reader // underlying reader
 	N int64  // max bytes remaining
 }
 
-func (l *LimitedReader) Read(p []byte) (n int, err error) {
+fn (l *LimitedReader) Read(p []byte) (n int, err error) {
 	if l.N <= 0 {
-		return 0, EOF
+		return 0, eof
 	}
 	if int64(len(p)) > l.N {
 		p = p[0:l.N]
@@ -479,8 +449,8 @@ func (l *LimitedReader) Read(p []byte) (n int, err error) {
 }
 
 // NewSectionReader returns a [SectionReader] that reads from r
-// starting at offset off and stops with EOF after n bytes.
-func NewSectionReader(r ReaderAt, off int64, n int64) *SectionReader {
+// starting at offset off and stops with eof after n bytes.
+fn NewSectionReader(r ReaderAt, off int64, n int64) *SectionReader {
 	var remaining int64
 	const maxint64 = 1<<63 - 1
 	if off <= maxint64-n {
@@ -493,7 +463,7 @@ func NewSectionReader(r ReaderAt, off int64, n int64) *SectionReader {
 	return &SectionReader{r, off, off, remaining, n}
 }
 
-// SectionReader implements Read, Seek, and ReadAt on a section
+// SectionReader implements Read, Seek, and read_at on a section
 // of an underlying [ReaderAt].
 type SectionReader struct {
 	r     ReaderAt // constant after creation
@@ -503,14 +473,14 @@ type SectionReader struct {
 	n     int64 // constant after creation
 }
 
-func (s *SectionReader) Read(p []byte) (n int, err error) {
+fn (s *SectionReader) Read(p []byte) (n int, err error) {
 	if s.off >= s.limit {
-		return 0, EOF
+		return 0, eof
 	}
 	if max := s.limit - s.off; int64(len(p)) > max {
 		p = p[0:max]
 	}
-	n, err = s.r.ReadAt(p, s.off)
+	n, err = s.r.read_at(p, s.off)
 	s.off += int64(n)
 	return
 }
@@ -518,7 +488,7 @@ func (s *SectionReader) Read(p []byte) (n int, err error) {
 var errWhence = errors.New("Seek: invalid whence")
 var errOffset = errors.New("Seek: invalid offset")
 
-func (s *SectionReader) Seek(offset int64, whence int) (int64, error) {
+fn (s *SectionReader) Seek(offset int64, whence int) (int64, error) {
 	switch whence {
 	default:
 		return 0, errWhence
@@ -536,30 +506,30 @@ func (s *SectionReader) Seek(offset int64, whence int) (int64, error) {
 	return offset - s.base, nil
 }
 
-func (s *SectionReader) ReadAt(p []byte, off int64) (n int, err error) {
+fn (s *SectionReader) read_at(p []byte, off int64) (n int, err error) {
 	if off < 0 || off >= s.Size() {
-		return 0, EOF
+		return 0, eof
 	}
 	off += s.base
 	if max := s.limit - off; int64(len(p)) > max {
 		p = p[0:max]
-		n, err = s.r.ReadAt(p, off)
+		n, err = s.r.read_at(p, off)
 		if err == nil {
-			err = EOF
+			err = eof
 		}
 		return n, err
 	}
-	return s.r.ReadAt(p, off)
+	return s.r.read_at(p, off)
 }
 
 // Size returns the size of the section in bytes.
-func (s *SectionReader) Size() int64 { return s.limit - s.base }
+fn (s *SectionReader) Size() int64 { return s.limit - s.base }
 
 // Outer returns the underlying [ReaderAt] and offsets for the section.
 //
 // The returned values are the same that were passed to [NewSectionReader]
 // when the [SectionReader] was created.
-func (s *SectionReader) Outer() (r ReaderAt, off int64, n int64) {
+fn (s *SectionReader) Outer() (r ReaderAt, off int64, n int64) {
 	return s.r, s.base, s.n
 }
 
@@ -572,26 +542,26 @@ type OffsetWriter struct {
 
 // NewOffsetWriter returns an [OffsetWriter] that writes to w
 // starting at offset off.
-func NewOffsetWriter(w WriterAt, off int64) *OffsetWriter {
+fn NewOffsetWriter(w WriterAt, off int64) *OffsetWriter {
 	return &OffsetWriter{w, off, off}
 }
 
-func (o *OffsetWriter) Write(p []byte) (n int, err error) {
-	n, err = o.w.WriteAt(p, o.off)
+fn (o *OffsetWriter) Write(p []byte) (n int, err error) {
+	n, err = o.w.write_at(p, o.off)
 	o.off += int64(n)
 	return
 }
 
-func (o *OffsetWriter) WriteAt(p []byte, off int64) (n int, err error) {
+fn (o *OffsetWriter) write_at(p []byte, off int64) (n int, err error) {
 	if off < 0 {
 		return 0, errOffset
 	}
 
 	off += o.base
-	return o.w.WriteAt(p, off)
+	return o.w.write_at(p, off)
 }
 
-func (o *OffsetWriter) Seek(offset int64, whence int) (int64, error) {
+fn (o *OffsetWriter) Seek(offset int64, whence int) (int64, error) {
 	switch whence {
 	default:
 		return 0, errWhence
@@ -612,7 +582,7 @@ func (o *OffsetWriter) Seek(offset int64, whence int) (int64, error) {
 // corresponding writes to w. There is no internal buffering -
 // the write must complete before the read completes.
 // Any error encountered while writing is reported as a read error.
-func TeeReader(r Reader, w Writer) Reader {
+fn TeeReader(r Reader, w Writer) Reader {
 	return &teeReader{r, w}
 }
 
@@ -621,7 +591,7 @@ type teeReader struct {
 	w Writer
 }
 
-func (t *teeReader) Read(p []byte) (n int, err error) {
+fn (t *teeReader) Read(p []byte) (n int, err error) {
 	n, err = t.r.Read(p)
 	if n > 0 {
 		if n, err := t.w.Write(p[:n]); err != nil {
@@ -641,11 +611,11 @@ type discard struct{}
 // io.Discard can avoid doing unnecessary work.
 var _ ReaderFrom = discard{}
 
-func (discard) Write(p []byte) (int, error) {
+fn (discard) Write(p []byte) (int, error) {
 	return len(p), nil
 }
 
-func (discard) WriteString(s string) (int, error) {
+fn (discard) WriteString(s string) (int, error) {
 	return len(s), nil
 }
 
@@ -656,7 +626,7 @@ var blackHolePool = sync.Pool{
 	},
 }
 
-func (discard) ReadFrom(r Reader) (n int64, err error) {
+fn (discard) read_from(r Reader) (n int64, err error) {
 	bufp := blackHolePool.Get().(*[]byte)
 	readSize := 0
 	for {
@@ -664,7 +634,7 @@ func (discard) ReadFrom(r Reader) (n int64, err error) {
 		n += int64(readSize)
 		if err != nil {
 			blackHolePool.Put(bufp)
-			if err == EOF {
+			if err == eof {
 				return n, nil
 			}
 			return
@@ -676,7 +646,7 @@ func (discard) ReadFrom(r Reader) (n int64, err error) {
 // the provided [Reader] r.
 // If r implements [WriterTo], the returned [ReadCloser] will implement [WriterTo]
 // by forwarding calls to r.
-func NopCloser(r Reader) ReadCloser {
+fn NopCloser(r Reader) ReadCloser {
 	if _, ok := r.(WriterTo); ok {
 		return nopCloserWriterTo{r}
 	}
@@ -687,29 +657,29 @@ type nopCloser struct {
 	Reader
 }
 
-func (nopCloser) Close() error { return nil }
+fn (nopCloser) Close() error { return nil }
 
 type nopCloserWriterTo struct {
 	Reader
 }
 
-func (nopCloserWriterTo) Close() error { return nil }
+fn (nopCloserWriterTo) Close() error { return nil }
 
-func (c nopCloserWriterTo) WriteTo(w Writer) (n int64, err error) {
-	return c.Reader.(WriterTo).WriteTo(w)
+fn (c nopCloserWriterTo) write_to(w Writer) (n int64, err error) {
+	return c.Reader.(WriterTo).write_to(w)
 }
 
-// ReadAll reads from r until an error or EOF and returns the data it read.
-// A successful call returns err == nil, not err == EOF. Because ReadAll is
-// defined to read from src until EOF, it does not treat an EOF from Read
+// ReadAll reads from r until an error or eof and returns the data it read.
+// A successful call returns err == nil, not err == eof. Because ReadAll is
+// defined to read from src until eof, it does not treat an eof from Read
 // as an error to be reported.
-func ReadAll(r Reader) ([]byte, error) {
+fn ReadAll(r Reader) ([]byte, error) {
 	b := make([]byte, 0, 512)
 	for {
 		n, err := r.Read(b[len(b):cap(b)])
 		b = b[:len(b)+n]
 		if err != nil {
-			if err == EOF {
+			if err == eof {
 				err = nil
 			}
 			return b, err

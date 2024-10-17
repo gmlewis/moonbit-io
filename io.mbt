@@ -1,7 +1,7 @@
 // This file is based on the Go implementation found here:
 // https://cs.opensource.google/go/go/+/refs/tags/go1.23.2:src/io/io.go
 // which has the copyright notice:
-// Copyright 2009 The Go Authors. All rights reserved.
+// copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -64,11 +64,11 @@ pub let err_no_progress : IOError = IOError(
 ///
 /// When Read encounters an error or end-of-file condition after
 /// successfully reading n > 0 bytes, it returns the number of
-/// bytes read. It may return the (non-nil) error from the same call
+/// bytes read. It may return the (non-None) error from the same call
 /// or return the error (and n == 0) from a subsequent call.
 /// An instance of this general case is that a Reader returning
 /// a non-zero number of bytes at the end of the input stream may
-/// return either err == eof or err == nil. The next Read should
+/// return either err == eof or err == None. The next Read should
 /// return 0, eof.
 ///
 /// Callers should always process the n > 0 bytes returned before
@@ -77,11 +77,11 @@ pub let err_no_progress : IOError = IOError(
 /// allowed eof behaviors.
 ///
 /// If len(p) == 0, Read should always return n == 0. It may return a
-/// non-nil error if some error condition is known, such as eof.
+/// non-None error if some error condition is known, such as eof.
 ///
 /// Implementations of Read are discouraged from returning a
-/// zero byte count with a nil error, except when len(p) == 0.
-/// Callers should treat a return of 0 and nil as indicating that
+/// zero byte count with a None error, except when len(p) == 0.
+/// Callers should treat a return of 0 and None as indicating that
 /// nothing happened; in particular it does not indicate eof.
 ///
 /// Implementations must not retain p.
@@ -94,7 +94,7 @@ pub trait Reader {
 /// Write writes len(p) bytes from p to the underlying data stream.
 /// It returns the number of bytes written from p (0 <= n <= len(p))
 /// and any error encountered that caused the write to stop early.
-/// Write must return a non-nil error if it returns n < len(p).
+/// Write must return a non-None error if it returns n < len(p).
 /// Write must not modify the slice data, even temporarily.
 ///
 /// Implementations must not retain p.
@@ -187,7 +187,7 @@ pub trait ReadWriteSeeker {
 /// The return value n is the number of bytes read.
 /// Any error except eof encountered during the read is also returned.
 ///
-/// The [Copy] function uses [ReaderFrom] if available.
+/// The [copy] function uses [ReaderFrom] if available.
 pub trait ReaderFrom {
   read_from(Self, Reader) -> (Int64, IOError?)
 }
@@ -198,7 +198,7 @@ pub trait ReaderFrom {
 /// when an error occurs. The return value n is the number of bytes
 /// written. Any error encountered during the write is also returned.
 ///
-/// The Copy function uses WriterTo if available.
+/// The copy function uses WriterTo if available.
 pub trait WriterTo {
   write_to(Self, Writer) -> (Int64, IOError?)
 }
@@ -209,7 +209,7 @@ pub trait WriterTo {
 /// underlying input source. It returns the number of bytes
 /// read (0 <= n <= len(p)) and any error encountered.
 ///
-/// When read_at returns n < len(p), it returns a non-nil error
+/// When read_at returns n < len(p), it returns a non-None error
 /// explaining why more bytes were not returned. In this respect,
 /// read_at is stricter than Read.
 ///
@@ -219,7 +219,7 @@ pub trait WriterTo {
 /// In this respect read_at is different from Read.
 ///
 /// If the n = len(p) bytes returned by read_at are at the end of the
-/// input source, read_at may return either err == eof or err == nil.
+/// input source, read_at may return either err == eof or err == None.
 ///
 /// If read_at is reading from an input source with a seek offset,
 /// read_at should not affect nor be affected by the underlying
@@ -238,7 +238,7 @@ pub trait ReaderAt {
 /// write_at writes len(p) bytes from p to the underlying data stream
 /// at offset off. It returns the number of bytes written from p (0 <= n <= len(p))
 /// and any error encountered that caused the write to stop early.
-/// write_at must return a non-nil error if it returns n < len(p).
+/// write_at must return a non-None error if it returns n < len(p).
 ///
 /// If write_at is writing to a destination with a seek offset,
 /// write_at should not affect nor be affected by the underlying
@@ -289,7 +289,7 @@ pub trait ByteWriter {
 /// If an eof happens after reading fewer than min bytes,
 /// read_at_least returns [err_unexpected_eof].
 /// If min is greater than the length of buf, read_at_least returns [err_short_buffer].
-/// On return, n >= min if and only if err == nil.
+/// On return, n >= min if and only if err == None.
 /// If r returns an error having read at least min bytes, the error is dropped.
 fn read_at_least(r : Reader, buf : Slice[Byte], min : Int) -> (Int, IOError?) {
   let mut n = 0
@@ -307,82 +307,86 @@ fn read_at_least(r : Reader, buf : Slice[Byte], min : Int) -> (Int, IOError?) {
   } else if n > 0 && err == Some(eof) {
     err = Some(err_unexpected_eof)
   }
-  return (n, err)
+  (n, err)
 }
 
-// ReadFull reads exactly len(buf) bytes from r into buf.
-// It returns the number of bytes copied and an error if fewer bytes were read.
-// The error is eof only if no bytes were read.
-// If an eof happens after reading some but not all the bytes,
-// ReadFull returns [err_unexpected_eof].
-// On return, n == len(buf) if and only if err == nil.
-// If r returns an error having read at least len(buf) bytes, the error is dropped.
-fn ReadFull(r Reader, buf []byte) (n int, err error) {
-	return read_at_least(r, buf, len(buf))
+/// read_full reads exactly len(buf) bytes from r into buf.
+/// It returns the number of bytes copied and an error if fewer bytes were read.
+/// The error is eof only if no bytes were read.
+/// If an eof happens after reading some but not all the bytes,
+/// read_full returns [err_unexpected_eof].
+/// On return, n == len(buf) if and only if err == None.
+/// If r returns an error having read at least len(buf) bytes, the error is dropped.
+pub fn read_full(r : Reader, buf : Slice[Byte]) -> (Int, IOError?) {
+  read_at_least(r, buf, buf.length())
 }
 
-// CopyN copies n bytes (or until an error) from src to dst.
-// It returns the number of bytes copied and the earliest
-// error encountered while copying.
-// On return, written == n if and only if err == nil.
-//
-// If dst implements [ReaderFrom], the copy is implemented using it.
-fn CopyN(dst Writer, src Reader, n int64) (written int64, err error) {
-	written, err = Copy(dst, LimitReader(src, n))
-	if written == n {
-		return n, nil
-	}
-	if written < n && err == nil {
-		// src stopped early; must have been eof.
-		err = eof
-	}
-	return
+/// copy_n copies n bytes (or until an error) from src to dst.
+/// It returns the number of bytes copied and the earliest
+/// error encountered while copying.
+/// On return, written == n if and only if err == None.
+///
+/// If dst implements [ReaderFrom], the copy is implemented using it.
+pub fn copy_n(dst : Writer, src : Reader, n : Int64) -> (Int64, IOError?) {
+  let v = copy(dst, LimitedReader::new(src, n))
+  let written = v.0
+  let mut err = v.1
+  if written == n {
+    return (n, None)
+  }
+  if written < n && err == None {
+    // src stopped early; must have been eof.
+    err = Some(eof)
+  }
+  (written, err)
 }
 
-// Copy copies from src to dst until either eof is reached
-// on src or an error occurs. It returns the number of bytes
-// copied and the first error encountered while copying, if any.
-//
-// A successful Copy returns err == nil, not err == eof.
-// Because Copy is defined to read from src until eof, it does
-// not treat an eof from Read as an error to be reported.
-//
-// If src implements [WriterTo],
-// the copy is implemented by calling src.write_to(dst).
-// Otherwise, if dst implements [ReaderFrom],
-// the copy is implemented by calling dst.read_from(src).
-fn Copy(dst Writer, src Reader) (written int64, err error) {
-	return copyBuffer(dst, src, nil)
+/// copy copies from src to dst until either eof is reached
+/// on src or an error occurs. It returns the number of bytes
+/// copied and the first error encountered while copying, if any.
+///
+/// A successful copy returns err == None, not err == eof.
+/// Because copy is defined to read from src until eof, it does
+/// not treat an eof from Read as an error to be reported.
+///
+/// If src implements [WriterTo],
+/// the copy is implemented by calling src.write_to(dst).
+/// Otherwise, if dst implements [ReaderFrom],
+/// the copy is implemented by calling dst.read_from(src).
+pub fn copy(dst : Writer, src : Reader) -> (Int64, IOError?) {
+  return copy_buffer(dst, src, None)
 }
 
-// CopyBuffer is identical to Copy except that it stages through the
-// provided buffer (if one is required) rather than allocating a
-// temporary one. If buf is nil, one is allocated; otherwise if it has
-// zero length, CopyBuffer panics.
-//
-// If either src implements [WriterTo] or dst implements [ReaderFrom],
-// buf will not be used to perform the copy.
-fn CopyBuffer(dst Writer, src Reader, buf []byte) (written int64, err error) {
-	if buf != nil && len(buf) == 0 {
-		panic("empty buffer in CopyBuffer")
-	}
-	return copyBuffer(dst, src, buf)
-}
+/// copy_buffer is identical to copy except that it stages through the
+/// provided buffer (if one is required) rather than allocating a
+/// temporary one. If buf is None, one is allocated; otherwise if it has
+/// zero length, copy_buffer panics.
+///
+/// If either src implements [WriterTo] or dst implements [ReaderFrom],
+/// buf will not be used to perform the copy.
+pub fn copy_buffer(
+  dst : Writer,
+  src : Reader,
+  buf : Slice[Byte]?
+) -> (Int64, IOError?) {
+  if buf != None && buf.unwrap().length() == 0 {
+    return (0, Some(IOError("empty buffer in copy_buffer")))
+  }
 
-// copyBuffer is the actual implementation of Copy and CopyBuffer.
-// if buf is nil, one is allocated.
-fn copyBuffer(dst Writer, src Reader, buf []byte) (written int64, err error) {
-	// If the reader has a write_to method, use it to do the copy.
-	// Avoids an allocation and a copy.
-	if wt, ok := src.(WriterTo); ok {
-		return wt.write_to(dst)
-	}
-	// Similarly, if the writer has a read_from method, use it to do the copy.
-	if rf, ok := dst.(ReaderFrom); ok {
-		return rf.read_from(src)
-	}
-	if buf == nil {
-		size := 32 * 1024
+  // TODO:
+	// // If the reader has a write_to method, use it to do the copy.
+	// // Avoids an allocation and a copy.
+	// if wt, ok := src.(WriterTo); ok {
+	// 	return wt.write_to(dst)
+	// }
+	// // Similarly, if the writer has a read_from method, use it to do the copy.
+	// if rf, ok := dst.(ReaderFrom); ok {
+	// 	return rf.read_from(src)
+	// }
+
+  //
+	if buf == None {
+		let size = 32 * 1024
 		if l, ok := src.(*LimitedReader); ok && int64(size) > l.N {
 			if l.N < 1 {
 				size = 1
@@ -398,12 +402,12 @@ fn copyBuffer(dst Writer, src Reader, buf []byte) (written int64, err error) {
 			nw, ew := dst.Write(buf[0:nr])
 			if nw < 0 || nr < nw {
 				nw = 0
-				if ew == nil {
+				if ew == None {
 					ew = err_invalid_write
 				}
 			}
 			written += int64(nw)
-			if ew != nil {
+			if ew != None {
 				err = ew
 				break
 			}
@@ -412,7 +416,7 @@ fn copyBuffer(dst Writer, src Reader, buf []byte) (written int64, err error) {
 				break
 			}
 		}
-		if er != nil {
+		if er != None {
 			if er != eof {
 				err = er
 			}
@@ -422,21 +426,21 @@ fn copyBuffer(dst Writer, src Reader, buf []byte) (written int64, err error) {
 	return written, err
 }
 
-// LimitReader returns a Reader that reads from r
-// but stops with eof after n bytes.
-// The underlying implementation is a *LimitedReader.
-fn LimitReader(r Reader, n int64) Reader { return &LimitedReader{r, n} }
+/// LimitedReader::new returns a Reader that reads from r
+/// but stops with eof after n bytes.
+/// The underlying implementation is a LimitedReader.
+pub fn LimitedReader::new(r : Reader, n : Int64) -> LimitedReader { {r, n} }
 
-// A LimitedReader reads from R but limits the amount of
-// data returned to just N bytes. Each call to Read
-// updates N to reflect the new amount remaining.
-// Read returns eof when N <= 0 or when the underlying R returns eof.
-type LimitedReader struct {
-	R Reader // underlying reader
-	N int64  // max bytes remaining
+/// A LimitedReader reads from R but limits the amount of
+/// data returned to just N bytes. Each call to Read
+/// updates N to reflect the new amount remaining.
+/// Read returns eof when N <= 0 or when the underlying R returns eof.
+pub struct LimitedReader {
+	r : Reader // underlying reader
+	n : int64  // max bytes remaining
 }
 
-fn (l *LimitedReader) Read(p []byte) (n int, err error) {
+fn read(self: LimitedReader, p Slive[Byte]) -> (Int, IOError?) {
 	if l.N <= 0 {
 		return 0, eof
 	}
@@ -448,9 +452,9 @@ fn (l *LimitedReader) Read(p []byte) (n int, err error) {
 	return
 }
 
-// NewSectionReader returns a [SectionReader] that reads from r
+// SectionReader::new returns a [SectionReader] that reads from r
 // starting at offset off and stops with eof after n bytes.
-fn NewSectionReader(r ReaderAt, off int64, n int64) *SectionReader {
+pub fn SectionReader::new(r ReaderAt, off int64, n int64) -> SectionReader {
 	var remaining int64
 	const maxint64 = 1<<63 - 1
 	if off <= maxint64-n {
@@ -503,7 +507,7 @@ fn (s *SectionReader) Seek(offset int64, whence int) (int64, error) {
 		return 0, errOffset
 	}
 	s.off = offset
-	return offset - s.base, nil
+	return offset - s.base, None
 }
 
 fn (s *SectionReader) read_at(p []byte, off int64) (n int, err error) {
@@ -514,7 +518,7 @@ fn (s *SectionReader) read_at(p []byte, off int64) (n int, err error) {
 	if max := s.limit - off; int64(len(p)) > max {
 		p = p[0:max]
 		n, err = s.r.read_at(p, off)
-		if err == nil {
+		if err == None {
 			err = eof
 		}
 		return n, err
@@ -527,7 +531,7 @@ fn (s *SectionReader) Size() int64 { return s.limit - s.base }
 
 // Outer returns the underlying [ReaderAt] and offsets for the section.
 //
-// The returned values are the same that were passed to [NewSectionReader]
+// The returned values are the same that were passed to [SectionReader::new]
 // when the [SectionReader] was created.
 fn (s *SectionReader) Outer() (r ReaderAt, off int64, n int64) {
 	return s.r, s.base, s.n
@@ -574,7 +578,7 @@ fn (o *OffsetWriter) Seek(offset int64, whence int) (int64, error) {
 		return 0, errOffset
 	}
 	o.off = offset
-	return offset - o.base, nil
+	return offset - o.base, None
 }
 
 // TeeReader returns a [Reader] that writes to w what it reads from r.
@@ -594,7 +598,7 @@ type teeReader struct {
 fn (t *teeReader) Read(p []byte) (n int, err error) {
 	n, err = t.r.Read(p)
 	if n > 0 {
-		if n, err := t.w.Write(p[:n]); err != nil {
+		if n, err := t.w.Write(p[:n]); err != None {
 			return n, err
 		}
 	}
@@ -607,16 +611,16 @@ var Discard Writer = discard{}
 
 type discard struct{}
 
-// discard implements ReaderFrom as an optimization so Copy to
+// discard implements ReaderFrom as an optimization so copy to
 // io.Discard can avoid doing unnecessary work.
 var _ ReaderFrom = discard{}
 
 fn (discard) Write(p []byte) (int, error) {
-	return len(p), nil
+	return len(p), None
 }
 
 fn (discard) WriteString(s string) (int, error) {
-	return len(s), nil
+	return len(s), None
 }
 
 var blackHolePool = sync.Pool{
@@ -632,10 +636,10 @@ fn (discard) read_from(r Reader) (n int64, err error) {
 	for {
 		readSize, err = r.Read(*bufp)
 		n += int64(readSize)
-		if err != nil {
+		if err != None {
 			blackHolePool.Put(bufp)
 			if err == eof {
-				return n, nil
+				return n, None
 			}
 			return
 		}
@@ -657,20 +661,20 @@ type nopCloser struct {
 	Reader
 }
 
-fn (nopCloser) Close() error { return nil }
+fn (nopCloser) Close() error { return None }
 
 type nopCloserWriterTo struct {
 	Reader
 }
 
-fn (nopCloserWriterTo) Close() error { return nil }
+fn (nopCloserWriterTo) Close() error { return None }
 
 fn (c nopCloserWriterTo) write_to(w Writer) (n int64, err error) {
 	return c.Reader.(WriterTo).write_to(w)
 }
 
 // ReadAll reads from r until an error or eof and returns the data it read.
-// A successful call returns err == nil, not err == eof. Because ReadAll is
+// A successful call returns err == None, not err == eof. Because ReadAll is
 // defined to read from src until eof, it does not treat an eof from Read
 // as an error to be reported.
 fn ReadAll(r Reader) ([]byte, error) {
@@ -678,9 +682,9 @@ fn ReadAll(r Reader) ([]byte, error) {
 	for {
 		n, err := r.Read(b[len(b):cap(b)])
 		b = b[:len(b)+n]
-		if err != nil {
+		if err != None {
 			if err == eof {
-				err = nil
+				err = None
 			}
 			return b, err
 		}

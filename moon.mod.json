@@ -1,0 +1,13 @@
+{
+  "name": "gmlewis/io",
+  "version": "0.1.0",
+  "deps": {},
+  "readme": "README.md",
+  "repository": "https://github.com/gmlewis/moonbit-io",
+  "license": "Apache-2.0",
+  "keywords": [
+    "io",
+    "moonbit"
+  ],
+  "description": "MoonBit io: provide simplified I/O abstractions similar to Go."
+}

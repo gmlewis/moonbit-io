@@ -372,72 +372,83 @@ pub fn copy_buffer(
   if buf != None && buf.unwrap().length() == 0 {
     return (0, Some(IOError("empty buffer in copy_buffer")))
   }
+  let mut buf = buf
 
   // TODO:
-	// // If the reader has a write_to method, use it to do the copy.
-	// // Avoids an allocation and a copy.
-	// if wt, ok := src.(WriterTo); ok {
-	// 	return wt.write_to(dst)
-	// }
-	// // Similarly, if the writer has a read_from method, use it to do the copy.
-	// if rf, ok := dst.(ReaderFrom); ok {
-	// 	return rf.read_from(src)
-	// }
+  // // If the reader has a write_to method, use it to do the copy.
+  // // Avoids an allocation and a copy.
+  // if wt, ok := src.(WriterTo); ok {
+  // 	return wt.write_to(dst)
+  // }
+  // // Similarly, if the writer has a read_from method, use it to do the copy.
+  // if rf, ok := dst.(ReaderFrom); ok {
+  // 	return rf.read_from(src)
+  // }
 
   //
-	if buf == None {
-		let size = 32 * 1024
-		if l, ok := src.(*LimitedReader); ok && int64(size) > l.N {
-			if l.N < 1 {
-				size = 1
-			} else {
-				size = int(l.N)
-			}
-		}
-		buf = make([]byte, size)
-	}
-	for {
-		nr, er := src.Read(buf)
-		if nr > 0 {
-			nw, ew := dst.Write(buf[0:nr])
-			if nw < 0 || nr < nw {
-				nw = 0
-				if ew == None {
-					ew = err_invalid_write
-				}
-			}
-			written += int64(nw)
-			if ew != None {
-				err = ew
-				break
-			}
-			if nr != nw {
-				err = err_short_write
-				break
-			}
-		}
-		if er != None {
-			if er != eof {
-				err = er
-			}
-			break
-		}
-	}
-	return written, err
+  if buf == None {
+    let size = 32 * 1024
+    // TODO:
+    // if l, ok := src.(*LimitedReader); ok && int64(size) > l.N {
+    // 	if l.N < 1 {
+    // 		size = 1
+    // 	} else {
+    // 		size = int(l.N)
+    // 	}
+    // }
+    buf = Some(Slice::new(Array::make(size, b'\x00')))
+  }
+  let buf = buf.unwrap()
+
+  //
+  let mut written = 0L
+  let mut err = None
+  for {
+    let (nr, er) = src.read(buf)
+    if nr > 0 {
+      let (nw, ew) = dst.write(buf[0:nr])
+      let mut nw = nw
+      let mut ew = ew
+      if nw < 0 || nr < nw {
+        nw = 0
+        if ew == None {
+          ew = Some(err_invalid_write)
+        }
+      }
+      written += nw.to_int64()
+      if ew != None {
+        err = ew
+        break
+      }
+      if nr != nw {
+        err = Some(err_short_write)
+        break
+      }
+    }
+    if er != None {
+      if er != Some(eof) {
+        err = er
+      }
+      break
+    }
+  }
+  (written, err)
 }
 
 /// LimitedReader::new returns a Reader that reads from r
 /// but stops with eof after n bytes.
 /// The underlying implementation is a LimitedReader.
-pub fn LimitedReader::new(r : Reader, n : Int64) -> LimitedReader { {r, n} }
+pub fn LimitedReader::new(r : Reader, n : Int64) -> LimitedReader {
+  { r, n }
+}
 
 /// A LimitedReader reads from R but limits the amount of
 /// data returned to just N bytes. Each call to Read
 /// updates N to reflect the new amount remaining.
 /// Read returns eof when N <= 0 or when the underlying R returns eof.
 pub struct LimitedReader {
-	r : Reader // underlying reader
-	n : int64  // max bytes remaining
+  r : Reader // underlying reader
+  n : int64 // max bytes remaining
 }
 
 fn read(self: LimitedReader, p Slive[Byte]) -> (Int, IOError?) {

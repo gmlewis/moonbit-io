@@ -13,86 +13,86 @@
 // limitations under the License.
 
 test "array_as_view" {
-  inspect!(@flate.Slice::new([1, 2, 3]).length(), content="3")
+  inspect!(@io.Slice::new([1, 2, 3]).length(), content="3")
 }
 
 test "view_as_view" {
-  inspect!(@flate.Slice::new([1, 2, 3]).length(), content="3")
+  inspect!(@io.Slice::new([1, 2, 3]).length(), content="3")
 }
 
 test "op_get" {
-  inspect!(@flate.Slice::new([1, 2, 3])[1], content="2")
-  inspect!(@flate.Slice::new([1, 2, 3])[2], content="3")
+  inspect!(@io.Slice::new([1, 2, 3])[1], content="2")
+  inspect!(@io.Slice::new([1, 2, 3])[2], content="3")
 }
 
 test "op_set" {
-  let v = @flate.Slice::new([1, 2, 3])
+  let v = @io.Slice::new([1, 2, 3])
   inspect!(v[1], content="2")
   v[1] = 4
   inspect!(v[1], content="4")
 }
 
 test "swap" {
-  let v = @flate.Slice::new([1, 2, 3])
+  let v = @io.Slice::new([1, 2, 3])
   inspect!(v[1], content="2")
   v.swap(1, 2)
   inspect!(v[1], content="3")
 }
 
 test "panic array_as_view_start_index_error" {
-  @flate.Slice::new([1, 2, 3])[-1:0] |> ignore
+  @io.Slice::new([1, 2, 3])[-1:0] |> ignore
 }
 
 test "panic array_as_view_start_index_error" {
-  @flate.Slice::new([1, 2, 3])[-1:0] |> ignore
+  @io.Slice::new([1, 2, 3])[-1:0] |> ignore
 }
 
 test "panic array_as_view_end_index_error" {
-  @flate.Slice::new([1, 2, 3])[0:-1] |> ignore
+  @io.Slice::new([1, 2, 3])[0:-1] |> ignore
 }
 
 test "panic array_as_view_end_index_error" {
-  @flate.Slice::new([1, 2, 3])[0:-1] |> ignore
+  @io.Slice::new([1, 2, 3])[0:-1] |> ignore
 }
 
 test "panic array_as_view_length_index_error" {
-  @flate.Slice::new([1, 2, 3])[0:4] |> ignore
+  @io.Slice::new([1, 2, 3])[0:4] |> ignore
 }
 
 test "panic view_as_view_start_index_error" {
-  @flate.Slice::new([1, 2, 3])[-1:0] |> ignore
+  @io.Slice::new([1, 2, 3])[-1:0] |> ignore
 }
 
 test "panic view_as_view_start_index_error" {
-  @flate.Slice::new([1, 2, 3])[-1:0] |> ignore
+  @io.Slice::new([1, 2, 3])[-1:0] |> ignore
 }
 
 test "panic view_as_view_end_index_error" {
-  @flate.Slice::new([1, 2, 3])[0:-1] |> ignore
+  @io.Slice::new([1, 2, 3])[0:-1] |> ignore
 }
 
 test "panic view_as_view_end_index_error" {
-  @flate.Slice::new([1, 2, 3])[0:-1] |> ignore
+  @io.Slice::new([1, 2, 3])[0:-1] |> ignore
 }
 
 test "panic view_as_view_length_index_error" {
-  @flate.Slice::new([1, 2, 3])[0:4] |> ignore
+  @io.Slice::new([1, 2, 3])[0:4] |> ignore
 }
 
 test "panic array_as_view_get_index_error" {
-  @flate.Slice::new([1, 2, 3])[5] |> ignore
+  @io.Slice::new([1, 2, 3])[5] |> ignore
 }
 
 test "panic array_as_view_set_index_error" {
-  @flate.Slice::new([1, 2, 3])[5] = 0
+  @io.Slice::new([1, 2, 3])[5] = 0
 }
 
 test "panic array_as_view_swap_index_error" {
-  @flate.Slice::new([1, 2, 3]).swap(1, 9)
+  @io.Slice::new([1, 2, 3]).swap(1, 9)
 }
 
 test "iter" {
-  let array = @flate.Slice::new([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+  let array = @io.Slice::new([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
   inspect!(
     array.iter().to_array(),
     content="[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]",
@@ -102,37 +102,37 @@ test "iter" {
 }
 
 // test "to_string" {
-//   let arr = @flate.Slice::new([0, 1, 2, 3, 4])
+//   let arr = @io.Slice::new([0, 1, 2, 3, 4])
 //   inspect!(arr[1:3].to_string(), content="[1, 2]")
 //   inspect!("\{arr[1:3]}!", content="[1, 2]!")
 // }
 
 test "slice_fold" {
-  let arr = @flate.Slice::new([1, 2, 3])
+  let arr = @io.Slice::new([1, 2, 3])
   let sum = arr.fold(fn(acc, x) { acc + x }, init=0)
   inspect!(sum, content="6")
 }
 
 test "slice_rev_fold" {
-  let arr = @flate.Slice::new([1, 2, 3])
+  let arr = @io.Slice::new([1, 2, 3])
   let sum = arr.rev_fold(fn(acc, x) { acc + x }, init=0)
   inspect!(sum, content="6")
 }
 
 test "slice_foldi" {
-  let arr = @flate.Slice::new([1, 2, 3])
+  let arr = @io.Slice::new([1, 2, 3])
   let sum = arr.foldi(fn(i, acc, x) { acc + i + x }, init=0)
   inspect!(sum, content="9")
 }
 
 test "slice_rev_foldi" {
-  let arr = @flate.Slice::new([1, 2, 3])
+  let arr = @io.Slice::new([1, 2, 3])
   let sum = arr.rev_foldi(fn(i, acc, x) { acc + i + x }, init=0)
   inspect!(sum, content="9")
 }
 
 test "slice grows within larger array" {
-  let arr = @flate.Slice::new([1, 2, 3, 4, 5, 6])[2:4]
+  let arr = @io.Slice::new([1, 2, 3, 4, 5, 6])[2:4]
   inspect!(arr, content="[3, 4]")
   let arr = arr[:3]
   inspect!(arr, content="[3, 4, 5]")

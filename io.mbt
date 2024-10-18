@@ -389,7 +389,7 @@ pub fn copy_buffer(
   if buf == None {
     let size = 32 * 1024
     // TODO:
-    // if l, ok := src.(*LimitedReader); ok && int64(size) > l.N {
+    // if l, ok := src.(*LimitedReader); ok && Int64(size) > l.N {
     // 	if l.N < 1 {
     // 		size = 1
     // 	} else {
@@ -446,263 +446,299 @@ pub fn LimitedReader::new(r : Reader, n : Int64) -> LimitedReader {
 /// data returned to just N bytes. Each call to Read
 /// updates N to reflect the new amount remaining.
 /// Read returns eof when N <= 0 or when the underlying R returns eof.
-pub struct LimitedReader {
+struct LimitedReader {
   r : Reader // underlying reader
-  n : int64 // max bytes remaining
+  mut n : Int64 // max bytes remaining
 }
 
-fn read(self: LimitedReader, p Slive[Byte]) -> (Int, IOError?) {
-	if l.N <= 0 {
-		return 0, eof
-	}
-	if int64(len(p)) > l.N {
-		p = p[0:l.N]
-	}
-	n, err = l.R.Read(p)
-	l.N -= int64(n)
-	return
+fn read(self : LimitedReader, p : Slice[Byte]) -> (Int, IOError?) {
+  if self.n <= 0 {
+    return (0, Some(eof))
+  }
+  let mut p = p
+  if p.length().to_int64() > self.n {
+    p = p[0:self.n.to_int()]
+  }
+  let (n, err) = self.r.read(p)
+  self.n -= n.to_int64()
+  (n, err)
 }
 
-// SectionReader::new returns a [SectionReader] that reads from r
-// starting at offset off and stops with eof after n bytes.
-pub fn SectionReader::new(r ReaderAt, off int64, n int64) -> SectionReader {
-	var remaining int64
-	const maxint64 = 1<<63 - 1
-	if off <= maxint64-n {
-		remaining = n + off
-	} else {
-		// Overflow, with no way to return error.
-		// Assume we can read up to an offset of 1<<63 - 1.
-		remaining = maxint64
-	}
-	return &SectionReader{r, off, off, remaining, n}
+/// SectionReader::new returns a [SectionReader] that reads from r
+/// starting at offset off and stops with eof after n bytes.
+pub fn SectionReader::new(
+  r : ReaderAt,
+  off : Int64,
+  n : Int64
+) -> SectionReader {
+  let mut remaining = 0L
+  if off <= @int64.max_value - n {
+    remaining = n + off
+  } else {
+    // Overflow, with no way to return error.
+    // Assume we can read up to an offset of 1<<63 - 1.
+    remaining = @int64.max_value
+  }
+  { r, base: off, off, limit: remaining, n }
 }
 
 // SectionReader implements Read, Seek, and read_at on a section
 // of an underlying [ReaderAt].
-type SectionReader struct {
-	r     ReaderAt // constant after creation
-	base  int64    // constant after creation
-	off   int64
-	limit int64 // constant after creation
-	n     int64 // constant after creation
+struct SectionReader {
+  r : ReaderAt // constant after creation
+  base : Int64 // constant after creation
+  mut off : Int64
+  limit : Int64 // constant after creation
+  n : Int64 // constant after creation
 }
 
-fn (s *SectionReader) Read(p []byte) (n int, err error) {
-	if s.off >= s.limit {
-		return 0, eof
-	}
-	if max := s.limit - s.off; int64(len(p)) > max {
-		p = p[0:max]
-	}
-	n, err = s.r.read_at(p, s.off)
-	s.off += int64(n)
-	return
+fn read(self : SectionReader, p : Slice[Byte]) -> (Int, IOError?) {
+  if self.off >= self.limit {
+    return (0, Some(eof))
+  }
+  let max = self.limit - self.off
+  let mut p = p
+  if p.length().to_int64() > max {
+    p = p[0:max.to_int()]
+  }
+  let (n, err) = self.r.read_at(p, self.off)
+  self.off += n.to_int64()
+  (n, err)
 }
 
-var errWhence = errors.New("Seek: invalid whence")
-var errOffset = errors.New("Seek: invalid offset")
+pub let err_whence : IOError = IOError("Seek: invalid whence")
 
-fn (s *SectionReader) Seek(offset int64, whence int) (int64, error) {
-	switch whence {
-	default:
-		return 0, errWhence
-	case SeekStart:
-		offset += s.base
-	case SeekCurrent:
-		offset += s.off
-	case SeekEnd:
-		offset += s.limit
-	}
-	if offset < s.base {
-		return 0, errOffset
-	}
-	s.off = offset
-	return offset - s.base, None
+pub let err_offset : IOError = IOError("Seek: invalid offset")
+
+fn seek(
+  self : SectionReader,
+  offset : Int64,
+  whence : Whence
+) -> (Int64, IOError?) {
+  let mut offset = offset
+  match whence {
+    SeekStart => offset += self.base
+    SeekCurrent => offset += self.off
+    SeekEnd => offset += self.limit
+  }
+  if offset < self.base {
+    return (0, Some(err_offset))
+  }
+  self.off = offset
+  (offset - self.base, None)
 }
 
-fn (s *SectionReader) read_at(p []byte, off int64) (n int, err error) {
-	if off < 0 || off >= s.Size() {
-		return 0, eof
-	}
-	off += s.base
-	if max := s.limit - off; int64(len(p)) > max {
-		p = p[0:max]
-		n, err = s.r.read_at(p, off)
-		if err == None {
-			err = eof
-		}
-		return n, err
-	}
-	return s.r.read_at(p, off)
+fn read_at(
+  self : SectionReader,
+  p : Slice[Byte],
+  off : Int64
+) -> (Int, IOError?) {
+  let mut off = off
+  if off < 0 || off >= self.size() {
+    return (0, Some(eof))
+  }
+  off += self.base
+  let max = self.limit - off
+  let mut p = p
+  if p.length().to_int64() > max {
+    p = p[0:max.to_int()]
+    let (n, err) = self.r.read_at(p, off)
+    let mut err = err
+    if err == None {
+      err = Some(eof)
+    }
+    return (n, err)
+  }
+  self.r.read_at(p, off)
 }
 
-// Size returns the size of the section in bytes.
-fn (s *SectionReader) Size() int64 { return s.limit - s.base }
-
-// Outer returns the underlying [ReaderAt] and offsets for the section.
-//
-// The returned values are the same that were passed to [SectionReader::new]
-// when the [SectionReader] was created.
-fn (s *SectionReader) Outer() (r ReaderAt, off int64, n int64) {
-	return s.r, s.base, s.n
+/// Size returns the size of the section in bytes.
+fn size(self : SectionReader) -> Int64 {
+  return self.limit - self.base
 }
 
-// An OffsetWriter maps writes at offset base to offset base+off in the underlying writer.
-type OffsetWriter struct {
-	w    WriterAt
-	base int64 // the original offset
-	off  int64 // the current offset
+/// Outer returns the underlying [ReaderAt] and offsets for the section.
+///
+/// The returned values are the same that were passed to [SectionReader::new]
+/// when the [SectionReader] was created.
+fn outer(self : SectionReader) -> (ReaderAt, Int64, Int64) {
+  (self.r, self.base, self.n)
 }
 
-// NewOffsetWriter returns an [OffsetWriter] that writes to w
+/// An OffsetWriter maps writes at offset base to offset base+off in the underlying writer.
+struct OffsetWriter {
+  w : WriterAt
+  base : Int64 // the original offset
+  mut off : Int64 // the current offset
+}
+
+// OffsetWriter::new returns an [OffsetWriter] that writes to w
 // starting at offset off.
-fn NewOffsetWriter(w WriterAt, off int64) *OffsetWriter {
-	return &OffsetWriter{w, off, off}
+pub fn OffsetWriter::new(w : WriterAt, off : Int64) -> OffsetWriter {
+  { w, base: off, off }
 }
 
-fn (o *OffsetWriter) Write(p []byte) (n int, err error) {
-	n, err = o.w.write_at(p, o.off)
-	o.off += int64(n)
-	return
+fn write(self : OffsetWriter, p : Slice[Byte]) -> (Int, IOError?) {
+  let (n, err) = self.w.write_at(p, self.off)
+  self.off += n.to_int64()
+  (n, err)
 }
 
-fn (o *OffsetWriter) write_at(p []byte, off int64) (n int, err error) {
-	if off < 0 {
-		return 0, errOffset
-	}
-
-	off += o.base
-	return o.w.write_at(p, off)
+fn write_at(
+  self : OffsetWriter,
+  p : Slice[Byte],
+  off : Int64
+) -> (Int, IOError?) {
+  if off < 0 {
+    return (0, Some(err_offset))
+  }
+  let off = off + self.base
+  self.w.write_at(p, off)
 }
 
-fn (o *OffsetWriter) Seek(offset int64, whence int) (int64, error) {
-	switch whence {
-	default:
-		return 0, errWhence
-	case SeekStart:
-		offset += o.base
-	case SeekCurrent:
-		offset += o.off
-	}
-	if offset < o.base {
-		return 0, errOffset
-	}
-	o.off = offset
-	return offset - o.base, None
+fn seek(
+  self : OffsetWriter,
+  offset : Int64,
+  whence : Whence
+) -> (Int64, IOError?) {
+  let mut offset = offset
+  match whence {
+    SeekStart => offset += self.base
+    SeekCurrent => offset += self.off
+    _ => return (0, Some(err_whence))
+  }
+  if offset < self.base {
+    return (0, Some(err_offset))
+  }
+  self.off = offset
+  (offset - self.base, None)
 }
 
-// TeeReader returns a [Reader] that writes to w what it reads from r.
-// All reads from r performed through it are matched with
-// corresponding writes to w. There is no internal buffering -
-// the write must complete before the read completes.
-// Any error encountered while writing is reported as a read error.
-fn TeeReader(r Reader, w Writer) Reader {
-	return &teeReader{r, w}
+/// TeeReader::new returns a [Reader] that writes to w what it reads from r.
+/// All reads from r performed through it are matched with
+/// corresponding writes to w. There is no internal buffering -
+/// the write must complete before the read completes.
+/// Any error encountered while writing is reported as a read error.
+pub fn TeeReader::new(r : Reader, w : Writer) -> TeeReader {
+  { r, w }
 }
 
-type teeReader struct {
-	r Reader
-	w Writer
+struct TeeReader {
+  r : Reader
+  w : Writer
 }
 
-fn (t *teeReader) Read(p []byte) (n int, err error) {
-	n, err = t.r.Read(p)
-	if n > 0 {
-		if n, err := t.w.Write(p[:n]); err != None {
-			return n, err
-		}
-	}
-	return
+fn read(self : TeeReader, p : Slice[Byte]) -> (Int, IOError?) {
+  let (n, err) = self.r.read(p)
+  if n > 0 {
+    let (n, err) = self.w.write(p[:n])
+    if err != None {
+      return (n, err)
+    }
+  }
+  (n, err)
 }
 
-// Discard is a [Writer] on which all Write calls succeed
-// without doing anything.
-var Discard Writer = discard{}
+/// discard is a [Writer] on which all Write calls succeed
+/// without doing anything.
+pub let discard : Discard = { compiler_workaround: true }
 
-type discard struct{}
+// let _ : Writer = discard
 
-// discard implements ReaderFrom as an optimization so copy to
-// io.Discard can avoid doing unnecessary work.
-var _ ReaderFrom = discard{}
-
-fn (discard) Write(p []byte) (int, error) {
-	return len(p), None
+struct Discard {
+  compiler_workaround : Bool // `pub let discard` above doesn't work without this.
 }
 
-fn (discard) WriteString(s string) (int, error) {
-	return len(s), None
+/// Discard implements ReaderFrom as an optimization so copy to
+/// io.Discard can avoid doing unnecessary work.
+/// let _ : ReaderFrom = discard
+
+fn write(self : Discard, p : Slice[Byte]) -> (Int, IOError?) {
+  (p.length(), None)
 }
 
-var blackHolePool = sync.Pool{
-	New: func() any {
-		b := make([]byte, 8192)
-		return &b
-	},
+fn read_from(self : Discard, r : Reader) -> (Int64, IOError?) {
+  let buf = Slice::new(Array::make(8192, b'\x00'))
+  let mut n = 0L
+  for {
+    let v = r.read(buf)
+    n += v.0.to_int64()
+    let err = v.1
+    if err != None {
+      if err == Some(eof) {
+        return (n, None)
+      }
+      return (n, err)
+    }
+  }
 }
 
-fn (discard) read_from(r Reader) (n int64, err error) {
-	bufp := blackHolePool.Get().(*[]byte)
-	readSize := 0
-	for {
-		readSize, err = r.Read(*bufp)
-		n += int64(readSize)
-		if err != None {
-			blackHolePool.Put(bufp)
-			if err == eof {
-				return n, None
-			}
-			return
-		}
-	}
+/// NopCloser::new returns a [ReadCloser] with a no-op Close method wrapping
+/// the provided [Reader] r.
+/// If r implements [WriterTo], the returned [ReadCloser] will implement [WriterTo]
+/// by forwarding calls to r.
+pub fn NopCloser::new(r : Reader) -> NopCloser {
+  // TODO:
+  // let _, ok := r.(WriterTo)
+  // if ok {
+  // 	return NopCloserWriterTo{r}
+  // }
+  { r, }
 }
 
-// NopCloser returns a [ReadCloser] with a no-op Close method wrapping
-// the provided [Reader] r.
-// If r implements [WriterTo], the returned [ReadCloser] will implement [WriterTo]
-// by forwarding calls to r.
-fn NopCloser(r Reader) ReadCloser {
-	if _, ok := r.(WriterTo); ok {
-		return nopCloserWriterTo{r}
-	}
-	return nopCloser{r}
+struct NopCloser {
+  r : Reader
 }
 
-type nopCloser struct {
-	Reader
+fn close(self : NopCloser) -> IOError? {
+  None
 }
 
-fn (nopCloser) Close() error { return None }
-
-type nopCloserWriterTo struct {
-	Reader
+struct NopCloserWriterTo {
+  r : Reader
 }
 
-fn (nopCloserWriterTo) Close() error { return None }
-
-fn (c nopCloserWriterTo) write_to(w Writer) (n int64, err error) {
-	return c.Reader.(WriterTo).write_to(w)
+fn close(self : NopCloserWriterTo) -> IOError? {
+  None
 }
 
-// ReadAll reads from r until an error or eof and returns the data it read.
-// A successful call returns err == None, not err == eof. Because ReadAll is
-// defined to read from src until eof, it does not treat an eof from Read
-// as an error to be reported.
-fn ReadAll(r Reader) ([]byte, error) {
-	b := make([]byte, 0, 512)
-	for {
-		n, err := r.Read(b[len(b):cap(b)])
-		b = b[:len(b)+n]
-		if err != None {
-			if err == eof {
-				err = None
-			}
-			return b, err
-		}
+// TODO:
+// fn write_to(self : NopCloserWriterTo, w : Writer) -> (Int64, IOEerror?) {
+//   // return c.Reader.(WriterTo).WriteTo(w)
+//   self.r.write_to(w)
+// }
 
-		if len(b) == cap(b) {
-			// Add more capacity (let append pick how much).
-			b = append(b, 0)[:len(b)]
-		}
-	}
+/// read_all reads from r until an error or eof and returns the data it read.
+/// A successful call returns err == None, not err == eof. Because read_all is
+/// defined to read from src until eof, it does not treat an eof from Read
+/// as an error to be reported.
+pub fn read_all(r : Reader) -> (Slice[Byte], IOError?) {
+  let mb = 1 << 20
+  let mut cap = 512
+  let mut arr = Array::make(cap, b'\x00')
+  let mut b = Slice::new(arr)
+  for {
+    let (n, err) = r.read(b[b.length():cap])
+    let mut err = err
+    b = b[:b.length() + n]
+    if err != None {
+      if err == Some(eof) {
+        err = None
+      }
+      return (b, err)
+    }
+    if b.length() == cap {
+      if cap < mb {
+        // naive doubling of memory up until 1<<20
+        cap *= 2
+      } else {
+        // thereafter, just add another 1<<20
+        cap += mb
+      }
+      let new_arr = Array::new(capacity=cap)
+      Array::unsafe_blit(new_arr, 0, arr, 0, b.length())
+      arr = new_arr
+      b = Slice::new(arr)[:b.length()]
+    }
+  }
 }

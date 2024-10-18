@@ -30,25 +30,21 @@ test "TestCopy" {
 // 	}
 // }
 
-// test "TestCopyBuffer" {
-// 	let rb = @io.Buffer::new()
-// 	let wb = @io.Buffer::new()
-// 	let _ = rb.write_bytes(b"hello, world.")
-// 	let _ = @io.copy_buffer(wb, rb, make([]byte, 1)) // Tiny buffer to keep it honest.
-// 	if wb.to_bytes() != b"hello, world." {
-// 		t.Errorf("CopyBuffer did not work properly")
-// 	}
-// }
+test "TestCopyBuffer" {
+  let rb = @io.Buffer::new()
+  let wb = @io.Buffer::new()
+  guard let (13, None) = rb.write_bytes(b"hello, world.")
+  guard let (13, None) = @io.copy_buffer(wb, rb, Some(@io.Slice::new([0]))) // Tiny buffer to keep it honest.
+  assert_eq!(wb.to_bytes(), b"hello, world.")
+}
 
-// test "TestCopyBufferNone" {
-// 	let rb = @io.Buffer::new()
-// 	let wb = @io.Buffer::new()
-// 	let _ = rb.write_bytes(b"hello, world.")
-// 	let _ = @io.copy_buffer(wb, rb, None) // Should allocate a buffer.
-// 	if wb.to_bytes() != b"hello, world." {
-// 		t.Errorf("CopyBuffer did not work properly")
-// 	}
-// }
+test "TestCopyBufferNone" {
+  let rb = @io.Buffer::new()
+  let wb = @io.Buffer::new()
+  guard let (13, None) = rb.write_bytes(b"hello, world.")
+  guard let (13, None) = @io.copy_buffer(wb, rb, None) // Should allocate a buffer.
+  assert_eq!(wb.to_bytes(), b"hello, world.")
+}
 
 // test "TestCopyReadFrom" {
 // 	let rb = @io.Buffer::new()
@@ -124,15 +120,13 @@ test "TestCopy" {
 // 	}
 // }
 
-// test "TestCopyN" {
-// 	let rb = @io.Buffer::new()
-// 	let wb = @io.Buffer::new()
-// 	let _ = rb.write_bytes(b"hello, world.")
-// 	let _ = @io.copy_n(wb, rb, 5)
-// 	if wb.to_bytes() != b"hello" {
-// 		t.Errorf("CopyN did not work properly")
-// 	}
-// }
+test "TestCopyN" {
+  let rb = @io.Buffer::new()
+  let wb = @io.Buffer::new()
+  guard let (13, None) = rb.write_bytes(b"hello, world.")
+  guard let (5, None) = @io.copy_n(wb, rb, 5)
+  assert_eq!(wb.to_bytes(), b"hello")
+}
 
 // test "TestCopyNReadFrom" {
 // 	let rb = @io.Buffer::new()

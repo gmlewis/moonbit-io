@@ -641,7 +641,7 @@ fn read(self : TeeReader, p : Slice[Byte]) -> (Int, IOError?) {
 
 /// discard is a [Writer] on which all Write calls succeed
 /// without doing anything.
-pub let discard : Discard = {}
+pub let discard : Discard = Discard::{  }
 
 // let _ : Writer = discard
 

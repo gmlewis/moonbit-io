@@ -641,13 +641,11 @@ fn read(self : TeeReader, p : Slice[Byte]) -> (Int, IOError?) {
 
 /// discard is a [Writer] on which all Write calls succeed
 /// without doing anything.
-pub let discard : Discard = { compiler_workaround: true }
+pub let discard : Discard = Discard::{  }
 
 // let _ : Writer = discard
 
-struct Discard {
-  compiler_workaround : Bool // `pub let discard` above doesn't work without this.
-}
+struct Discard {}
 
 /// Discard implements ReaderFrom as an optimization so copy to
 /// io.Discard can avoid doing unnecessary work.

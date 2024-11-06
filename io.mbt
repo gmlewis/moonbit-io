@@ -714,7 +714,7 @@ pub fn read_all(r : Reader) -> (Slice[Byte], IOError?) {
   let mb = 1 << 20
   let mut cap = 512
   let mut arr = Array::make(cap, b'\x00')
-  let mut b = Slice::new(arr)
+  let mut b = Slice::new(arr, end=0)
   for {
     let (n, err) = r.read(b[b.length():cap])
     let mut err = err

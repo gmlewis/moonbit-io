@@ -669,3 +669,309 @@ test "TestCopyN" {
 // 		checkContent(name, f)
 // 	})
 // }
+
+struct EmptyReader {}
+
+impl @io.Reader for EmptyReader with read(self, b) { (0, Some(@io.eof)) }
+
+test "edge case: empty read" {
+  let reader : EmptyReader = EmptyReader::{  }
+  let (result, err) = @io.read_all(reader)
+  inspect!(result, content="[]")
+  inspect!(err, content="None")
+}
+
+// test "read_all: basic functionality" {
+//   let data = Bytes::from_array(Array::make(10, b'a'))
+//   let reader = @io.Buffer::new()
+//   guard let (10, None) = reader.write_bytes(data)
+//   let (result, err) = @io.read_all(reader)
+//   let got = result.to_bytes().to_array()
+//   inspect!(got, content="[97, 97, 97, 97, 97, 97, 97, 97, 97, 97]")
+//   inspect!(err, content="None")
+// }
+
+// test "edge case: single-byte read" {
+//   let b = b'\x12'
+//   let reader = @io.NopCloser::new(
+//     @io.Reader::new(
+//       fn() -> (Int, @io.IOError?) {
+//         (1, Some(@io.eof))
+//       },
+//     ),
+//   )
+//   let (result, _) = @io.read_all(reader)
+//   inspect!(result, content="[12]")
+// }
+
+// test "read_all with empty buffer" {
+//   // Implement a dummy Reader that behaves as expected for the test
+//   struct EmptyReader {}
+//   impl Reader for EmptyReader {
+//     fn read(self, _ : Slice[Byte]) -> (Int, IOError?) {
+//       (0, Some(eof))
+//     }
+//   }
+//   let r = EmptyReader {}
+//   let (data, err) = @io.read_all(r)
+//   assert_eq!(data.length(), 0)
+//   assert_eq!(err, None)
+// }
+
+// test "read_all with small data buffer" {
+//   struct SmallReader {
+//     data : Array[Byte]
+//     mut read_pointer : Int
+//   }
+//   impl Reader for SmallReader {
+//     fn read(self, buf : Slice[Byte]) -> (Int, IOError?) {
+//       let remaining = self.data.length() - self.read_pointer
+//       let n = minimum(remaining, buf.length())
+//       Array::unsafe_blit(buf.buf, buf.start, self.data, self.read_pointer, n)
+//       self.read_pointer += n if n == 0 {
+//         (0, Some(eof))
+//       } else {
+//         (n, None)
+//       }
+//     }
+//   }
+
+//   let data = [b'H', b'e', b'l', b'l', b'o']
+//   let r = SmallReader { data, read_pointer: 0 }
+//   let (read_data, err) = @io.read_all(r)
+//   assert_eq!(read_data.length(), 5)
+//   assert_eq!(read_data.as_array_view(), data.to_view())
+//   assert_eq!(err, None)
+// }
+
+// test "edge case: nonzero-size read with eof" {
+//   let arr = Array::new([7, 3])
+//   arr[0] = b'1'
+//   arr[1] = b'1'
+//   let reader = @io.NopCloser::new(
+//     @io.Reader::new(
+//       fn() -> (Int, @io.IOError?) {
+//         (arr.length(), Some(@io.eof))
+//       },
+//     ),
+//   )
+//   let (result, _) = @io.read_all(reader)
+//   inspect!(result, content="[13]")
+// }
+
+// test "read_all: eof handling" {
+//   let data = Array::make(5, b'b')
+//   let reader = {
+//     read(_, p) {
+//       let n = minimum(p.length(), data.length())
+//       Array::unsafe_blit(p.buf, p.start, data, 0, n)
+//       data = []
+//       (n, Some(eof))
+//     }
+//   }
+//   let (result, err) = @io.read_all(reader)
+//   inspect!(result, content="bbbbb")
+//   inspect!(err, content="None")
+// }
+
+// test "length variants" {
+//   for i = 0; i < 1024; i = i + 1 {
+//     let arr = Array::new([i])
+//     let reader = @io.NopCloser::new(
+//       @io.Reader::new(
+//         fn() -> (Int, @io.IOError?) {
+//           (i, Some(@io.eof))
+//         },
+//       ),
+//     )
+//     let (result, _) = @io.read_all(reader)
+//     let ei = @io.ERROR_CREATE_FILE
+//     assert_eq!(result[:i].to_array(), mut(arr))
+//   }
+// }
+
+// test "read_all buffer exactly mb in size" {
+//   struct FullMBReader {
+//     data : Array[Byte]
+//     mut read_pointer : Int
+//   }
+//   impl Reader for FullMBReader {
+//     fn read(self, buf : Slice[Byte]) -> (Int, IOError?) {
+//       let remaining = self.data.length() - self.read_pointer
+//       let n = minimum(remaining, buf.length())
+//       Array::unsafe_blit(buf.buf, buf.start, self.data, self.read_pointer, n)
+//       self.read_pointer += n
+//       if n == 0 {
+//         (0, Some(eof))
+//       } else {
+//         (n, None)
+//       }
+//     }
+//   }
+
+//   let mb = 1 << 20
+//   let data = Array::make(mb, b'\x00')
+//   let r = FullMBReader { data, read_pointer: 0 }  let (read_data, err) = @io.read_all(r)
+//   assert_eq!(read_data.length(), mb)
+//   assert_eq!(err, None)
+// }
+
+// test "limited read all cases" {
+//   let b = Array::make(10, b'\x8')
+//   let reader = @io.LimitedReader::new(
+//     @io.NopCloser::new(@io.Reader::new(fn() { (10, Some(eof)) })),
+//     5,
+//   )
+//   let (result, _) = @io.read_all(reader)
+//   let expect = Array::make(5, b'\x8')
+//   assert_eq!(result.to_array(), mut(expect))
+//   let reader2 = @io.NopCloser::new(@io.Reader::new(fn() { (10, Some(eof)) }))
+//   let (result2, _) = @io.read_all(reader2)
+//   let expect2 = Array::make(10, b'\x8')
+//   assert_eq!(result2.to_array(), mut(expect2))
+// }
+
+// test "read_all with large data needing resize" {
+//   struct LargeReader {
+//     data : Array[Byte]
+//     mut read_pointer : Int
+//   } impl Reader for LargeReader {
+//     fn read(self, buf : Slice[Byte]) -> (Int, IOError?) {
+//       let remaining = self.data.length() - self.read_pointer
+//       let n = minimum(remaining, buf.length())
+//       Array::unsafe_blit(buf.buf, buf.start, self.data, self.read_pointer, n)
+//       self.read_pointer += n
+//       if n == 0 {
+//         (0, Some(eof))
+//       } else {
+//         (n, None)
+//       }
+//     }
+//   }
+
+//   let largeSize = (1 << 21) + 100
+//   let data = Array::make(largeSize, b'\x00')
+//   let r = LargeReader { data, read_pointer: 0 }
+//   let (read_data, err) = @io.read_all(r)
+//   assert_eq!(read_data.length(), largeSize)
+//   assert_eq!(err, None)
+// }
+
+// test "read_all: random input" {
+//   for i = 0; i < 5; i = i + 1 {
+//     let data_length = @random.init_state(seed=i).int(1000)
+//     let data = Array::make(data_length, b'c')
+//     let reader = {  read(_, p) {
+//         let n = minimum(p.length(), data.length())
+//         Array::unsafe_blit(p.buf, p.start, data, 0, n)
+//         data = []
+//         (n, Some(eof))
+//       }
+//     }  let (result, err) = @io.read_all(reader)
+//     inspect!(result.length(), content=data_length.to_string())
+//     inspect!(err, content="None")
+//   }
+// }
+
+// test "read_all with immediate eof" {
+//   struct ImmediateEOFReader {}
+//   impl Reader for ImmediateEOFReader {
+//     fn read(self, _ : Slice[Byte]) -> (Int, IOError?) {
+//       (0, Some(eof))
+//     }
+//   }
+//   let r = ImmediateEOFReader {}
+//   let (data, err) = @io.read_all(r)
+//   assert_eq!(data.length(), 0)
+//   assert_eq!(err, None)
+// }
+
+// test "regular/eof read all cases" {
+//   let b = Array::new([5])
+//   b[0] = b'\x8'
+//   b[1] = b'\x8' b[2] = b'\x8'
+//   b[3] = b'\x8'
+//   b[4] = b'\x8'
+//   let reader = @io.NopCloser::new( @io.Reader::new(
+//       fn() -> (Int, @io.IOError?) {
+//         (5, Some(eof))
+//       },
+//     ),
+//   )
+//   let (result, _) = @io.read_all(reader)
+//   let expect = Array::make(5, b'\x8')
+//   assert_eq!(result.to_array(), mut(expect))
+//   let reader2 = @io.NopCloser::new(@io.Reader::new(fn() { (1, Some(eof)) }))
+//   let (result2, _) = @io.read_all(reader2)
+//   let expect2 = Array::make(1, b'\x8')
+//   assert_eq!(result2.to_array(), mut(expect2))
+// }
+
+// test "read_all with random single-byte reads" {
+//   struct RandomSingleByteReader { mut called : Bool }
+//   impl Reader for RandomSingleByteReader {
+//     fn read(self, buf : Slice[Byte]) -> (Int, IOError?) {
+//       if self.called {
+//         (0, Some(eof))
+//       } else {
+//         self.called = true
+//         buf[0] =
+
+// test "read_all: boundary cases" {
+//   let data = Array::make(0, b'd')
+//   let reader = {
+//     read(_, p) {
+//       let n = minimum(p.length(), data.length())
+//       Array::unsafe_blit(p.buf, p.start, data, 0, n)
+//       (n, Some(eof))
+//     }
+//   } let (result, err) = @io.read_all(reader)
+//   inspect!(result, content="")
+//   inspect!(err, content="None")
+// }
+
+// test "read_all overflow cases" {
+//   let b = Array::make(80000, b'\x8')
+//   let reader = @io.NopCloser::new(
+//     @io.Reader::new(
+//       fn() -> (Int, @io.IOError?) {
+//         (80000, None)
+//       },
+//     ),
+//   )
+//   let (result, _) = @io.read_all(reader)
+
+// test "read_all: error handling" {
+//   let data = Array::make(5, b'e')
+//   let reader = {
+//     read(_, p) {
+//       let n = minimum(p.length(), data.length())
+//       Array::unsafe_blit(p.buf, p.start, data, 0, n)
+//       data = []
+//       (n, Some(IOError("custom error")))
+//     }
+//   }
+//   let (result, err) = @io.read_all(reader)
+//   inspect!(result, content="eeeee")
+//   inspect!(err, content="Some(IOError(\"custom error\"))")
+// }
+
+// test "read_all: large input" {
+//   let data_length = 1 << 20 // 1 MB
+//   let data = Array::make(data_length, b'f')
+//   let reader = {
+//     read(_, p) {
+//       let n = minimum(p.length(), data.length())
+//       Array::unsafe_blit(p.buf, p.start, data, 0, n)
+//       data = []
+//       (n, Some(eof))
+//     }
+//   }
+//   let (result, err) = @io.read_all(reader)
+//   inspect!(result.length(), content=data_length.to_string())
+//   inspect!(err, content="None")
+// }
+
+// test "read_all: multiple reads" {
+//   let data = Array::make(10, b'g')
+//   let mut read_count =

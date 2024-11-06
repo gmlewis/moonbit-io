@@ -37,6 +37,16 @@ pub fn read(self : Buffer, buf : Slice[Byte]) -> (Int, IOError?) {
   (n, None)
 }
 
+pub fn read_byte(self : Buffer) -> (Byte, IOError?) {
+  let remaining = self.b.length() - self.off
+  if remaining <= 0 {
+    return (0, Some(eof))
+  }
+  let b = self.b[self.off]
+  self.off += 1
+  (b, None)
+}
+
 fn minimum(a : Int, b : Int) -> Int {
   if a < b {
     a

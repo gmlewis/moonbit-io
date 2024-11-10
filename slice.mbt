@@ -26,6 +26,7 @@ struct Slice[T] {
   len : Int
 }
 
+/// length returns the length of the slice.
 pub fn length[T](self : Slice[T]) -> Int {
   self.len
 }
@@ -86,6 +87,35 @@ pub fn op_as_view[T](self : Slice[T], ~start : Int, ~end? : Int) -> Slice[T] {
     abort("View start index out of bounds")
   }
   Slice::{ buf: self.buf, start: self.start + start, len: end - start }
+}
+
+/// cap returns the total capacity of the slice regardless of the current length.
+pub fn cap[T](self : Slice[T]) -> Int {
+  self.buf.length() - self.start
+}
+
+/// append appends `s` to the end of the slice, reallocating the underlying
+/// array if necessary, then returns the new slice.
+pub fn append[T](self : Slice[T], s : Slice[T]) -> Slice[T] {
+  let remaining = self.cap() - self.length()
+  if remaining >= s.length() {
+    // plenty of room, reuse current internal Array.
+    let idx = self.start + self.len
+    for i in 0..<s.length() {
+      self.buf[idx + i] = s[i]
+    }
+    return { buf: self.buf, start: self.start, len: self.len + s.length() }
+  }
+  // reallocate array, copy the data, then return the new slice
+  let arr = Array::new(capacity=self.length() + s.length())
+  let idx = self.length()
+  for i in 0..<idx {
+    arr.push(self.buf[i + self.start])
+  }
+  for i in 0..<s.length() {
+    arr.push(s.buf[i + s.start])
+  }
+  { buf: arr, start: 0, len: self.length() + s.length() }
 }
 
 pub fn iter[A](self : Slice[A]) -> Iter[A] {

@@ -85,7 +85,7 @@ pub let err_no_progress : IOError = IOError(
 /// nothing happened; in particular it does not indicate eof.
 ///
 /// Implementations must not retain p.
-pub trait Reader {
+pub(open) trait Reader {
   read(Self, Slice[Byte]) -> (Int, IOError?)
 }
 
@@ -98,7 +98,7 @@ pub trait Reader {
 /// Write must not modify the slice data, even temporarily.
 ///
 /// Implementations must not retain p.
-pub trait Writer {
+pub(open) trait Writer {
   write(Self, Slice[Byte]) -> (Int, IOError?)
 }
 
@@ -106,7 +106,7 @@ pub trait Writer {
 ///
 /// The behavior of Close after the first call is undefined.
 /// Specific implementations may document their own behavior.
-pub trait Closer {
+pub(open) trait Closer {
   close(Self) -> IOError?
 }
 
@@ -125,57 +125,57 @@ pub trait Closer {
 /// Seeking to any positive offset may be allowed, but if the new offset exceeds
 /// the size of the underlying object the behavior of subsequent I/O operations
 /// is implementation-dependent.
-pub trait Seeker {
+pub(open) trait Seeker {
   seek(Self, Int64, Whence) -> (Int64, IOError?)
 }
 
 /// ReadWriter is the interface that groups the basic Read and Write methods.
-pub trait ReadWriter {
+pub(open) trait ReadWriter {
   read(Self, Slice[Byte]) -> (Int, IOError?)
   write(Self, Slice[Byte]) -> (Int, IOError?)
 }
 
 /// ReadCloser is the interface that groups the basic Read and Close methods.
-pub trait ReadCloser {
+pub(open) trait ReadCloser {
   read(Self, Slice[Byte]) -> (Int, IOError?)
   close(Self) -> IOError?
 }
 
 /// WriteCloser is the interface that groups the basic Write and Close methods.
-pub trait WriteCloser {
+pub(open) trait WriteCloser {
   write(Self, Slice[Byte]) -> (Int, IOError?)
   close(Self) -> IOError?
 }
 
 /// ReadWriteCloser is the interface that groups the basic Read, Write and Close methods.
-pub trait ReadWriteCloser {
+pub(open) trait ReadWriteCloser {
   read(Self, Slice[Byte]) -> (Int, IOError?)
   write(Self, Slice[Byte]) -> (Int, IOError?)
   close(Self) -> IOError?
 }
 
 /// ReadSeeker is the interface that groups the basic Read and Seek methods.
-pub trait ReadSeeker {
+pub(open) trait ReadSeeker {
   read(Self, Slice[Byte]) -> (Int, IOError?)
   seek(Self, Int64, Whence) -> (Int64, IOError?)
 }
 
 /// ReadSeekCloser is the interface that groups the basic Read, Seek and Close
 /// methods.
-pub trait ReadSeekCloser {
+pub(open) trait ReadSeekCloser {
   read(Self, Slice[Byte]) -> (Int, IOError?)
   seek(Self, Int64, Whence) -> (Int64, IOError?)
   close(Self) -> IOError?
 }
 
 /// WriteSeeker is the interface that groups the basic Write and Seek methods.
-pub trait WriteSeeker {
+pub(open) trait WriteSeeker {
   write(Self, Slice[Byte]) -> (Int, IOError?)
   seek(Self, Int64, Whence) -> (Int64, IOError?)
 }
 
 /// ReadWriteSeeker is the interface that groups the basic Read, Write and Seek methods.
-pub trait ReadWriteSeeker {
+pub(open) trait ReadWriteSeeker {
   read(Self, Slice[Byte]) -> (Int, IOError?)
   write(Self, Slice[Byte]) -> (Int, IOError?)
   seek(Self, Int64, Whence) -> (Int64, IOError?)
@@ -188,7 +188,7 @@ pub trait ReadWriteSeeker {
 /// Any error except eof encountered during the read is also returned.
 ///
 /// The [copy] function uses [ReaderFrom] if available.
-pub trait ReaderFrom {
+pub(open) trait ReaderFrom {
   read_from(Self, Reader) -> (Int64, IOError?)
 }
 
@@ -199,7 +199,7 @@ pub trait ReaderFrom {
 /// written. Any error encountered during the write is also returned.
 ///
 /// The copy function uses WriterTo if available.
-pub trait WriterTo {
+pub(open) trait WriterTo {
   write_to(Self, Writer) -> (Int64, IOError?)
 }
 
@@ -229,7 +229,7 @@ pub trait WriterTo {
 /// same input source.
 ///
 /// Implementations must not retain p.
-pub trait ReaderAt {
+pub(open) trait ReaderAt {
   read_at(Self, Slice[Byte], Int64) -> (Int, IOError?)
 }
 
@@ -248,7 +248,7 @@ pub trait ReaderAt {
 /// destination if the ranges do not overlap.
 ///
 /// Implementations must not retain p.
-pub trait WriterAt {
+pub(open) trait WriterAt {
   write_at(Self, Slice[Byte], Int64) -> (Int, IOError?)
 }
 
@@ -261,7 +261,7 @@ pub trait WriterAt {
 /// read_byte provides an efficient interface for byte-at-time
 /// processing. A [Reader] that does not implement  ByteReader
 /// can be wrapped using bufio.NewReader to add this method.
-pub trait ByteReader {
+pub(open) trait ByteReader {
   read_byte(Self) -> (Byte, IOError?)
 }
 
@@ -273,13 +273,13 @@ pub trait ByteReader {
 /// return an error, unread the last byte read (or the byte prior to the
 /// last-unread byte), or (in implementations that support the [Seeker] interface)
 /// seek to one byte before the current offset.
-pub trait ByteScanner {
+pub(open) trait ByteScanner {
   read_byte(Self) -> (Byte, IOError?)
   unread_byte(Self) -> IOError?
 }
 
 /// ByteWriter is the interface that wraps the write_byte method.
-pub trait ByteWriter {
+pub(open) trait ByteWriter {
   write_byte(Self, Byte) -> IOError?
 }
 

@@ -442,6 +442,8 @@ pub fn LimitedReader::new(r : Reader, n : Int64) -> LimitedReader {
   { r, n }
 }
 
+let _trait3 : Reader = LimitedReader::new(discard, 0)
+
 /// A LimitedReader reads from R but limits the amount of
 /// data returned to just N bytes. Each call to Read
 /// updates N to reflect the new amount remaining.
@@ -628,6 +630,8 @@ struct TeeReader {
   w : Writer
 }
 
+let _trait : Reader = TeeReader::new(discard, discard)
+
 fn read(self : TeeReader, p : Slice[Byte]) -> (Int, IOError?) {
   let (n, err) = self.r.read(p)
   if n > 0 {
@@ -643,15 +647,21 @@ fn read(self : TeeReader, p : Slice[Byte]) -> (Int, IOError?) {
 /// without doing anything.
 pub let discard : Discard = Discard::{  }
 
-// let _ : Writer = discard
+let _trait1 : Writer = discard
+
+let _trait2 : Reader = discard
 
 struct Discard {}
+
+fn read(self : Discard, _b : Slice[Byte]) -> (Int, IOError?) {
+  (0, Some(eof))
+}
 
 /// Discard implements ReaderFrom as an optimization so copy to
 /// io.Discard can avoid doing unnecessary work.
 /// let _ : ReaderFrom = discard
-
-fn write(self : Discard, p : Slice[Byte]) -> (Int, IOError?) {
+pub fn write(self : Discard, p : Slice[Byte]) -> (Int, IOError?) {
+  // possible compiler bug - this `pub` should not be needed here but buffer_test.mbt fails if missing.
   (p.length(), None)
 }
 

@@ -8,6 +8,15 @@ pub fn Buffer::new() -> Buffer {
   { b, off: 0 }
 }
 
+let _trait4 : Reader = Buffer::new()
+
+let _trait5 : Writer = Buffer::new()
+
+pub fn Buffer::from(s : Slice[Byte]) -> Buffer {
+  let b = s.to_bytes().to_array()
+  { b, off: 0 }
+}
+
 pub fn reset(self : Buffer) -> Unit {
   self.b = []
   self.off = 0

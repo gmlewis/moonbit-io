@@ -25,8 +25,14 @@ pub fn reset(self : Buffer) -> Unit {
 pub fn write(self : Buffer, buf : Slice[Byte]) -> (Int, IOError?) {
   let cap = buf.length() + self.b.length()
   let b = Array::new(capacity=cap)
-  Array::unsafe_blit(b, 0, self.b, 0, self.b.length())
-  Array::unsafe_blit(b, self.b.length(), buf.buf, buf.start, buf.len)
+  // Array::unsafe_blit(b, 0, self.b, 0, self.b.length())  // Doesn't work on wasm, wasm-gc, native.
+  for i in 0..<self.b.length() {
+    b.push(self.b[i])
+  }
+  // Array::unsafe_blit(b, self.b.length(), buf.buf, buf.start, buf.len) // ditto
+  for i in 0..<buf.len {
+    b.push(buf.buf[buf.start + i])
+  }
   self.b = b
   (buf.length(), None)
 }

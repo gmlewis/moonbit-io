@@ -744,7 +744,10 @@ pub fn read_all(r : Reader) -> (Slice[Byte], IOError?) {
         cap += mb
       }
       let new_arr = Array::new(capacity=cap)
-      Array::unsafe_blit(new_arr, 0, arr, 0, b.length())
+      // Array::unsafe_blit(new_arr, 0, arr, 0, b.length())  // Doesn't work on wasm, wasm-gc, native
+      for i in 0..<b.length() {
+        new_arr.push(arr[i])
+      }
       arr = new_arr
       b = Slice::new(arr)[:b.length()]
     }

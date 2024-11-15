@@ -13,6 +13,14 @@ test "TestCopy" {
   guard let (13, None) = rb.write_bytes(b"hello, world.")
   guard let (13, None) = @io.copy(wb, rb)
   assert_eq!(wb.to_bytes(), b"hello, world.")
+
+  // reuse buffers
+  rb.reset()
+  wb.reset()
+  guard let (13, None) = rb.write_bytes(b"hello, world.")
+  guard let (13, None) = rb.write_bytes(b"hello, world.")
+  guard let (26, None) = @io.copy(wb, rb)
+  assert_eq!(wb.to_bytes(), b"hello, world.hello, world.")
 }
 
 // test "TestCopyNegative" {

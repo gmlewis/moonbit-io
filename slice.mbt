@@ -60,7 +60,7 @@ pub fn swap[T](self : Slice[T], i : Int, j : Int) -> Unit {
   self.buf[self.start + j] = temp
 }
 
-pub fn Slice::new[T](buf : Array[T], ~start : Int = 0, ~end? : Int) -> Slice[T] {
+pub fn Slice::new[T](buf : Array[T], start~ : Int = 0, end? : Int) -> Slice[T] {
   let len = buf.length()
   let end = match end {
     None => len
@@ -77,7 +77,7 @@ pub fn as_array_view[T](self : Slice[T]) -> ArrayView[T] {
   self.buf[self.start:end]
 }
 
-pub fn op_as_view[T](self : Slice[T], ~start : Int, ~end? : Int) -> Slice[T] {
+pub fn op_as_view[T](self : Slice[T], start~ : Int, end? : Int) -> Slice[T] {
   let len = self.buf.length()
   let end = match end {
     None => self.len
@@ -153,7 +153,7 @@ pub fn iter2[A](self : Slice[A]) -> Iter2[Int, A] {
 /// let sum = [1, 2, 3, 4, 5][:].fold(init=0, fn { sum, elem => sum + elem })
 /// sum // 15
 /// ```
-pub fn fold[A, B](self : Slice[A], ~init : B, f : (B, A) -> B) -> B {
+pub fn fold[A, B](self : Slice[A], init~ : B, f : (B, A) -> B) -> B {
   for i = 0, acc = init; i < self.length(); {
     continue i + 1, f(acc, self[i])
   } else {
@@ -168,7 +168,7 @@ pub fn fold[A, B](self : Slice[A], ~init : B, f : (B, A) -> B) -> B {
 /// let sum = [1, 2, 3, 4, 5][:].rev_fold(init=0, fn { sum, elem => sum + elem })
 /// sum // 15
 /// ```
-pub fn rev_fold[A, B](self : Slice[A], ~init : B, f : (B, A) -> B) -> B {
+pub fn rev_fold[A, B](self : Slice[A], init~ : B, f : (B, A) -> B) -> B {
   for i = self.length() - 1, acc = init; i >= 0; {
     continue i - 1, f(acc, self[i])
   } else {
@@ -183,7 +183,7 @@ pub fn rev_fold[A, B](self : Slice[A], ~init : B, f : (B, A) -> B) -> B {
 /// let sum = [1, 2, 3, 4, 5][:].foldi(init=0, fn { index, sum, elem => sum + index })
 /// sum // 10
 /// ```
-pub fn foldi[A, B](self : Slice[A], ~init : B, f : (Int, B, A) -> B) -> B {
+pub fn foldi[A, B](self : Slice[A], init~ : B, f : (Int, B, A) -> B) -> B {
   for i = 0, acc = init; i < self.length(); {
     continue i + 1, f(i, acc, self[i])
   } else {
@@ -198,7 +198,7 @@ pub fn foldi[A, B](self : Slice[A], ~init : B, f : (Int, B, A) -> B) -> B {
 /// let sum = [1, 2, 3, 4, 5][:].rev_foldi(~init=0, fn { index, sum, elem => sum + index })
 /// sum // 10
 /// ```
-pub fn rev_foldi[A, B](self : Slice[A], ~init : B, f : (Int, B, A) -> B) -> B {
+pub fn rev_foldi[A, B](self : Slice[A], init~ : B, f : (Int, B, A) -> B) -> B {
   let len = self.length()
   for i = len - 1, acc = init; i >= 0; {
     continue i - 1, f(len - i - 1, acc, self[i])

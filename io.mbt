@@ -15,14 +15,14 @@
 /// assume they are safe for parallel execution.
 
 /// Seek whence values.
-pub enum Whence {
+pub(all) enum Whence {
   SeekStart /// seek relative to the origin of the file
   SeekCurrent /// seek relative to the current offset
   SeekEnd /// seek relative to the end
 }
 
 /// An IOError can be tested with equality checks.
-pub type! IOError String derive(Show, Eq)
+pub(all) type! IOError String derive(Show, Eq)
 
 /// err_short_write means that a write accepted fewer bytes than requested
 /// but failed to return an explicit error.

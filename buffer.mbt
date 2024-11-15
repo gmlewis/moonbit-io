@@ -67,3 +67,7 @@ fn minimum(a : Int, b : Int) -> Int {
 pub fn to_bytes(self : Buffer) -> Bytes {
   Bytes::from_array(self.b)
 }
+
+pub fn to_slice(self : Buffer) -> Slice[Byte] {
+  Slice::new(self.b)
+}

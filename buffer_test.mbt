@@ -66,3 +66,9 @@ test "discard" {
   guard let (10, None) = @io.copy(@io.discard, b)
 
 }
+
+test "buffer::to_slice" {
+  let b = @io.Buffer::from(Slice::new([1, 2, 3]))
+  let got = b.to_slice()
+  assert_eq!(got.to_bytes(), b"\x01\x02\x03")
+}

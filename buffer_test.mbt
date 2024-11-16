@@ -5,6 +5,14 @@ test "write basic functionality" {
   inspect!(result, content="(3, None)")
 }
 
+test "write_string basic functionality" {
+  let buffer = @io.Buffer::new()
+  let result = buffer.write_string("ABC")
+  inspect!(result, content="(3, None)")
+  let got = buffer.to_slice()
+  assert_eq!(got.to_bytes(), b"ABC")
+}
+
 test "write with different lengths" {
   let buffer = @io.Buffer::new()
   let short_input : @io.Slice[Byte] = @io.Slice::new([b'F'])

@@ -41,6 +41,13 @@ pub fn write_bytes(self : Buffer, buf : Bytes) -> (Int, IOError?) {
   self.write(Slice::new(buf.to_array()))
 }
 
+// `write_string` converts the MoonBit UTF-16 String to UTF-8 and
+// writes the bytes to the buffer.
+pub fn write_string(self : Buffer, s : String) -> (Int, IOError?) {
+  let b = @base64.str2bytes(s)
+  self.write_bytes(b)
+}
+
 pub fn read(self : Buffer, buf : Slice[Byte]) -> (Int, IOError?) {
   let remaining = self.b.length() - self.off
   if remaining <= 0 || buf.length() == 0 {

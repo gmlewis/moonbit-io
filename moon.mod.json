@@ -1,7 +1,9 @@
 {
   "name": "gmlewis/io",
-  "version": "0.9.0",
-  "deps": {},
+  "version": "0.10.0",
+  "deps": {
+    "gmlewis/base64": "0.9.0"
+  },
   "readme": "README.md",
   "repository": "https://github.com/gmlewis/moonbit-io",
   "license": "Apache-2.0",

@@ -120,10 +120,10 @@ pub fn append[T](self : Slice[T], s : Slice[T]) -> Slice[T] {
 
 pub fn iter[A](self : Slice[A]) -> Iter[A] {
   Iter::new(
-    fn(yield) {
+    fn(yield_fn) {
       for i = 0; i < self.len; i = i + 1 {
         let v = self.buf[self.start + i]
-        guard let IterContinue = yield(v) else { x => break x }
+        guard let IterContinue = yield_fn(v) else { x => break x }
 
       } else {
         IterContinue
@@ -134,10 +134,10 @@ pub fn iter[A](self : Slice[A]) -> Iter[A] {
 
 pub fn iter2[A](self : Slice[A]) -> Iter2[Int, A] {
   Iter2::new(
-    fn(yield) {
+    fn(yield_fn) {
       for i = 0; i < self.len; i = i + 1 {
         let v = self.buf[self.start + i]
-        guard let IterContinue = yield(i, v) else { x => break x }
+        guard let IterContinue = yield_fn(i, v) else { x => break x }
 
       } else {
         IterContinue

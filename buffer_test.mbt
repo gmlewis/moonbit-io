@@ -9,6 +9,7 @@ test "write_string basic functionality" {
   let buffer = @io.Buffer::new()
   let result = buffer.write_string("ABC")
   inspect!(result, content="(3, None)")
+  assert_eq!(buffer.length(), 3)
   let got = buffer.to_slice()
   assert_eq!(got.to_bytes(), b"ABC")
 }

@@ -84,3 +84,7 @@ pub fn to_bytes(self : Buffer) -> Bytes {
 pub fn to_slice(self : Buffer) -> Slice[Byte] {
   Slice::new(self.b)
 }
+
+pub fn length(self : Buffer) -> Int {
+  self.b.length()
+}

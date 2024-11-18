@@ -118,6 +118,12 @@ pub fn append[T](self : Slice[T], s : Slice[T]) -> Slice[T] {
   { buf: arr, start: 0, len: self.length() + s.length() }
 }
 
+/// push appends `e` to the end of the slice, reallocating the underlying
+/// array if necessary, then returns the new slice.
+pub fn push[T](self : Slice[T], e : T) -> Slice[T] {
+  self.append(Slice::new([e]))
+}
+
 pub fn iter[A](self : Slice[A]) -> Iter[A] {
   Iter::new(
     fn(yield_fn) {

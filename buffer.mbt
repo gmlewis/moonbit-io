@@ -69,6 +69,10 @@ pub fn read_byte(self : Buffer) -> (Byte, IOError?) {
   (b, None)
 }
 
+pub fn read_from(self : Buffer, r : Reader) -> (Int64, IOError?) {
+  copy(self, r)
+}
+
 fn minimum(a : Int, b : Int) -> Int {
   if a < b {
     a

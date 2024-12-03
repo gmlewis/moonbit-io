@@ -1,27 +1,34 @@
+///|
 struct Buffer {
   mut b : Array[Byte]
   mut off : Int
 }
 
+///|
 pub fn Buffer::new() -> Buffer {
   let b = []
   { b, off: 0 }
 }
 
+///|
 let _trait4 : Reader = Buffer::new()
 
+///|
 let _trait5 : Writer = Buffer::new()
 
+///|
 pub fn Buffer::from(s : Slice[Byte]) -> Buffer {
   let b = s.to_bytes().to_array()
   { b, off: 0 }
 }
 
+///|
 pub fn reset(self : Buffer) -> Unit {
   self.b = []
   self.off = 0
 }
 
+///|
 pub fn write(self : Buffer, buf : Slice[Byte]) -> (Int, IOError?) {
   let cap = buf.length() + self.b.length()
   let b = Array::new(capacity=cap)
@@ -37,17 +44,20 @@ pub fn write(self : Buffer, buf : Slice[Byte]) -> (Int, IOError?) {
   (buf.length(), None)
 }
 
+///|
 pub fn write_bytes(self : Buffer, buf : Bytes) -> (Int, IOError?) {
   self.write(Slice::new(buf.to_array()))
 }
 
 // `write_string` converts the MoonBit UTF-16 String to UTF-8 and
 // writes the bytes to the buffer.
+///|
 pub fn write_string(self : Buffer, s : String) -> (Int, IOError?) {
   let b = @base64.str2bytes(s)
   self.write_bytes(b)
 }
 
+///|
 pub fn read(self : Buffer, buf : Slice[Byte]) -> (Int, IOError?) {
   let remaining = self.b.length() - self.off
   if remaining <= 0 || buf.length() == 0 {
@@ -59,6 +69,7 @@ pub fn read(self : Buffer, buf : Slice[Byte]) -> (Int, IOError?) {
   (n, None)
 }
 
+///|
 pub fn read_byte(self : Buffer) -> (Byte, IOError?) {
   let remaining = self.b.length() - self.off
   if remaining <= 0 {
@@ -69,10 +80,12 @@ pub fn read_byte(self : Buffer) -> (Byte, IOError?) {
   (b, None)
 }
 
+///|
 pub fn read_from(self : Buffer, r : Reader) -> (Int64, IOError?) {
   copy(self, r)
 }
 
+///|
 fn minimum(a : Int, b : Int) -> Int {
   if a < b {
     a
@@ -81,14 +94,17 @@ fn minimum(a : Int, b : Int) -> Int {
   }
 }
 
+///|
 pub fn to_bytes(self : Buffer) -> Bytes {
   Bytes::from_array(self.b)
 }
 
+///|
 pub fn to_slice(self : Buffer) -> Slice[Byte] {
   Slice::new(self.b)
 }
 
+///|
 pub fn length(self : Buffer) -> Int {
   self.b.length()
 }

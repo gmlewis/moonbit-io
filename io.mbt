@@ -662,30 +662,30 @@ fn read(self : TeeReader, p : Slice[Byte]) -> (Int, IOError?) {
 /// without doing anything.
 pub let discard : Discard = Discard::{  }
 
-///|
-let _trait1 : Writer = discard
+///| `discard` satisfies the `Writer` trait.
+let _discardIsWriter : Writer = discard
 
-///|
-let _trait2 : Reader = discard
+///| `discard` satisfies the `Reader` trait.
+let _discardIsReader : Reader = discard
 
 ///|
 struct Discard {}
 
 ///|
-fn read(self : Discard, _b : Slice[Byte]) -> (Int, IOError?) {
+fn Discard::read(_self : Discard, _b : Slice[Byte]) -> (Int, IOError?) {
   (0, Some(eof))
 }
 
 ///| Discard implements ReaderFrom as an optimization so copy to
 /// io.Discard can avoid doing unnecessary work.
 /// let _ : ReaderFrom = discard
-pub fn write(self : Discard, p : Slice[Byte]) -> (Int, IOError?) {
+pub fn Discard::write(_self : Discard, p : Slice[Byte]) -> (Int, IOError?) {
   // possible compiler bug - this `pub` should not be needed here but buffer_test.mbt fails if missing.
   (p.length(), None)
 }
 
 ///|
-fn read_from(self : Discard, r : Reader) -> (Int64, IOError?) {
+fn Discard::read_from(_self : Discard, r : Reader) -> (Int64, IOError?) {
   let buf = Slice::new(Array::make(8192, b'\x00'))
   let mut n = 0L
   for {
@@ -714,25 +714,34 @@ pub fn NopCloser::new(r : Reader) -> NopCloser {
   { r, }
 }
 
+///| `NopCloser` satisfies the `ReadCloser` trait.
+let _NopCloser : ReadCloser = NopCloser::new(Buffer::new())
+
+///|
+fn read(self : NopCloser, b : Slice[Byte]) -> (Int, IOError?) {
+  self.r.read(b)
+}
+
 ///|
 struct NopCloser {
   r : Reader
 }
 
 ///|
-fn close(self : NopCloser) -> IOError? {
+fn NopCloser::close(_self : NopCloser) -> IOError? {
   None
 }
 
-///|
-struct NopCloserWriterTo {
-  r : Reader
-}
-
-///|
-fn close(self : NopCloserWriterTo) -> IOError? {
-  None
-}
+// TODO:
+// ///| NopCloserWriterTo is for internal use only. Do not make public.
+// struct NopCloserWriterTo {
+//   // TODO: r : Reader
+// }
+//
+// ///|
+// fn NopCloserWriterTo::close(_self : NopCloserWriterTo) -> IOError? {
+//   None
+// }
 
 // TODO:
 // fn write_to(self : NopCloserWriterTo, w : Writer) -> (Int64, IOEerror?) {

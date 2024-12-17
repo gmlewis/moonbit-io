@@ -406,7 +406,7 @@ pub fn copy_buffer(
   for {
     let (nr, er) = src.read(buf)
     if nr > 0 {
-      let (nw, ew) = dst.write(buf[0:nr])
+      let (nw, ew) = dst.write(buf[:nr])
       let mut nw = nw
       let mut ew = ew
       if nw < 0 || nr < nw {
@@ -461,7 +461,7 @@ fn read(self : LimitedReader, p : Slice[Byte]) -> (Int, IOError?) {
   }
   let mut p = p
   if p.length().to_int64() > self.n {
-    p = p[0:self.n.to_int()]
+    p = p[:self.n.to_int()]
   }
   let (n, err) = self.r.read(p)
   self.n -= n.to_int64()
@@ -505,7 +505,7 @@ fn read(self : SectionReader, p : Slice[Byte]) -> (Int, IOError?) {
   let max = self.limit - self.off
   let mut p = p
   if p.length().to_int64() > max {
-    p = p[0:max.to_int()]
+    p = p[:max.to_int()]
   }
   let (n, err) = self.r.read_at(p, self.off)
   self.off += n.to_int64()
@@ -551,7 +551,7 @@ fn read_at(
   let max = self.limit - off
   let mut p = p
   if p.length().to_int64() > max {
-    p = p[0:max.to_int()]
+    p = p[:max.to_int()]
     let (n, err) = self.r.read_at(p, off)
     let mut err = err
     if err == None {
@@ -650,7 +650,7 @@ let _trait : &Reader = TeeReader::new(discard, discard)
 fn read(self : TeeReader, p : Slice[Byte]) -> (Int, IOError?) {
   let (n, err) = self.r.read(p)
   if n > 0 {
-    let (n, err) = self.w.write(p[0:n])
+    let (n, err) = self.w.write(p[:n])
     if err != None {
       return (n, err)
     }
@@ -761,7 +761,7 @@ pub fn read_all(r : &Reader) -> (Slice[Byte], IOError?) {
   for {
     let (n, err) = r.read(b[b.length():cap])
     let mut err = err
-    b = b[0:b.length() + n]
+    b = b[:b.length() + n]
     if err != None {
       if err == Some(eof) {
         err = None
@@ -782,7 +782,7 @@ pub fn read_all(r : &Reader) -> (Slice[Byte], IOError?) {
         new_arr.push(arr[i])
       }
       arr = new_arr
-      b = Slice::new(arr)[0:b.length()]
+      b = Slice::new(arr)[:b.length()]
     }
   }
 }

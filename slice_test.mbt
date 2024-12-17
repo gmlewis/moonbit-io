@@ -48,15 +48,15 @@ test "panic array_as_view_start_index_error" {
 }
 
 test "panic array_as_view_end_index_error" {
-  Slice::new([1, 2, 3])[0:-1] |> ignore
+  Slice::new([1, 2, 3])[:-1] |> ignore
 }
 
 test "panic array_as_view_end_index_error" {
-  Slice::new([1, 2, 3])[0:-1] |> ignore
+  Slice::new([1, 2, 3])[:-1] |> ignore
 }
 
 test "panic array_as_view_length_index_error" {
-  Slice::new([1, 2, 3])[0:4] |> ignore
+  Slice::new([1, 2, 3])[:4] |> ignore
 }
 
 test "panic view_as_view_start_index_error" {
@@ -68,15 +68,15 @@ test "panic view_as_view_start_index_error" {
 }
 
 test "panic view_as_view_end_index_error" {
-  Slice::new([1, 2, 3])[0:-1] |> ignore
+  Slice::new([1, 2, 3])[:-1] |> ignore
 }
 
 test "panic view_as_view_end_index_error" {
-  Slice::new([1, 2, 3])[0:-1] |> ignore
+  Slice::new([1, 2, 3])[:-1] |> ignore
 }
 
 test "panic view_as_view_length_index_error" {
-  Slice::new([1, 2, 3])[0:4] |> ignore
+  Slice::new([1, 2, 3])[:4] |> ignore
 }
 
 test "panic array_as_view_get_index_error" {
@@ -136,11 +136,11 @@ test "slice grows within larger array" {
   inspect!(arr, content="[3, 4]")
   inspect!(arr.length(), content="2")
   inspect!(arr.cap(), content="4")
-  let arr = arr[0:3]
+  let arr = arr[:3]
   inspect!(arr, content="[3, 4, 5]")
   inspect!(arr.length(), content="3")
   inspect!(arr.cap(), content="4")
-  let arr = arr[0:4]
+  let arr = arr[:4]
   inspect!(arr, content="[3, 4, 5, 6]")
   inspect!(arr.length(), content="4")
   inspect!(arr.cap(), content="4")

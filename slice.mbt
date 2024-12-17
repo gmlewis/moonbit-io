@@ -132,32 +132,28 @@ pub fn push[T](self : Slice[T], e : T) -> Slice[T] {
 
 ///|
 pub fn iter[A](self : Slice[A]) -> Iter[A] {
-  Iter::new(
-    fn(yield_fn) {
-      for i = 0; i < self.len; i = i + 1 {
-        let v = self.buf[self.start + i]
-        guard let IterContinue = yield_fn(v) else { x => break x }
+  Iter::new(fn(yield_fn) {
+    for i = 0; i < self.len; i = i + 1 {
+      let v = self.buf[self.start + i]
+      guard let IterContinue = yield_fn(v) else { x => break x }
 
-      } else {
-        IterContinue
-      }
-    },
-  )
+    } else {
+      IterContinue
+    }
+  })
 }
 
 ///|
 pub fn iter2[A](self : Slice[A]) -> Iter2[Int, A] {
-  Iter2::new(
-    fn(yield_fn) {
-      for i = 0; i < self.len; i = i + 1 {
-        let v = self.buf[self.start + i]
-        guard let IterContinue = yield_fn(i, v) else { x => break x }
+  Iter2::new(fn(yield_fn) {
+    for i = 0; i < self.len; i = i + 1 {
+      let v = self.buf[self.start + i]
+      guard let IterContinue = yield_fn(i, v) else { x => break x }
 
-      } else {
-        IterContinue
-      }
-    },
-  )
+    } else {
+      IterContinue
+    }
+  })
 }
 
 ///| Fold out values from an Slice according to certain rules.

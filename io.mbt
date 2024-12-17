@@ -189,7 +189,7 @@ pub(open) trait ReadWriteSeeker {
 ///
 /// The [copy] function uses [ReaderFrom] if available.
 pub(open) trait ReaderFrom {
-  read_from(Self, Reader) -> (Int64, IOError?)
+  read_from(Self, &Reader) -> (Int64, IOError?)
 }
 
 ///| WriterTo is the interface that wraps the write_to method.
@@ -200,7 +200,7 @@ pub(open) trait ReaderFrom {
 ///
 /// The copy function uses WriterTo if available.
 pub(open) trait WriterTo {
-  write_to(Self, Writer) -> (Int64, IOError?)
+  write_to(Self, &Writer) -> (Int64, IOError?)
 }
 
 ///| ReaderAt is the interface that wraps the basic read_at method.
@@ -291,7 +291,7 @@ pub(open) trait ByteWriter {
 /// If min is greater than the length of buf, read_at_least returns [err_short_buffer].
 /// On return, n >= min if and only if err == None.
 /// If r returns an error having read at least min bytes, the error is dropped.
-fn read_at_least(r : Reader, buf : Slice[Byte], min : Int) -> (Int, IOError?) {
+fn read_at_least(r : &Reader, buf : Slice[Byte], min : Int) -> (Int, IOError?) {
   let mut n = 0
   let mut err = None
   if buf.length() < min {
@@ -317,7 +317,7 @@ fn read_at_least(r : Reader, buf : Slice[Byte], min : Int) -> (Int, IOError?) {
 /// read_full returns [err_unexpected_eof].
 /// On return, n == len(buf) if and only if err == None.
 /// If r returns an error having read at least len(buf) bytes, the error is dropped.
-pub fn read_full(r : Reader, buf : Slice[Byte]) -> (Int, IOError?) {
+pub fn read_full(r : &Reader, buf : Slice[Byte]) -> (Int, IOError?) {
   read_at_least(r, buf, buf.length())
 }
 
@@ -327,7 +327,7 @@ pub fn read_full(r : Reader, buf : Slice[Byte]) -> (Int, IOError?) {
 /// On return, written == n if and only if err == None.
 ///
 /// If dst implements [ReaderFrom], the copy is implemented using it.
-pub fn copy_n(dst : Writer, src : Reader, n : Int64) -> (Int64, IOError?) {
+pub fn copy_n(dst : &Writer, src : &Reader, n : Int64) -> (Int64, IOError?) {
   let v = copy(dst, LimitedReader::new(src, n))
   let written = v.0
   let mut err = v.1
@@ -353,7 +353,7 @@ pub fn copy_n(dst : Writer, src : Reader, n : Int64) -> (Int64, IOError?) {
 /// the copy is implemented by calling src.write_to(dst).
 /// Otherwise, if dst implements [ReaderFrom],
 /// the copy is implemented by calling dst.read_from(src).
-pub fn copy(dst : Writer, src : Reader) -> (Int64, IOError?) {
+pub fn copy(dst : &Writer, src : &Reader) -> (Int64, IOError?) {
   return copy_buffer(dst, src, None)
 }
 
@@ -365,8 +365,8 @@ pub fn copy(dst : Writer, src : Reader) -> (Int64, IOError?) {
 /// If either src implements [WriterTo] or dst implements [ReaderFrom],
 /// buf will not be used to perform the copy.
 pub fn copy_buffer(
-  dst : Writer,
-  src : Reader,
+  dst : &Writer,
+  src : &Reader,
   buf : Slice[Byte]?
 ) -> (Int64, IOError?) {
   if buf != None && buf.unwrap().length() == 0 {
@@ -438,19 +438,19 @@ pub fn copy_buffer(
 ///| LimitedReader::new returns a Reader that reads from r
 /// but stops with eof after n bytes.
 /// The underlying implementation is a LimitedReader.
-pub fn LimitedReader::new(r : Reader, n : Int64) -> LimitedReader {
+pub fn LimitedReader::new(r : &Reader, n : Int64) -> LimitedReader {
   { r, n }
 }
 
 ///|
-let _trait3 : Reader = LimitedReader::new(discard, 0)
+let _trait3 : &Reader = LimitedReader::new(discard, 0)
 
 ///| A LimitedReader reads from R but limits the amount of
 /// data returned to just N bytes. Each call to Read
 /// updates N to reflect the new amount remaining.
 /// Read returns eof when N <= 0 or when the underlying R returns eof.
 struct LimitedReader {
-  r : Reader // underlying reader
+  r : &Reader // underlying reader
   mut n : Int64 // max bytes remaining
 }
 
@@ -471,7 +471,7 @@ fn read(self : LimitedReader, p : Slice[Byte]) -> (Int, IOError?) {
 ///| SectionReader::new returns a [SectionReader] that reads from r
 /// starting at offset off and stops with eof after n bytes.
 pub fn SectionReader::new(
-  r : ReaderAt,
+  r : &ReaderAt,
   off : Int64,
   n : Int64
 ) -> SectionReader {
@@ -490,7 +490,7 @@ pub fn SectionReader::new(
 // of an underlying [ReaderAt].
 ///|
 struct SectionReader {
-  r : ReaderAt // constant after creation
+  r : &ReaderAt // constant after creation
   base : Int64 // constant after creation
   mut off : Int64
   limit : Int64 // constant after creation
@@ -571,13 +571,13 @@ fn size(self : SectionReader) -> Int64 {
 ///
 /// The returned values are the same that were passed to [SectionReader::new]
 /// when the [SectionReader] was created.
-fn outer(self : SectionReader) -> (ReaderAt, Int64, Int64) {
+fn outer(self : SectionReader) -> (&ReaderAt, Int64, Int64) {
   (self.r, self.base, self.n)
 }
 
 ///| An OffsetWriter maps writes at offset base to offset base+off in the underlying writer.
 struct OffsetWriter {
-  w : WriterAt
+  w : &WriterAt
   base : Int64 // the original offset
   mut off : Int64 // the current offset
 }
@@ -585,7 +585,7 @@ struct OffsetWriter {
 // OffsetWriter::new returns an [OffsetWriter] that writes to w
 // starting at offset off.
 ///|
-pub fn OffsetWriter::new(w : WriterAt, off : Int64) -> OffsetWriter {
+pub fn OffsetWriter::new(w : &WriterAt, off : Int64) -> OffsetWriter {
   { w, base: off, off }
 }
 
@@ -633,24 +633,24 @@ fn seek(
 /// corresponding writes to w. There is no internal buffering -
 /// the write must complete before the read completes.
 /// Any error encountered while writing is reported as a read error.
-pub fn TeeReader::new(r : Reader, w : Writer) -> TeeReader {
+pub fn TeeReader::new(r : &Reader, w : &Writer) -> TeeReader {
   { r, w }
 }
 
 ///|
 struct TeeReader {
-  r : Reader
-  w : Writer
+  r : &Reader
+  w : &Writer
 }
 
 ///|
-let _trait : Reader = TeeReader::new(discard, discard)
+let _trait : &Reader = TeeReader::new(discard, discard)
 
 ///|
 fn read(self : TeeReader, p : Slice[Byte]) -> (Int, IOError?) {
   let (n, err) = self.r.read(p)
   if n > 0 {
-    let (n, err) = self.w.write(p[:n])
+    let (n, err) = self.w.write(p[0:n])
     if err != None {
       return (n, err)
     }
@@ -663,10 +663,10 @@ fn read(self : TeeReader, p : Slice[Byte]) -> (Int, IOError?) {
 pub let discard : Discard = Discard::{  }
 
 ///| `discard` satisfies the `Writer` trait.
-let _discardIsWriter : Writer = discard
+let _discardIsWriter : &Writer = discard
 
 ///| `discard` satisfies the `Reader` trait.
-let _discardIsReader : Reader = discard
+let _discardIsReader : &Reader = discard
 
 ///|
 struct Discard {}
@@ -678,14 +678,14 @@ fn Discard::read(_self : Discard, _b : Slice[Byte]) -> (Int, IOError?) {
 
 ///| Discard implements ReaderFrom as an optimization so copy to
 /// io.Discard can avoid doing unnecessary work.
-/// let _ : ReaderFrom = discard
+/// let _ : &ReaderFrom = discard
 pub fn Discard::write(_self : Discard, p : Slice[Byte]) -> (Int, IOError?) {
   // possible compiler bug - this `pub` should not be needed here but buffer_test.mbt fails if missing.
   (p.length(), None)
 }
 
 ///|
-fn Discard::read_from(_self : Discard, r : Reader) -> (Int64, IOError?) {
+fn Discard::read_from(_self : Discard, r : &Reader) -> (Int64, IOError?) {
   let buf = Slice::new(Array::make(8192, b'\x00'))
   let mut n = 0L
   for {
@@ -705,7 +705,7 @@ fn Discard::read_from(_self : Discard, r : Reader) -> (Int64, IOError?) {
 /// the provided [Reader] r.
 /// If r implements [WriterTo], the returned [ReadCloser] will implement [WriterTo]
 /// by forwarding calls to r.
-pub fn NopCloser::new(r : Reader) -> NopCloser {
+pub fn NopCloser::new(r : &Reader) -> NopCloser {
   // TODO:
   // let _, ok := r.(WriterTo)
   // if ok {
@@ -715,7 +715,7 @@ pub fn NopCloser::new(r : Reader) -> NopCloser {
 }
 
 ///| `NopCloser` satisfies the `ReadCloser` trait.
-let _NopCloser : ReadCloser = NopCloser::new(Buffer::new())
+let _NopCloser : &ReadCloser = NopCloser::new(Buffer::new())
 
 ///|
 fn read(self : NopCloser, b : Slice[Byte]) -> (Int, IOError?) {
@@ -724,7 +724,7 @@ fn read(self : NopCloser, b : Slice[Byte]) -> (Int, IOError?) {
 
 ///|
 struct NopCloser {
-  r : Reader
+  r : &Reader
 }
 
 ///|
@@ -735,7 +735,7 @@ fn NopCloser::close(_self : NopCloser) -> IOError? {
 // TODO:
 // ///| NopCloserWriterTo is for internal use only. Do not make public.
 // struct NopCloserWriterTo {
-//   // TODO: r : Reader
+//   // TODO: r : &Reader
 // }
 //
 // ///|
@@ -744,7 +744,7 @@ fn NopCloser::close(_self : NopCloser) -> IOError? {
 // }
 
 // TODO:
-// fn write_to(self : NopCloserWriterTo, w : Writer) -> (Int64, IOEerror?) {
+// fn write_to(self : NopCloserWriterTo, w : &Writer) -> (Int64, IOEerror?) {
 //   // return c.Reader.(WriterTo).WriteTo(w)
 //   self.r.write_to(w)
 // }
@@ -753,7 +753,7 @@ fn NopCloser::close(_self : NopCloser) -> IOError? {
 /// A successful call returns err == None, not err == eof. Because read_all is
 /// defined to read from src until eof, it does not treat an eof from Read
 /// as an error to be reported.
-pub fn read_all(r : Reader) -> (Slice[Byte], IOError?) {
+pub fn read_all(r : &Reader) -> (Slice[Byte], IOError?) {
   let mb = 1 << 20
   let mut cap = 512
   let mut arr = Array::make(cap, b'\x00')
@@ -761,7 +761,7 @@ pub fn read_all(r : Reader) -> (Slice[Byte], IOError?) {
   for {
     let (n, err) = r.read(b[b.length():cap])
     let mut err = err
-    b = b[:b.length() + n]
+    b = b[0:b.length() + n]
     if err != None {
       if err == Some(eof) {
         err = None
@@ -782,7 +782,7 @@ pub fn read_all(r : Reader) -> (Slice[Byte], IOError?) {
         new_arr.push(arr[i])
       }
       arr = new_arr
-      b = Slice::new(arr)[:b.length()]
+      b = Slice::new(arr)[0:b.length()]
     }
   }
 }

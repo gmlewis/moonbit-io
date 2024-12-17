@@ -17,9 +17,9 @@ test "write_string basic functionality" {
 test "write with different lengths" {
   let buffer = @io.Buffer::new()
   let short_input : @io.Slice[Byte] = @io.Slice::new([b'F'])
-  let long_input : @io.Slice[Byte] = @io.Slice::new(
-    [b'A', b'B', b'C', b'D', b'E'],
-  )
+  let long_input : @io.Slice[Byte] = @io.Slice::new([
+    b'A', b'B', b'C', b'D', b'E',
+  ])
   let short_result = buffer.write(short_input)
   let long_result = buffer.write(long_input)
   inspect!(short_result, content="(1, None)")
@@ -36,9 +36,9 @@ test "write boundary test" {
 test "write random test cases" {
   let buffer1 = @io.Buffer::new()
   let buffer2 = @io.Buffer::new()
-  let input : @io.Slice[Byte] = @io.Slice::new(
-    [b'R', b'A', b'N', b'D', b'O', b'M'],
-  )
+  let input : @io.Slice[Byte] = @io.Slice::new([
+    b'R', b'A', b'N', b'D', b'O', b'M',
+  ])
   let result1 = buffer1.write(input)
   let result2 = buffer2.write(input)
   inspect!(result1, content="(6, None)")

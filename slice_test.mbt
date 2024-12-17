@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-///|
-typealias Slice[T] = @io.Slice[T]
-
 test "array_as_view" {
   inspect!(Slice::new([1, 2, 3]).length(), content="3")
 }
@@ -139,11 +136,11 @@ test "slice grows within larger array" {
   inspect!(arr, content="[3, 4]")
   inspect!(arr.length(), content="2")
   inspect!(arr.cap(), content="4")
-  let arr = arr[:3]
+  let arr = arr[0:3]
   inspect!(arr, content="[3, 4, 5]")
   inspect!(arr.length(), content="3")
   inspect!(arr.cap(), content="4")
-  let arr = arr[:4]
+  let arr = arr[0:4]
   inspect!(arr, content="[3, 4, 5, 6]")
   inspect!(arr.length(), content="4")
   inspect!(arr.cap(), content="4")

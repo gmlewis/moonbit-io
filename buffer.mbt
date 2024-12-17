@@ -11,10 +11,10 @@ pub fn Buffer::new() -> Buffer {
 }
 
 ///|
-let _trait4 : Reader = Buffer::new()
+let _trait4 : &Reader = Buffer::new()
 
 ///|
-let _trait5 : Writer = Buffer::new()
+let _trait5 : &Writer = Buffer::new()
 
 ///|
 pub fn Buffer::from(s : Slice[Byte]) -> Buffer {
@@ -81,7 +81,7 @@ pub fn read_byte(self : Buffer) -> (Byte, IOError?) {
 }
 
 ///|
-pub fn read_from(self : Buffer, r : Reader) -> (Int64, IOError?) {
+pub fn read_from(self : Buffer, r : &Reader) -> (Int64, IOError?) {
   copy(self, r)
 }
 

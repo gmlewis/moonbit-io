@@ -455,7 +455,10 @@ struct LimitedReader {
 }
 
 ///|
-fn read(self : LimitedReader, p : Slice[Byte]) -> (Int, IOError?) {
+fn LimitedReader::read(
+  self : LimitedReader,
+  p : Slice[Byte]
+) -> (Int, IOError?) {
   if self.n <= 0 {
     return (0, Some(eof))
   }
@@ -498,7 +501,10 @@ struct SectionReader {
 }
 
 ///|
-fn read(self : SectionReader, p : Slice[Byte]) -> (Int, IOError?) {
+fn SectionReader::read(
+  self : SectionReader,
+  p : Slice[Byte]
+) -> (Int, IOError?) {
   if self.off >= self.limit {
     return (0, Some(eof))
   }
@@ -590,7 +596,7 @@ pub fn OffsetWriter::new(w : &WriterAt, off : Int64) -> OffsetWriter {
 }
 
 ///|
-fn write(self : OffsetWriter, p : Slice[Byte]) -> (Int, IOError?) {
+fn OffsetWriter::write(self : OffsetWriter, p : Slice[Byte]) -> (Int, IOError?) {
   let (n, err) = self.w.write_at(p, self.off)
   self.off += n.to_int64()
   (n, err)
@@ -610,7 +616,7 @@ fn write_at(
 }
 
 ///|
-fn seek(
+fn OffsetWriter::seek(
   self : OffsetWriter,
   offset : Int64,
   whence : Whence
@@ -647,7 +653,7 @@ struct TeeReader {
 let _trait : &Reader = TeeReader::new(discard, discard)
 
 ///|
-fn read(self : TeeReader, p : Slice[Byte]) -> (Int, IOError?) {
+fn TeeReader::read(self : TeeReader, p : Slice[Byte]) -> (Int, IOError?) {
   let (n, err) = self.r.read(p)
   if n > 0 {
     let (n, err) = self.w.write(p[:n])
@@ -718,7 +724,7 @@ pub fn NopCloser::new(r : &Reader) -> NopCloser {
 let _NopCloser : &ReadCloser = NopCloser::new(Buffer::new())
 
 ///|
-fn read(self : NopCloser, b : Slice[Byte]) -> (Int, IOError?) {
+fn NopCloser::read(self : NopCloser, b : Slice[Byte]) -> (Int, IOError?) {
   self.r.read(b)
 }
 

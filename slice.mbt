@@ -27,7 +27,7 @@ struct Slice[T] {
 }
 
 ///| length returns the length of the slice.
-pub fn length[T](self : Slice[T]) -> Int {
+pub fn Slice::length[T](self : Slice[T]) -> Int {
   self.len
 }
 
@@ -258,6 +258,6 @@ pub fn op_equal[T : Eq](self : Slice[T], other : Slice[T]) -> Bool {
 }
 
 ///| to_bytes returns slice as Bytes.
-pub fn to_bytes(self : Slice[Byte]) -> Bytes {
+pub fn Slice::to_bytes(self : Slice[Byte]) -> Bytes {
   Bytes::from_iter(self.iter())
 }

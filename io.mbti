@@ -1,0 +1,204 @@
+package gmlewis/io
+
+// Values
+fn copy(&Writer, &Reader) -> (Int64, IOError?)
+
+fn copy_buffer(&Writer, &Reader, Slice[Byte]?) -> (Int64, IOError?)
+
+fn copy_n(&Writer, &Reader, Int64) -> (Int64, IOError?)
+
+let discard : Discard
+
+let eof : IOError
+
+let err_invalid_write : IOError
+
+let err_no_progress : IOError
+
+let err_offset : IOError
+
+let err_short_buffer : IOError
+
+let err_short_write : IOError
+
+let err_unexpected_eof : IOError
+
+let err_whence : IOError
+
+fn read_all(&Reader) -> (Slice[Byte], IOError?)
+
+fn read_full(&Reader, Slice[Byte]) -> (Int, IOError?)
+
+// Types and methods
+type Buffer
+impl Buffer {
+  from(Slice[Byte]) -> Self
+  length(Self) -> Int
+  new() -> Self
+  read(Self, Slice[Byte]) -> (Int, IOError?)
+  read_byte(Self) -> (Byte, IOError?)
+  read_from(Self, &Reader) -> (Int64, IOError?)
+  reset(Self) -> Unit
+  to_bytes(Self) -> Bytes
+  to_slice(Self) -> Slice[Byte]
+  write(Self, Slice[Byte]) -> (Int, IOError?)
+  write_bytes(Self, Bytes) -> (Int, IOError?)
+  write_string(Self, String) -> (Int, IOError?)
+}
+
+type Discard
+impl Discard {
+  write(Self, Slice[Byte]) -> (Int, IOError?)
+}
+
+pub(all) type! IOError String
+impl Eq for IOError
+impl Show for IOError
+
+type LimitedReader
+impl LimitedReader {
+  new(&Reader, Int64) -> Self
+}
+
+type NopCloser
+impl NopCloser {
+  new(&Reader) -> Self
+}
+
+type OffsetWriter
+impl OffsetWriter {
+  new(&WriterAt, Int64) -> Self
+}
+
+type SectionReader
+impl SectionReader {
+  new(&ReaderAt, Int64, Int64) -> Self
+}
+
+type Slice[T]
+impl Slice {
+  append[T](Self[T], Self[T]) -> Self[T]
+  as_array_view[T](Self[T]) -> ArrayView[T]
+  cap[T](Self[T]) -> Int
+  each[T](Self[T], (T) -> Unit) -> Unit
+  fold[A, B](Self[A], init~ : B, (B, A) -> B) -> B
+  foldi[A, B](Self[A], init~ : B, (Int, B, A) -> B) -> B
+  iter[A](Self[A]) -> Iter[A]
+  iter2[A](Self[A]) -> Iter2[Int, A]
+  length[T](Self[T]) -> Int
+  new[T](Array[T], start~ : Int = .., end? : Int) -> Self[T]
+  op_as_view[T](Self[T], start~ : Int = .., end? : Int) -> Self[T]
+  op_equal[T : Eq](Self[T], Self[T]) -> Bool
+  op_get[T](Self[T], Int) -> T
+  op_set[T](Self[T], Int, T) -> Unit
+  push[T](Self[T], T) -> Self[T]
+  rev_fold[A, B](Self[A], init~ : B, (B, A) -> B) -> B
+  rev_foldi[A, B](Self[A], init~ : B, (Int, B, A) -> B) -> B
+  rev_inplace[T](Self[T]) -> Unit
+  swap[T](Self[T], Int, Int) -> Unit
+  to_bytes(Self[Byte]) -> Bytes
+}
+impl[X : Show] Show for Slice[X]
+
+type TeeReader
+impl TeeReader {
+  new(&Reader, &Writer) -> Self
+}
+
+pub(all) enum Whence {
+  SeekStart
+  SeekCurrent
+  SeekEnd
+}
+
+// Type aliases
+
+// Traits
+pub(open) trait ByteReader {
+  read_byte(Self) -> (Byte, IOError?)
+}
+
+pub(open) trait ByteScanner {
+  read_byte(Self) -> (Byte, IOError?)
+  unread_byte(Self) -> IOError?
+}
+
+pub(open) trait ByteWriter {
+  write_byte(Self, Byte) -> IOError?
+}
+
+pub(open) trait Closer {
+  close(Self) -> IOError?
+}
+
+pub(open) trait ReadCloser {
+  read(Self, Slice[Byte]) -> (Int, IOError?)
+  close(Self) -> IOError?
+}
+
+pub(open) trait ReadSeekCloser {
+  read(Self, Slice[Byte]) -> (Int, IOError?)
+  seek(Self, Int64, Whence) -> (Int64, IOError?)
+  close(Self) -> IOError?
+}
+
+pub(open) trait ReadSeeker {
+  read(Self, Slice[Byte]) -> (Int, IOError?)
+  seek(Self, Int64, Whence) -> (Int64, IOError?)
+}
+
+pub(open) trait ReadWriteCloser {
+  read(Self, Slice[Byte]) -> (Int, IOError?)
+  write(Self, Slice[Byte]) -> (Int, IOError?)
+  close(Self) -> IOError?
+}
+
+pub(open) trait ReadWriteSeeker {
+  read(Self, Slice[Byte]) -> (Int, IOError?)
+  write(Self, Slice[Byte]) -> (Int, IOError?)
+  seek(Self, Int64, Whence) -> (Int64, IOError?)
+}
+
+pub(open) trait ReadWriter {
+  read(Self, Slice[Byte]) -> (Int, IOError?)
+  write(Self, Slice[Byte]) -> (Int, IOError?)
+}
+
+pub(open) trait Reader {
+  read(Self, Slice[Byte]) -> (Int, IOError?)
+}
+
+pub(open) trait ReaderAt {
+  read_at(Self, Slice[Byte], Int64) -> (Int, IOError?)
+}
+
+pub(open) trait ReaderFrom {
+  read_from(Self, &Reader) -> (Int64, IOError?)
+}
+
+pub(open) trait Seeker {
+  seek(Self, Int64, Whence) -> (Int64, IOError?)
+}
+
+pub(open) trait WriteCloser {
+  write(Self, Slice[Byte]) -> (Int, IOError?)
+  close(Self) -> IOError?
+}
+
+pub(open) trait WriteSeeker {
+  write(Self, Slice[Byte]) -> (Int, IOError?)
+  seek(Self, Int64, Whence) -> (Int64, IOError?)
+}
+
+pub(open) trait Writer {
+  write(Self, Slice[Byte]) -> (Int, IOError?)
+}
+
+pub(open) trait WriterAt {
+  write_at(Self, Slice[Byte], Int64) -> (Int, IOError?)
+}
+
+pub(open) trait WriterTo {
+  write_to(Self, &Writer) -> (Int64, IOError?)
+}
+

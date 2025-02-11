@@ -1,3 +1,4 @@
+///|
 test "write basic functionality" {
   let buffer = @io.Buffer::new()
   let input : @io.Slice[Byte] = @io.Slice::new([b'A', b'B', b'C'])
@@ -5,6 +6,7 @@ test "write basic functionality" {
   inspect!(result, content="(3, None)")
 }
 
+///|
 test "write_string basic functionality" {
   let buffer = @io.Buffer::new()
   let result = buffer.write_string("ABC")
@@ -14,6 +16,7 @@ test "write_string basic functionality" {
   assert_eq!(got.to_bytes(), b"ABC")
 }
 
+///|
 test "write with different lengths" {
   let buffer = @io.Buffer::new()
   let short_input : @io.Slice[Byte] = @io.Slice::new([b'F'])
@@ -26,6 +29,7 @@ test "write with different lengths" {
   inspect!(long_result, content="(5, None)")
 }
 
+///|
 test "write boundary test" {
   let buffer = @io.Buffer::new()
   let max_bytes : @io.Slice[Byte] = @io.Slice::new(Array::make(1024, b'A'))
@@ -33,6 +37,7 @@ test "write boundary test" {
   inspect!(result, content="(1024, None)")
 }
 
+///|
 test "write random test cases" {
   let buffer1 = @io.Buffer::new()
   let buffer2 = @io.Buffer::new()
@@ -45,6 +50,7 @@ test "write random test cases" {
   inspect!(result2, content="(6, None)")
 }
 
+///|
 test "boundary test: read from an empty buffer" {
   let buffer = @io.Buffer::new()
   let (byte, error) = @io.read_byte(buffer)
@@ -52,12 +58,14 @@ test "boundary test: read from an empty buffer" {
   inspect!(error, content="Some(IOError(\"eof\"))")
 }
 
+///|
 test "convert empty Bytes" {
   let buf = @io.Buffer::new()
   let bytes = buf.to_bytes()
   assert_eq!(bytes.length(), 0)
 }
 
+///|
 test "randomized/buffer_generated the bytes should be 0" {
   for i = 0; i < 10; i = i + 1 {
     let buf = @io.Buffer::new()
@@ -70,12 +78,14 @@ test "randomized/buffer_generated the bytes should be 0" {
   }
 }
 
+///|
 test "discard" {
   let b = @io.Buffer::from(Slice::new([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
   guard let (10, None) = @io.copy(@io.discard, b)
 
 }
 
+///|
 test "buffer::to_slice" {
   let b = @io.Buffer::from(Slice::new([1, 2, 3]))
   let got = b.to_slice()

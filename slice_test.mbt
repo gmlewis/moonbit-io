@@ -12,19 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+///|
 test "array_as_view" {
   inspect!(Slice::new([1, 2, 3]).length(), content="3")
 }
 
+///|
 test "slice capacity" {
   inspect!(Slice::new([1, 2, 3]).cap(), content="3")
 }
 
+///|
 test "op_get" {
   inspect!(Slice::new([1, 2, 3])[1], content="2")
   inspect!(Slice::new([1, 2, 3])[2], content="3")
 }
 
+///|
 test "op_set" {
   let v = Slice::new([1, 2, 3])
   inspect!(v[1], content="2")
@@ -32,6 +36,7 @@ test "op_set" {
   inspect!(v[1], content="4")
 }
 
+///|
 test "swap" {
   let v = Slice::new([1, 2, 3])
   inspect!(v[1], content="2")
@@ -39,58 +44,72 @@ test "swap" {
   inspect!(v[1], content="3")
 }
 
+///|
 test "panic array_as_view_start_index_error" {
   Slice::new([1, 2, 3])[-1:0] |> ignore
 }
 
+///|
 test "panic array_as_view_start_index_error" {
   Slice::new([1, 2, 3])[-1:0] |> ignore
 }
 
+///|
 test "panic array_as_view_end_index_error" {
   Slice::new([1, 2, 3])[:-1] |> ignore
 }
 
+///|
 test "panic array_as_view_end_index_error" {
   Slice::new([1, 2, 3])[:-1] |> ignore
 }
 
+///|
 test "panic array_as_view_length_index_error" {
   Slice::new([1, 2, 3])[:4] |> ignore
 }
 
+///|
 test "panic view_as_view_start_index_error" {
   Slice::new([1, 2, 3])[-1:0] |> ignore
 }
 
+///|
 test "panic view_as_view_start_index_error" {
   Slice::new([1, 2, 3])[-1:0] |> ignore
 }
 
+///|
 test "panic view_as_view_end_index_error" {
   Slice::new([1, 2, 3])[:-1] |> ignore
 }
 
+///|
 test "panic view_as_view_end_index_error" {
   Slice::new([1, 2, 3])[:-1] |> ignore
 }
 
+///|
 test "panic view_as_view_length_index_error" {
   Slice::new([1, 2, 3])[:4] |> ignore
 }
 
+///|
 test "panic array_as_view_get_index_error" {
   Slice::new([1, 2, 3])[5] |> ignore
 }
 
+///|
 test "panic array_as_view_set_index_error" {
   Slice::new([1, 2, 3])[5] = 0
 }
 
+///|
 test "panic array_as_view_swap_index_error" {
   Slice::new([1, 2, 3]).swap(1, 9)
 }
 
+///|
 test "iter" {
   let array = Slice::new([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
   inspect!(
@@ -107,30 +126,35 @@ test "iter" {
 //   inspect!("\{arr[1:3]}!", content="[1, 2]!")
 // }
 
+///|
 test "slice_fold" {
   let arr = Slice::new([1, 2, 3])
   let sum = arr.fold(fn(acc, x) { acc + x }, init=0)
   inspect!(sum, content="6")
 }
 
+///|
 test "slice_rev_fold" {
   let arr = Slice::new([1, 2, 3])
   let sum = arr.rev_fold(fn(acc, x) { acc + x }, init=0)
   inspect!(sum, content="6")
 }
 
+///|
 test "slice_foldi" {
   let arr = Slice::new([1, 2, 3])
   let sum = arr.foldi(fn(i, acc, x) { acc + i + x }, init=0)
   inspect!(sum, content="9")
 }
 
+///|
 test "slice_rev_foldi" {
   let arr = Slice::new([1, 2, 3])
   let sum = arr.rev_foldi(fn(i, acc, x) { acc + i + x }, init=0)
   inspect!(sum, content="9")
 }
 
+///|
 test "slice grows within larger array" {
   let arr = Slice::new([1, 2, 3, 4, 5, 6])[2:4]
   inspect!(arr, content="[3, 4]")
@@ -154,6 +178,7 @@ test "slice grows within larger array" {
   inspect!(arr.cap(), content="6")
 }
 
+///|
 test "slice append grows beyond capacity" {
   let arr = Slice::new([1, 2, 3, 4, 5, 6])[2:4]
   inspect!(arr, content="[3, 4]")

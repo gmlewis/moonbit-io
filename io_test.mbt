@@ -7,6 +7,7 @@
 
 // Simple tests, primarily to verify the ReadFrom and WriteTo callouts inside Copy, CopyBuffer and CopyN.
 
+///|
 test "TestCopy" {
   let rb = @io.Buffer::new()
   let wb = @io.Buffer::new()
@@ -38,6 +39,7 @@ test "TestCopy" {
 // 	}
 // }
 
+///|
 test "TestCopyBuffer" {
   let rb = @io.Buffer::new()
   let wb = @io.Buffer::new()
@@ -46,6 +48,7 @@ test "TestCopyBuffer" {
   assert_eq!(wb.to_bytes(), b"hello, world.")
 }
 
+///|
 test "TestCopyBufferNone" {
   let rb = @io.Buffer::new()
   let wb = @io.Buffer::new()
@@ -128,6 +131,7 @@ test "TestCopyBufferNone" {
 // 	}
 // }
 
+///|
 test "TestCopyN" {
   let rb = @io.Buffer::new()
   let wb = @io.Buffer::new()
@@ -684,6 +688,7 @@ struct EmptyReader {}
 ///|
 impl @io.Reader for EmptyReader with read(_self, _b) { (0, Some(@io.eof)) }
 
+///|
 test "edge case: empty read" {
   let reader : EmptyReader = EmptyReader::{  }
   let (result, err) = @io.read_all(reader)

@@ -686,7 +686,9 @@ test "TestCopyN" {
 struct EmptyReader {}
 
 ///|
-impl @io.Reader for EmptyReader with read(_self, _b) { (0, Some(@io.eof)) }
+impl @io.Reader for EmptyReader with read(_self, _b) {
+  (0, Some(@io.eof))
+}
 
 ///|
 test "edge case: empty read" {

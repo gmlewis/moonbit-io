@@ -486,9 +486,8 @@ pub fn SectionReader::new(
   { r, base: off, off, limit: remaining, n }
 }
 
-// SectionReader implements Read, Seek, and read_at on a section
-// of an underlying [ReaderAt].
-///|
+///| SectionReader implements Read, Seek, and read_at on a section
+/// of an underlying [ReaderAt].
 struct SectionReader {
   r : &ReaderAt // constant after creation
   base : Int64 // constant after creation
@@ -585,9 +584,9 @@ struct OffsetWriter {
   mut off : Int64 // the current offset
 }
 
-// OffsetWriter::new returns an [OffsetWriter] that writes to w
-// starting at offset off.
 ///|
+/// OffsetWriter::new returns an [OffsetWriter] that writes to w
+/// starting at offset off.
 pub fn OffsetWriter::new(w : &WriterAt, off : Int64) -> OffsetWriter {
   { w, base: off, off }
 }

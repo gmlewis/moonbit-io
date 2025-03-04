@@ -35,7 +35,6 @@ impl Buffer {
   from(Slice[Byte]) -> Self
   length(Self) -> Int
   new() -> Self
-  read_byte(Self) -> (Byte, IOError?)
   read_from(Self, &Reader) -> (Int64, IOError?)
   reset(Self) -> Unit
   to_bytes(Self) -> Bytes
@@ -43,6 +42,7 @@ impl Buffer {
   write_bytes(Self, Bytes) -> (Int, IOError?)
   write_string(Self, String) -> (Int, IOError?)
 }
+impl ByteReader for Buffer
 impl Reader for Buffer
 impl Writer for Buffer
 

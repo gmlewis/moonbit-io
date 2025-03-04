@@ -53,7 +53,7 @@ test "write random test cases" {
 ///|
 test "boundary test: read from an empty buffer" {
   let buffer = @io.Buffer::new()
-  let (byte, error) = @io.read_byte(buffer)
+  let (byte, error) = buffer.read_byte()
   inspect!(byte.to_int(), content="0")
   inspect!(error, content="Some(IOError(\"eof\"))")
 }

@@ -35,21 +35,20 @@ impl Buffer {
   from(Slice[Byte]) -> Self
   length(Self) -> Int
   new() -> Self
-  read(Self, Slice[Byte]) -> (Int, IOError?)
   read_byte(Self) -> (Byte, IOError?)
   read_from(Self, &Reader) -> (Int64, IOError?)
   reset(Self) -> Unit
   to_bytes(Self) -> Bytes
   to_slice(Self) -> Slice[Byte]
-  write(Self, Slice[Byte]) -> (Int, IOError?)
   write_bytes(Self, Bytes) -> (Int, IOError?)
   write_string(Self, String) -> (Int, IOError?)
 }
+impl Reader for Buffer
+impl Writer for Buffer
 
 type Discard
-impl Discard {
-  write(Self, Slice[Byte]) -> (Int, IOError?)
-}
+impl Reader for Discard
+impl Writer for Discard
 
 pub(all) type! IOError String
 impl Eq for IOError
@@ -59,11 +58,13 @@ type LimitedReader
 impl LimitedReader {
   new(&Reader, Int64) -> Self
 }
+impl Reader for LimitedReader
 
 type NopCloser
 impl NopCloser {
   new(&Reader) -> Self
 }
+impl ReadCloser for NopCloser
 
 type OffsetWriter
 impl OffsetWriter {
@@ -88,7 +89,6 @@ impl Slice {
   length[T](Self[T]) -> Int
   new[T](Array[T], start~ : Int = .., end? : Int) -> Self[T]
   op_as_view[T](Self[T], start~ : Int = .., end? : Int) -> Self[T]
-  op_equal[T : Eq](Self[T], Self[T]) -> Bool
   op_get[T](Self[T], Int) -> T
   op_set[T](Self[T], Int, T) -> Unit
   push[T](Self[T], T) -> Self[T]
@@ -98,12 +98,14 @@ impl Slice {
   swap[T](Self[T], Int, Int) -> Unit
   to_bytes(Self[Byte]) -> Bytes
 }
+impl[T : Eq] Eq for Slice[T]
 impl[X : Show] Show for Slice[X]
 
 type TeeReader
 impl TeeReader {
   new(&Reader, &Writer) -> Self
 }
+impl Reader for TeeReader
 
 pub(all) enum Whence {
   SeekStart

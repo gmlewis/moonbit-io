@@ -69,7 +69,7 @@ test "convert empty Bytes" {
 test "randomized/buffer_generated the bytes should be 0" {
   for i = 0; i < 10; i = i + 1 {
     let buf = @io.Buffer::new()
-    guard let (1, None) = buf.write_bytes(Bytes::from_array([b'\x00']))
+    guard buf.write_bytes(Bytes::from_array([b'\x00'])) is (1, None)
     let bytes = buf.to_bytes()
     for j = 0; j < bytes.length(); j = j + 1 {
       let byte = bytes[j]
@@ -81,7 +81,7 @@ test "randomized/buffer_generated the bytes should be 0" {
 ///|
 test "discard" {
   let b = @io.Buffer::from(Slice::new([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
-  guard let (10, None) = @io.copy(@io.discard, b)
+  guard @io.copy(@io.discard, b) is (10, None)
 
 }
 

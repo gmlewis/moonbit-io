@@ -135,7 +135,7 @@ pub fn iter[A](self : Slice[A]) -> Iter[A] {
   Iter::new(fn(yield_fn) {
     for i = 0; i < self.len; i = i + 1 {
       let v = self.buf[self.start + i]
-      guard let IterContinue = yield_fn(v) else { x => break x }
+      guard yield_fn(v) is IterContinue else { break IterEnd }
 
     } else {
       IterContinue
@@ -148,7 +148,7 @@ pub fn iter2[A](self : Slice[A]) -> Iter2[Int, A] {
   Iter2::new(fn(yield_fn) {
     for i = 0; i < self.len; i = i + 1 {
       let v = self.buf[self.start + i]
-      guard let IterContinue = yield_fn(i, v) else { x => break x }
+      guard yield_fn(i, v) is IterContinue else { break IterEnd }
 
     } else {
       IterContinue
@@ -243,7 +243,7 @@ pub fn each[T](self : Slice[T], f : (T) -> Unit) -> Unit {
 }
 
 ///| Compares two slices for equality.
-pub fn op_equal[T : Eq](self : Slice[T], other : Slice[T]) -> Bool {
+pub impl[T : Eq] Eq for Slice[T] with op_equal(self, other) {
   guard self.length() == other.length() else { return false }
   for i = 0 {
     // CR: format issue

@@ -11,16 +11,16 @@
 test "TestCopy" {
   let rb = @io.Buffer::new()
   let wb = @io.Buffer::new()
-  guard let (13, None) = rb.write_bytes(b"hello, world.")
-  guard let (13, None) = @io.copy(wb, rb)
+  guard rb.write_bytes(b"hello, world.") is (13, None)
+  guard @io.copy(wb, rb) is (13, None)
   assert_eq!(wb.to_bytes(), b"hello, world.")
 
   // reuse buffers
   rb.reset()
   wb.reset()
-  guard let (13, None) = rb.write_bytes(b"hello, world.")
-  guard let (13, None) = rb.write_bytes(b"hello, world.")
-  guard let (26, None) = @io.copy(wb, rb)
+  guard rb.write_bytes(b"hello, world.") is (13, None)
+  guard rb.write_bytes(b"hello, world.") is (13, None)
+  guard @io.copy(wb, rb) is (26, None)
   assert_eq!(wb.to_bytes(), b"hello, world.hello, world.")
 }
 
@@ -43,8 +43,8 @@ test "TestCopy" {
 test "TestCopyBuffer" {
   let rb = @io.Buffer::new()
   let wb = @io.Buffer::new()
-  guard let (13, None) = rb.write_bytes(b"hello, world.")
-  guard let (13, None) = @io.copy_buffer(wb, rb, Some(@io.Slice::new([0]))) // Tiny buffer to keep it honest.
+  guard rb.write_bytes(b"hello, world.") is (13, None)
+  guard @io.copy_buffer(wb, rb, Some(@io.Slice::new([0]))) is (13, None)  // Tiny buffer to keep it honest.
   assert_eq!(wb.to_bytes(), b"hello, world.")
 }
 
@@ -52,8 +52,8 @@ test "TestCopyBuffer" {
 test "TestCopyBufferNone" {
   let rb = @io.Buffer::new()
   let wb = @io.Buffer::new()
-  guard let (13, None) = rb.write_bytes(b"hello, world.")
-  guard let (13, None) = @io.copy_buffer(wb, rb, None) // Should allocate a buffer.
+  guard rb.write_bytes(b"hello, world.") is (13, None)
+  guard @io.copy_buffer(wb, rb, None) is (13, None)  // Should allocate a buffer.
   assert_eq!(wb.to_bytes(), b"hello, world.")
 }
 
@@ -135,8 +135,8 @@ test "TestCopyBufferNone" {
 test "TestCopyN" {
   let rb = @io.Buffer::new()
   let wb = @io.Buffer::new()
-  guard let (13, None) = rb.write_bytes(b"hello, world.")
-  guard let (5, None) = @io.copy_n(wb, rb, 5)
+  guard rb.write_bytes(b"hello, world.") is (13, None)
+  guard @io.copy_n(wb, rb, 5) is (5, None)
   assert_eq!(wb.to_bytes(), b"hello")
 }
 

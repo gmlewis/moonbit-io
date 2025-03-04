@@ -29,7 +29,7 @@ pub fn reset(self : Buffer) -> Unit {
 }
 
 ///|
-pub fn write(self : Buffer, buf : Slice[Byte]) -> (Int, IOError?) {
+pub impl Writer for Buffer with write(self, buf) {
   let blen = self.b.length()
   let buflen = buf.length()
   self.b = Array::makei(blen + buflen, fn(i) {
@@ -56,7 +56,7 @@ pub fn write_string(self : Buffer, s : String) -> (Int, IOError?) {
 }
 
 ///|
-pub fn read(self : Buffer, buf : Slice[Byte]) -> (Int, IOError?) {
+pub impl Reader for Buffer with read(self, buf) {
   let remaining = self.b.length() - self.off
   if remaining <= 0 || buf.length() == 0 {
     return (0, Some(eof))

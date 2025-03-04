@@ -455,10 +455,7 @@ struct LimitedReader {
 }
 
 ///|
-fn LimitedReader::read(
-  self : LimitedReader,
-  p : Slice[Byte]
-) -> (Int, IOError?) {
+pub impl Reader for LimitedReader with read(self, p) {
   if self.n <= 0 {
     return (0, Some(eof))
   }
@@ -653,7 +650,7 @@ struct TeeReader {
 let _trait : &Reader = TeeReader::new(discard, discard)
 
 ///|
-fn TeeReader::read(self : TeeReader, p : Slice[Byte]) -> (Int, IOError?) {
+pub impl Reader for TeeReader with read(self, p) {
   let (n, err) = self.r.read(p)
   if n > 0 {
     let (n, err) = self.w.write(p[:n])
@@ -678,14 +675,14 @@ let _discardIsReader : &Reader = discard
 struct Discard {}
 
 ///|
-fn Discard::read(_self : Discard, _b : Slice[Byte]) -> (Int, IOError?) {
+pub impl Reader for Discard with read(_self, _b) {
   (0, Some(eof))
 }
 
 ///| Discard implements ReaderFrom as an optimization so copy to
 /// io.Discard can avoid doing unnecessary work.
 /// let _ : &ReaderFrom = discard
-pub fn Discard::write(_self : Discard, p : Slice[Byte]) -> (Int, IOError?) {
+pub impl Writer for Discard with write(_self, p) {
   // possible compiler bug - this `pub` should not be needed here but buffer_test.mbt fails if missing.
   (p.length(), None)
 }
@@ -724,7 +721,7 @@ pub fn NopCloser::new(r : &Reader) -> NopCloser {
 let _NopCloser : &ReadCloser = NopCloser::new(Buffer::new())
 
 ///|
-fn NopCloser::read(self : NopCloser, b : Slice[Byte]) -> (Int, IOError?) {
+pub impl ReadCloser for NopCloser with read(self, b) {
   self.r.read(b)
 }
 
@@ -734,7 +731,7 @@ struct NopCloser {
 }
 
 ///|
-fn NopCloser::close(_self : NopCloser) -> IOError? {
+pub impl ReadCloser for NopCloser with close(_self) {
   None
 }
 

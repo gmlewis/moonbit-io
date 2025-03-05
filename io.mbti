@@ -64,7 +64,8 @@ type NopCloser
 impl NopCloser {
   new(&Reader) -> Self
 }
-impl ReadCloser for NopCloser
+impl Closer for NopCloser
+impl Reader for NopCloser
 
 type OffsetWriter
 impl OffsetWriter {
@@ -120,8 +121,7 @@ pub(open) trait ByteReader {
   read_byte(Self) -> (Byte, IOError?)
 }
 
-pub(open) trait ByteScanner {
-  read_byte(Self) -> (Byte, IOError?)
+pub(open) trait ByteScanner : ByteReader {
   unread_byte(Self) -> IOError?
 }
 
@@ -133,37 +133,22 @@ pub(open) trait Closer {
   close(Self) -> IOError?
 }
 
-pub(open) trait ReadCloser {
-  read(Self, Slice[Byte]) -> (Int, IOError?)
-  close(Self) -> IOError?
+pub(open) trait ReadCloser : Reader + Closer {
 }
 
-pub(open) trait ReadSeekCloser {
-  read(Self, Slice[Byte]) -> (Int, IOError?)
-  seek(Self, Int64, Whence) -> (Int64, IOError?)
-  close(Self) -> IOError?
+pub(open) trait ReadSeekCloser : Reader + Seeker + Closer {
 }
 
-pub(open) trait ReadSeeker {
-  read(Self, Slice[Byte]) -> (Int, IOError?)
-  seek(Self, Int64, Whence) -> (Int64, IOError?)
+pub(open) trait ReadSeeker : Reader + Seeker {
 }
 
-pub(open) trait ReadWriteCloser {
-  read(Self, Slice[Byte]) -> (Int, IOError?)
-  write(Self, Slice[Byte]) -> (Int, IOError?)
-  close(Self) -> IOError?
+pub(open) trait ReadWriteCloser : Reader + Writer + Closer {
 }
 
-pub(open) trait ReadWriteSeeker {
-  read(Self, Slice[Byte]) -> (Int, IOError?)
-  write(Self, Slice[Byte]) -> (Int, IOError?)
-  seek(Self, Int64, Whence) -> (Int64, IOError?)
+pub(open) trait ReadWriteSeeker : Reader + Writer + Seeker {
 }
 
-pub(open) trait ReadWriter {
-  read(Self, Slice[Byte]) -> (Int, IOError?)
-  write(Self, Slice[Byte]) -> (Int, IOError?)
+pub(open) trait ReadWriter : Reader + Writer {
 }
 
 pub(open) trait Reader {
@@ -182,14 +167,10 @@ pub(open) trait Seeker {
   seek(Self, Int64, Whence) -> (Int64, IOError?)
 }
 
-pub(open) trait WriteCloser {
-  write(Self, Slice[Byte]) -> (Int, IOError?)
-  close(Self) -> IOError?
+pub(open) trait WriteCloser : Writer + Closer {
 }
 
-pub(open) trait WriteSeeker {
-  write(Self, Slice[Byte]) -> (Int, IOError?)
-  seek(Self, Int64, Whence) -> (Int64, IOError?)
+pub(open) trait WriteSeeker : Writer + Seeker {
 }
 
 pub(open) trait Writer {

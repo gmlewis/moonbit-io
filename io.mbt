@@ -130,56 +130,29 @@ pub(open) trait Seeker {
 }
 
 ///| ReadWriter is the interface that groups the basic Read and Write methods.
-pub(open) trait ReadWriter {
-  read(Self, Slice[Byte]) -> (Int, IOError?)
-  write(Self, Slice[Byte]) -> (Int, IOError?)
-}
+pub(open) trait ReadWriter: Reader + Writer {}
 
 ///| ReadCloser is the interface that groups the basic Read and Close methods.
-pub(open) trait ReadCloser {
-  read(Self, Slice[Byte]) -> (Int, IOError?)
-  close(Self) -> IOError?
-}
+pub(open) trait ReadCloser: Reader + Closer {}
 
 ///| WriteCloser is the interface that groups the basic Write and Close methods.
-pub(open) trait WriteCloser {
-  write(Self, Slice[Byte]) -> (Int, IOError?)
-  close(Self) -> IOError?
-}
+pub(open) trait WriteCloser: Writer + Closer {}
 
 ///| ReadWriteCloser is the interface that groups the basic Read, Write and Close methods.
-pub(open) trait ReadWriteCloser {
-  read(Self, Slice[Byte]) -> (Int, IOError?)
-  write(Self, Slice[Byte]) -> (Int, IOError?)
-  close(Self) -> IOError?
-}
+pub(open) trait ReadWriteCloser: Reader + Writer + Closer {}
 
 ///| ReadSeeker is the interface that groups the basic Read and Seek methods.
-pub(open) trait ReadSeeker {
-  read(Self, Slice[Byte]) -> (Int, IOError?)
-  seek(Self, Int64, Whence) -> (Int64, IOError?)
-}
+pub(open) trait ReadSeeker: Reader + Seeker {}
 
 ///| ReadSeekCloser is the interface that groups the basic Read, Seek and Close
 /// methods.
-pub(open) trait ReadSeekCloser {
-  read(Self, Slice[Byte]) -> (Int, IOError?)
-  seek(Self, Int64, Whence) -> (Int64, IOError?)
-  close(Self) -> IOError?
-}
+pub(open) trait ReadSeekCloser: Reader + Seeker + Closer {}
 
 ///| WriteSeeker is the interface that groups the basic Write and Seek methods.
-pub(open) trait WriteSeeker {
-  write(Self, Slice[Byte]) -> (Int, IOError?)
-  seek(Self, Int64, Whence) -> (Int64, IOError?)
-}
+pub(open) trait WriteSeeker: Writer + Seeker {}
 
 ///| ReadWriteSeeker is the interface that groups the basic Read, Write and Seek methods.
-pub(open) trait ReadWriteSeeker {
-  read(Self, Slice[Byte]) -> (Int, IOError?)
-  write(Self, Slice[Byte]) -> (Int, IOError?)
-  seek(Self, Int64, Whence) -> (Int64, IOError?)
-}
+pub(open) trait ReadWriteSeeker: Reader + Writer + Seeker {}
 
 ///| ReaderFrom is the interface that wraps the read_from method.
 ///
@@ -273,8 +246,7 @@ pub(open) trait ByteReader {
 /// return an error, unread the last byte read (or the byte prior to the
 /// last-unread byte), or (in implementations that support the [Seeker] interface)
 /// seek to one byte before the current offset.
-pub(open) trait ByteScanner {
-  read_byte(Self) -> (Byte, IOError?)
+pub(open) trait ByteScanner: ByteReader {
   unread_byte(Self) -> IOError?
 }
 
@@ -720,7 +692,7 @@ pub fn NopCloser::new(r : &Reader) -> NopCloser {
 let _NopCloser : &ReadCloser = NopCloser::new(Buffer::new())
 
 ///|
-pub impl ReadCloser for NopCloser with read(self, b) {
+pub impl Reader for NopCloser with read(self, b) {
   self.r.read(b)
 }
 
@@ -730,7 +702,7 @@ struct NopCloser {
 }
 
 ///|
-pub impl ReadCloser for NopCloser with close(_self) {
+pub impl Closer for NopCloser with close(_self) {
   None
 }
 

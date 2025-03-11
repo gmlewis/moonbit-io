@@ -1,6 +1,6 @@
 {
   "name": "gmlewis/io",
-  "version": "0.21.5",
+  "version": "0.21.6",
   "deps": {
     "gmlewis/base64": "0.14.1"
   },

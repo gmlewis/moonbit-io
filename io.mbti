@@ -1,6 +1,12 @@
 package gmlewis/io
 
 // Values
+fn append[T](Slice[T], Slice[T]) -> Slice[T]
+
+fn as_array_view[T](Slice[T]) -> ArrayView[T]
+
+fn cap[T](Slice[T]) -> Int
+
 fn copy(&Writer, &Reader) -> (Int64, IOError?)
 
 fn copy_buffer(&Writer, &Reader, Slice[Byte]?) -> (Int64, IOError?)
@@ -8,6 +14,8 @@ fn copy_buffer(&Writer, &Reader, Slice[Byte]?) -> (Int64, IOError?)
 fn copy_n(&Writer, &Reader, Int64) -> (Int64, IOError?)
 
 let discard : Discard
+
+fn each[T](Slice[T], (T) -> Unit) -> Unit
 
 let eof : IOError
 
@@ -25,9 +33,47 @@ let err_unexpected_eof : IOError
 
 let err_whence : IOError
 
+fn fold[A, B](Slice[A], init~ : B, (B, A) -> B) -> B
+
+fn foldi[A, B](Slice[A], init~ : B, (Int, B, A) -> B) -> B
+
+fn iter[A](Slice[A]) -> Iter[A]
+
+fn iter2[A](Slice[A]) -> Iter2[Int, A]
+
+fn length(Buffer) -> Int
+
+fn op_as_view[T](Slice[T], start~ : Int = .., end? : Int) -> Slice[T]
+
+fn op_get[T](Slice[T], Int) -> T
+
+fn op_set[T](Slice[T], Int, T) -> Unit
+
+fn push[T](Slice[T], T) -> Slice[T]
+
 fn read_all(&Reader) -> (Slice[Byte], IOError?)
 
+fn read_from(Buffer, &Reader) -> (Int64, IOError?)
+
 fn read_full(&Reader, Slice[Byte]) -> (Int, IOError?)
+
+fn reset(Buffer) -> Unit
+
+fn rev_fold[A, B](Slice[A], init~ : B, (B, A) -> B) -> B
+
+fn rev_foldi[A, B](Slice[A], init~ : B, (Int, B, A) -> B) -> B
+
+fn rev_inplace[T](Slice[T]) -> Unit
+
+fn swap[T](Slice[T], Int, Int) -> Unit
+
+fn to_bytes(Buffer) -> Bytes
+
+fn to_slice(Buffer) -> Slice[Byte]
+
+fn write_bytes(Buffer, Bytes) -> (Int, IOError?)
+
+fn write_string(Buffer, String) -> (Int, IOError?)
 
 // Types and methods
 type Buffer

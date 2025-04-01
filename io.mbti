@@ -1,4 +1,4 @@
-package gmlewis/io
+package "gmlewis/io"
 
 // Values
 fn append[T](Slice[T], Slice[T]) -> Slice[T]

@@ -11,7 +11,13 @@ fn copy(&Writer, &Reader) -> (Int64, IOError?)
 
 fn copy_buffer(&Writer, &Reader, Slice[Byte]?) -> (Int64, IOError?)
 
+fn copy_json(&ByteReader) -> (Json, Int64, IOError?)
+
 fn copy_n(&Writer, &Reader, Int64) -> (Int64, IOError?)
+
+fn copy_size(&Writer, &ByteReader, Int64) -> (Int64, IOError?)
+
+fn copy_until(&Writer, &ByteReader, Byte) -> (Int64, IOError?)
 
 let discard : Discard
 
@@ -57,7 +63,7 @@ fn read_from(Buffer, &Reader) -> (Int64, IOError?)
 
 fn read_full(&Reader, Slice[Byte]) -> (Int, IOError?)
 
-fn reset(Buffer) -> Unit
+fn reset(Buffer, size_hint~ : Int = ..) -> Unit
 
 fn rev_fold[A, B](Slice[A], init~ : B, (B, A) -> B) -> B
 
@@ -65,11 +71,15 @@ fn rev_foldi[A, B](Slice[A], init~ : B, (Int, B, A) -> B) -> B
 
 fn rev_inplace[T](Slice[T]) -> Unit
 
+fn substring(Buffer, start~ : Int = .., end~ : Int = ..) -> String
+
 fn swap[T](Slice[T], Int, Int) -> Unit
 
 fn to_bytes(Buffer) -> Bytes
 
 fn to_slice(Buffer) -> Slice[Byte]
+
+fn write_byte(Buffer, Byte) -> (Int, IOError?)
 
 fn write_bytes(Buffer, Bytes) -> (Int, IOError?)
 
@@ -78,19 +88,26 @@ fn write_string(Buffer, String) -> (Int, IOError?)
 // Types and methods
 type Buffer
 impl Buffer {
-  from(Slice[Byte]) -> Self
+  from_bytes(Bytes) -> Self
+  from_slice(Slice[Byte]) -> Self
+  from_string(String) -> Self
   length(Self) -> Int
-  new() -> Self
+  new(size_hint~ : Int = ..) -> Self
+  op_get(Self, Int) -> Byte
   read_from(Self, &Reader) -> (Int64, IOError?)
-  reset(Self) -> Unit
+  reset(Self, size_hint~ : Int = ..) -> Unit
+  substring(Self, start~ : Int = .., end~ : Int = ..) -> String
   to_bytes(Self) -> Bytes
   to_slice(Self) -> Slice[Byte]
+  write_byte(Self, Byte) -> (Int, IOError?)
   write_bytes(Self, Bytes) -> (Int, IOError?)
   write_string(Self, String) -> (Int, IOError?)
 }
 impl ByteReader for Buffer
 impl Reader for Buffer
 impl Writer for Buffer
+impl Eq for Buffer
+impl Show for Buffer
 
 type Discard
 impl Reader for Discard

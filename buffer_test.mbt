@@ -4,16 +4,33 @@ test "write basic functionality" {
   let input : @io.Slice[Byte] = @io.Slice::new([b'A', b'B', b'C'])
   let result = buffer.write(input)
   inspect!(result, content="(3, None)")
+  assert_eq!(buffer.to_bytes(), b"ABC")
+  assert_eq!(buffer.to_string(), "ABC")
+}
+
+///|
+test "write basic functionality with size_hint" {
+  let buffer = @io.Buffer::new(size_hint=100)
+  let input : @io.Slice[Byte] = @io.Slice::new([b'A', b'B', b'C'])
+  let result = buffer.write(input)
+  inspect!(result, content="(3, None)")
+  assert_eq!(buffer.to_bytes(), b"ABC")
+  assert_eq!(buffer.to_string(), "ABC")
 }
 
 ///|
 test "write_string basic functionality" {
   let buffer = @io.Buffer::new()
-  let result = buffer.write_string("ABC")
-  inspect!(result, content="(3, None)")
-  assert_eq!(buffer.length(), 3)
-  let got = buffer.to_slice()
-  assert_eq!(got.to_bytes(), b"ABC")
+  let result = buffer.write_string("ABC\r\nDEF")
+  inspect!(result, content="(8, None)")
+  assert_eq!(buffer.length(), 8)
+  assert_eq!(
+    buffer.to_slice(),
+    @io.Slice::new([b'A', b'B', b'C', b'\r', b'\n', b'D', b'E', b'F']),
+  )
+  assert_eq!(buffer.to_slice().to_bytes(), b"ABC\r\nDEF")
+  assert_eq!(buffer.to_bytes(), b"ABC\r\nDEF")
+  assert_eq!(buffer.to_string(), "ABC\r\nDEF")
 }
 
 ///|
@@ -80,14 +97,14 @@ test "randomized/buffer_generated the bytes should be 0" {
 
 ///|
 test "discard" {
-  let b = @io.Buffer::from(Slice::new([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
+  let b = @io.Buffer::from_slice(Slice::new([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
   guard @io.copy(@io.discard, b) is (10, None)
 
 }
 
 ///|
 test "buffer::to_slice" {
-  let b = @io.Buffer::from(Slice::new([1, 2, 3]))
+  let b = @io.Buffer::from_slice(Slice::new([1, 2, 3]))
   let got = b.to_slice()
   assert_eq!(got.to_bytes(), b"\x01\x02\x03")
 }

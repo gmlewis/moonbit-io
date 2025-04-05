@@ -28,6 +28,26 @@ test "copy_json" {
   )
   inspect!(bytes, content="16")
   inspect!(err, content="None")
+
+  // Test nested JSON object with extra whitespace and UTF-8
+  let buf = Buffer::from_string(
+    #|
+    #|{
+    #|  "a": 1,
+    #|  "b": true,
+    #|  "utf-8": "✓ Hello, 世界! 🌍"
+    #|}
+    ,
+  )
+  let (json, bytes, err) = copy_json(buf)
+  inspect!(
+    json,
+    content=
+      #|Object({"a": Number(1), "b": True, "utf-8": String("✓ Hello, 世界! 🌍")})
+    ,
+  )
+  inspect!(bytes, content="64")
+  inspect!(err, content="None")
 }
 
 ///|

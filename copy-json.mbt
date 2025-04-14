@@ -1,4 +1,5 @@
-///| copy_json copies bytes from a source reader until a valid JSON value is completed.
+///|
+/// copy_json copies bytes from a source reader until a valid JSON value is completed.
 /// It returns the Json value, the number of bytes copied, and any error that occurred during the process.
 pub fn copy_json(src : &ByteReader) -> (Json, Int64, IOError?) {
   let ctx = ParseContext::make(src)
@@ -267,10 +268,12 @@ fn ParseContext::read_char(ctx : ParseContext) -> Char? {
   ParseContext::read_new_byte(ctx)
 }
 
-///| low surrogate
+///|
+/// low surrogate
 // const SURROGATE_LOW_CHAR = 0xD800
 
-///| high surrogate
+///|
+/// high surrogate
 // const SURROGATE_HIGH_CHAR = 0xDFFF
 
 ///|

@@ -1,4 +1,5 @@
-///| copy_until copies bytes from a source reader to a destination writer
+///|
+/// copy_until copies bytes from a source reader to a destination writer
 /// until a specified byte is encountered. It returns the number of bytes
 /// copied and any error that occurred during the process.
 pub fn copy_until(
@@ -19,7 +20,8 @@ pub fn copy_until(
   }
 }
 
-///| copy_size copies a specified number of bytes from a source reader to a
+///|
+/// copy_size copies a specified number of bytes from a source reader to a
 /// destination writer. It returns the number of bytes copied and any error
 /// that occurred during the process.
 pub fn copy_size(

@@ -7,7 +7,8 @@ struct Buffer {
   mut off : Int
 }
 
-///| Buffer::new creates a new empty Buffer with an optional size hint.
+///|
+/// Buffer::new creates a new empty Buffer with an optional size hint.
 /// The size hint is used to preallocate memory for the buffer, which can
 /// improve performance when the size of the data to be written is known in advance.
 pub fn Buffer::new(size_hint~ : Int = 0) -> Buffer {
@@ -33,7 +34,8 @@ pub fn Buffer::from_bytes(b : Bytes) -> Buffer {
   { b: buf, off: 0 }
 }
 
-///| `Buffer::from_string` converts the MoonBit UTF-16 String to UTF-8
+///|
+/// `Buffer::from_string` converts the MoonBit UTF-16 String to UTF-8
 /// and creates a Buffer from the bytes.
 pub fn Buffer::from_string(s : String) -> Buffer {
   let b = @base64.str2bytes(s)
@@ -73,7 +75,8 @@ pub fn write_byte(self : Buffer, b : Byte) -> (Int, IOError?) {
   self.write(Slice::new([b]))
 }
 
-///| `write_string` converts the MoonBit UTF-16 String to UTF-8 and
+///|
+/// `write_string` converts the MoonBit UTF-16 String to UTF-8 and
 /// writes the bytes to the buffer.
 pub fn write_string(self : Buffer, s : String) -> (Int, IOError?) {
   let b = @base64.str2bytes(s)

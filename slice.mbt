@@ -1,4 +1,5 @@
-///| A `Slice` is a slice of an `Array`.
+///|
+/// A `Slice` is a slice of an `Array`.
 ///
 /// A separate Slice type was needed because of this issue:
 /// https://github.com/moonbitlang/core/issues/1063
@@ -26,7 +27,8 @@ struct Slice[T] {
   len : Int
 }
 
-///| length returns the length of the slice.
+///|
+/// length returns the length of the slice.
 pub fn Slice::length[T](self : Slice[T]) -> Int {
   self.len
 }
@@ -95,12 +97,14 @@ pub fn op_as_view[T](self : Slice[T], start~ : Int = 0, end? : Int) -> Slice[T] 
   Slice::{ buf: self.buf, start: self.start + start, len: end - start }
 }
 
-///| cap returns the total capacity of the slice regardless of the current length.
+///|
+/// cap returns the total capacity of the slice regardless of the current length.
 pub fn cap[T](self : Slice[T]) -> Int {
   self.buf.length() - self.start
 }
 
-///| append appends `s` to the end of the slice, reallocating the underlying
+///|
+/// append appends `s` to the end of the slice, reallocating the underlying
 /// array if necessary, then returns the new slice.
 pub fn append[T](self : Slice[T], s : Slice[T]) -> Slice[T] {
   let remaining = self.cap() - self.length()
@@ -124,7 +128,8 @@ pub fn append[T](self : Slice[T], s : Slice[T]) -> Slice[T] {
   { buf: arr, start: 0, len: self.length() + s.length() }
 }
 
-///| push appends `e` to the end of the slice, reallocating the underlying
+///|
+/// push appends `e` to the end of the slice, reallocating the underlying
 /// array if necessary, then returns the new slice.
 pub fn push[T](self : Slice[T], e : T) -> Slice[T] {
   self.append(Slice::new([e]))
@@ -156,7 +161,8 @@ pub fn iter2[A](self : Slice[A]) -> Iter2[Int, A] {
   })
 }
 
-///| Fold out values from an Slice according to certain rules.
+///|
+/// Fold out values from an Slice according to certain rules.
 ///
 /// # Example
 /// ```
@@ -171,7 +177,8 @@ pub fn fold[A, B](self : Slice[A], init~ : B, f : (B, A) -> B) -> B {
   }
 }
 
-///| Fold out values from an Slice according to certain rules in reversed turn.
+///|
+/// Fold out values from an Slice according to certain rules in reversed turn.
 ///
 /// # Example
 /// ```
@@ -186,7 +193,8 @@ pub fn rev_fold[A, B](self : Slice[A], init~ : B, f : (B, A) -> B) -> B {
   }
 }
 
-///| Fold out values from an Slice according to certain rules with index.
+///|
+/// Fold out values from an Slice according to certain rules with index.
 ///
 /// # Example
 /// ```
@@ -201,7 +209,8 @@ pub fn foldi[A, B](self : Slice[A], init~ : B, f : (Int, B, A) -> B) -> B {
   }
 }
 
-///| Fold out values from an Slice according to certain rules in reversed turn with index.
+///|
+/// Fold out values from an Slice according to certain rules in reversed turn with index.
 ///
 /// # Example
 /// ```
@@ -242,7 +251,8 @@ pub fn each[T](self : Slice[T], f : (T) -> Unit) -> Unit {
   }
 }
 
-///| Compares two slices for equality.
+///|
+/// Compares two slices for equality.
 pub impl[T : Eq] Eq for Slice[T] with op_equal(self, other) {
   guard self.length() == other.length() else { return false }
   for i = 0 {
@@ -257,7 +267,8 @@ pub impl[T : Eq] Eq for Slice[T] with op_equal(self, other) {
   }
 }
 
-///| to_bytes returns slice as Bytes.
+///|
+/// to_bytes returns slice as Bytes.
 pub fn Slice::to_bytes(self : Slice[Byte]) -> Bytes {
   Bytes::from_iter(self.iter())
 }

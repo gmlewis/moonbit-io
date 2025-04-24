@@ -6,7 +6,7 @@ pub fn copy_json(src : &ByteReader) -> (Json, Int64, IOError?) {
   let val = try {
     ctx.parse_value!()
   } catch {
-    ParseError(e) => return (Null, 0, Some(IOError(e.to_string())))
+    ParseError(e) => return (Json::null(), 0, Some(IOError(e.to_string())))
   }
   (val, ctx.offset.to_int64(), None)
 }
@@ -42,11 +42,11 @@ fn ParseContext::parse_value2(
   tok : Token
 ) -> Json!ParseError {
   match tok {
-    Null => Null
-    True => True
-    False => False
-    Number(n) => Number(n)
-    String(s) => String(s)
+    Null => Json::null()
+    True => true.to_json()
+    False => false.to_json()
+    Number(n) => n.to_json()
+    String(s) => s.to_json()
     LBrace => ctx.parse_object!()
     LBracket => ctx.parse_array!()
     RBracket | RBrace | Comma =>
@@ -60,13 +60,13 @@ fn ParseContext::parse_value2(
 fn ParseContext::parse_object(ctx : ParseContext) -> Json!ParseError {
   let map = Map::new()
   loop ctx.lex_property_name!() {
-    RBrace => Object(map)
+    RBrace => map.to_json()
     String(name) => {
       ctx.lex_after_property_name!()
       map[name] = ctx.parse_value!()
       match ctx.lex_after_object_value!() {
         Comma => continue ctx.lex_property_name2!()
-        RBrace => Object(map)
+        RBrace => map.to_json()
         tok =>
           raise ParseError(
             "invalid JSON: expected ',' or '}' at offset \{ctx.offset}, got '\{tok}'",
@@ -84,13 +84,13 @@ fn ParseContext::parse_object(ctx : ParseContext) -> Json!ParseError {
 fn ParseContext::parse_array(ctx : ParseContext) -> Json!ParseError {
   let vec = []
   loop ctx.lex_value!(allow_rbracket=true) {
-    RBracket => Array(vec)
+    RBracket => vec.to_json()
     tok => {
       vec.push(ctx.parse_value2!(tok))
       let tok2 = ctx.lex_after_array_value!()
       match tok2 {
         Comma => continue ctx.lex_value!(allow_rbracket=false)
-        RBracket => Array(vec)
+        RBracket => vec.to_json()
         _ => raise ParseError("unexpected '\{tok2}' at offset \{ctx.offset}")
       }
     }

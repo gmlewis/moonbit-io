@@ -254,7 +254,7 @@ fn ParseContext::read_new_byte(self : ParseContext) -> Char? {
   self.offset += 1
   let (_, err) = self.buf.write_byte(b)
   guard err is None else { return None }
-  let current = Char::from_int(b.to_int())
+  let current = Int::unsafe_to_char(b.to_int())
   Some(current)
 }
 
@@ -263,7 +263,7 @@ fn ParseContext::read_char(ctx : ParseContext) -> Char? {
   if ctx.offset < ctx.buf.length() {
     let b = ctx.buf[ctx.offset]
     ctx.offset += 1
-    return Some(Char::from_int(b.to_int()))
+    return Some(Int::unsafe_to_char(b.to_int()))
   }
   ParseContext::read_new_byte(ctx)
 }
@@ -329,7 +329,7 @@ fn ParseContext::expect_ascii_char(
   // if c.to_int() != c1 {
   //   ctx.invalid_char!(c, shift=-1)
   // }
-  ParseContext::expect_char!(ctx, Char::from_int(c.to_int()))
+  ParseContext::expect_char!(ctx, Int::unsafe_to_char(c.to_int()))
 }
 
 ///|
@@ -602,7 +602,7 @@ fn ParseContext::lex_string(ctx : ParseContext) -> String!ParseError {
           Some('/') => buf.write_char('/')
           Some('u') => {
             let c = ctx.lex_hex_digits!(4)
-            buf.write_char(Char::from_int(c))
+            buf.write_char(Int::unsafe_to_char(c))
           }
           Some(c) => ctx.invalid_char!(c, shift=-1)
           None => raise ParseError("invalid eof")

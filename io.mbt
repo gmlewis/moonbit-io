@@ -17,9 +17,12 @@
 ///|
 /// Seek whence values.
 pub(all) enum Whence {
-  SeekStart /// seek relative to the origin of the file
-  SeekCurrent /// seek relative to the current offset
-  SeekEnd /// seek relative to the end
+  /// seek relative to the origin of the file
+  SeekStart
+  /// seek relative to the current offset
+  SeekCurrent
+  /// seek relative to the end
+  SeekEnd
 }
 
 ///|

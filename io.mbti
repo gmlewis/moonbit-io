@@ -1,11 +1,11 @@
 package "gmlewis/io"
 
 // Values
-fn append[T](Slice[T], Slice[T]) -> Slice[T]
+fn[T] append(Slice[T], Slice[T]) -> Slice[T]
 
-fn as_array_view[T](Slice[T]) -> ArrayView[T]
+fn[T] as_array_view(Slice[T]) -> ArrayView[T]
 
-fn cap[T](Slice[T]) -> Int
+fn[T] cap(Slice[T]) -> Int
 
 fn copy(&Writer, &Reader) -> (Int64, IOError?)
 
@@ -21,7 +21,7 @@ fn copy_until(&Writer, &ByteReader, Byte) -> (Int64, IOError?)
 
 let discard : Discard
 
-fn each[T](Slice[T], (T) -> Unit) -> Unit
+fn[T] each(Slice[T], (T) -> Unit) -> Unit
 
 let eof : IOError
 
@@ -39,23 +39,23 @@ let err_unexpected_eof : IOError
 
 let err_whence : IOError
 
-fn fold[A, B](Slice[A], init~ : B, (B, A) -> B) -> B
+fn[A, B] fold(Slice[A], init~ : B, (B, A) -> B) -> B
 
-fn foldi[A, B](Slice[A], init~ : B, (Int, B, A) -> B) -> B
+fn[A, B] foldi(Slice[A], init~ : B, (Int, B, A) -> B) -> B
 
-fn iter[A](Slice[A]) -> Iter[A]
+fn[A] iter(Slice[A]) -> Iter[A]
 
-fn iter2[A](Slice[A]) -> Iter2[Int, A]
+fn[A] iter2(Slice[A]) -> Iter2[Int, A]
 
 fn length(Buffer) -> Int
 
-fn op_as_view[T](Slice[T], start~ : Int = .., end? : Int) -> Slice[T]
+fn[T] op_as_view(Slice[T], start~ : Int = .., end? : Int) -> Slice[T]
 
-fn op_get[T](Slice[T], Int) -> T
+fn[T] op_get(Slice[T], Int) -> T
 
-fn op_set[T](Slice[T], Int, T) -> Unit
+fn[T] op_set(Slice[T], Int, T) -> Unit
 
-fn push[T](Slice[T], T) -> Slice[T]
+fn[T] push(Slice[T], T) -> Slice[T]
 
 fn read_all(&Reader) -> (Slice[Byte], IOError?)
 
@@ -65,15 +65,15 @@ fn read_full(&Reader, Slice[Byte]) -> (Int, IOError?)
 
 fn reset(Buffer, size_hint~ : Int = ..) -> Unit
 
-fn rev_fold[A, B](Slice[A], init~ : B, (B, A) -> B) -> B
+fn[A, B] rev_fold(Slice[A], init~ : B, (B, A) -> B) -> B
 
-fn rev_foldi[A, B](Slice[A], init~ : B, (Int, B, A) -> B) -> B
+fn[A, B] rev_foldi(Slice[A], init~ : B, (Int, B, A) -> B) -> B
 
-fn rev_inplace[T](Slice[T]) -> Unit
+fn[T] rev_inplace(Slice[T]) -> Unit
 
 fn substring(Buffer, start~ : Int = .., end~ : Int = ..) -> String
 
-fn swap[T](Slice[T], Int, Int) -> Unit
+fn[T] swap(Slice[T], Int, Int) -> Unit
 
 fn to_bytes(Buffer) -> Bytes
 

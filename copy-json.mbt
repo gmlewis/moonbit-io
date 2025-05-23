@@ -3,9 +3,7 @@
 /// It returns the Json value, the number of bytes copied, and any error that occurred during the process.
 pub fn copy_json(src : &ByteReader) -> (Json, Int64, IOError?) {
   let ctx = ParseContext::make(src)
-  let val = try {
-    ctx.parse_value!()
-  } catch {
+  let val = try ctx.parse_value!() catch {
     ParseError(e) => return (Json::null(), 0, Some(IOError(e.to_string())))
   }
   (val, ctx.offset.to_int64(), None)
@@ -238,7 +236,7 @@ fn ParseContext::lex_value(
 }
 
 ///|
-fn ParseContext::invalid_char[T](
+fn[T] ParseContext::invalid_char(
   ctx : ParseContext,
   c : Char,
   shift~ : Int = 0
@@ -564,9 +562,7 @@ fn ParseContext::lex_number_end(
   end : Int
 ) -> Double!ParseError {
   let s = ctx.buf.substring(start~, end~)
-  try {
-    @strconv.parse_double!(s)
-  } catch {
+  try @strconv.parse_double!(s) catch {
     _ => raise ParseError("invalid number '\{s}' at offsets \{start}:\{end}") // InvalidNumber(offset_to_position(ctx.input, start), s)
   }
 }

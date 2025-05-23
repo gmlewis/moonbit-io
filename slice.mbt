@@ -29,12 +29,12 @@ struct Slice[T] {
 
 ///|
 /// length returns the length of the slice.
-pub fn Slice::length[T](self : Slice[T]) -> Int {
+pub fn[T] Slice::length(self : Slice[T]) -> Int {
   self.len
 }
 
 ///|
-pub fn op_get[T](self : Slice[T], index : Int) -> T {
+pub fn[T] op_get(self : Slice[T], index : Int) -> T {
   guard index >= 0 && index < self.len else {
     abort(
       "index out of bounds: the len is from 0 to \{self.len} but the index is \{index}",
@@ -44,7 +44,7 @@ pub fn op_get[T](self : Slice[T], index : Int) -> T {
 }
 
 ///|
-pub fn op_set[T](self : Slice[T], index : Int, value : T) -> Unit {
+pub fn[T] op_set(self : Slice[T], index : Int, value : T) -> Unit {
   guard index >= 0 && index < self.len else {
     abort(
       "index out of bounds: the len is from 0 to \{self.len} but the index is \{index}",
@@ -54,7 +54,7 @@ pub fn op_set[T](self : Slice[T], index : Int, value : T) -> Unit {
 }
 
 ///|
-pub fn swap[T](self : Slice[T], i : Int, j : Int) -> Unit {
+pub fn[T] swap(self : Slice[T], i : Int, j : Int) -> Unit {
   guard i >= 0 && i < self.len && j >= 0 && j < self.len else {
     abort(
       "index out of bounds: the len is from 0 to \{self.len} but the index is (\{i}, \{j})",
@@ -66,7 +66,7 @@ pub fn swap[T](self : Slice[T], i : Int, j : Int) -> Unit {
 }
 
 ///|
-pub fn Slice::new[T](buf : Array[T], start~ : Int = 0, end? : Int) -> Slice[T] {
+pub fn[T] Slice::new(buf : Array[T], start~ : Int = 0, end? : Int) -> Slice[T] {
   let len = buf.length()
   let end = match end {
     None => len
@@ -79,13 +79,13 @@ pub fn Slice::new[T](buf : Array[T], start~ : Int = 0, end? : Int) -> Slice[T] {
 }
 
 ///|
-pub fn as_array_view[T](self : Slice[T]) -> ArrayView[T] {
+pub fn[T] as_array_view(self : Slice[T]) -> ArrayView[T] {
   let end = self.len + self.start
   self.buf[self.start:end]
 }
 
 ///|
-pub fn op_as_view[T](self : Slice[T], start~ : Int = 0, end? : Int) -> Slice[T] {
+pub fn[T] op_as_view(self : Slice[T], start~ : Int = 0, end? : Int) -> Slice[T] {
   let len = self.buf.length()
   let end = match end {
     None => self.len
@@ -99,14 +99,14 @@ pub fn op_as_view[T](self : Slice[T], start~ : Int = 0, end? : Int) -> Slice[T] 
 
 ///|
 /// cap returns the total capacity of the slice regardless of the current length.
-pub fn cap[T](self : Slice[T]) -> Int {
+pub fn[T] cap(self : Slice[T]) -> Int {
   self.buf.length() - self.start
 }
 
 ///|
 /// append appends `s` to the end of the slice, reallocating the underlying
 /// array if necessary, then returns the new slice.
-pub fn append[T](self : Slice[T], s : Slice[T]) -> Slice[T] {
+pub fn[T] append(self : Slice[T], s : Slice[T]) -> Slice[T] {
   let remaining = self.cap() - self.length()
   if remaining >= s.length() {
     // plenty of room, reuse current internal Array.
@@ -131,12 +131,12 @@ pub fn append[T](self : Slice[T], s : Slice[T]) -> Slice[T] {
 ///|
 /// push appends `e` to the end of the slice, reallocating the underlying
 /// array if necessary, then returns the new slice.
-pub fn push[T](self : Slice[T], e : T) -> Slice[T] {
+pub fn[T] push(self : Slice[T], e : T) -> Slice[T] {
   self.append(Slice::new([e]))
 }
 
 ///|
-pub fn iter[A](self : Slice[A]) -> Iter[A] {
+pub fn[A] iter(self : Slice[A]) -> Iter[A] {
   Iter::new(fn(yield_fn) {
     for i = 0; i < self.len; i = i + 1 {
       let v = self.buf[self.start + i]
@@ -149,7 +149,7 @@ pub fn iter[A](self : Slice[A]) -> Iter[A] {
 }
 
 ///|
-pub fn iter2[A](self : Slice[A]) -> Iter2[Int, A] {
+pub fn[A] iter2(self : Slice[A]) -> Iter2[Int, A] {
   Iter2::new(fn(yield_fn) {
     for i = 0; i < self.len; i = i + 1 {
       let v = self.buf[self.start + i]
@@ -169,7 +169,7 @@ pub fn iter2[A](self : Slice[A]) -> Iter2[Int, A] {
 /// let sum = [1, 2, 3, 4, 5][:].fold(init=0, fn { sum, elem => sum + elem })
 /// sum // 15
 /// ```
-pub fn fold[A, B](self : Slice[A], init~ : B, f : (B, A) -> B) -> B {
+pub fn[A, B] fold(self : Slice[A], init~ : B, f : (B, A) -> B) -> B {
   for i = 0, acc = init; i < self.length(); {
     continue i + 1, f(acc, self[i])
   } else {
@@ -185,7 +185,7 @@ pub fn fold[A, B](self : Slice[A], init~ : B, f : (B, A) -> B) -> B {
 /// let sum = [1, 2, 3, 4, 5][:].rev_fold(init=0, fn { sum, elem => sum + elem })
 /// sum // 15
 /// ```
-pub fn rev_fold[A, B](self : Slice[A], init~ : B, f : (B, A) -> B) -> B {
+pub fn[A, B] rev_fold(self : Slice[A], init~ : B, f : (B, A) -> B) -> B {
   for i = self.length() - 1, acc = init; i >= 0; {
     continue i - 1, f(acc, self[i])
   } else {
@@ -201,7 +201,7 @@ pub fn rev_fold[A, B](self : Slice[A], init~ : B, f : (B, A) -> B) -> B {
 /// let sum = [1, 2, 3, 4, 5][:].foldi(init=0, fn { index, sum, elem => sum + index })
 /// sum // 10
 /// ```
-pub fn foldi[A, B](self : Slice[A], init~ : B, f : (Int, B, A) -> B) -> B {
+pub fn[A, B] foldi(self : Slice[A], init~ : B, f : (Int, B, A) -> B) -> B {
   for i = 0, acc = init; i < self.length(); {
     continue i + 1, f(i, acc, self[i])
   } else {
@@ -217,7 +217,7 @@ pub fn foldi[A, B](self : Slice[A], init~ : B, f : (Int, B, A) -> B) -> B {
 /// let sum = [1, 2, 3, 4, 5][:].rev_foldi(~init=0, fn { index, sum, elem => sum + index })
 /// sum // 10
 /// ```
-pub fn rev_foldi[A, B](self : Slice[A], init~ : B, f : (Int, B, A) -> B) -> B {
+pub fn[A, B] rev_foldi(self : Slice[A], init~ : B, f : (Int, B, A) -> B) -> B {
   let len = self.length()
   for i = len - 1, acc = init; i >= 0; {
     continue i - 1, f(len - i - 1, acc, self[i])
@@ -236,7 +236,7 @@ pub impl[X : Show] Show for Slice[X] with output(self, logger) {
 // }
 
 ///|
-pub fn rev_inplace[T](self : Slice[T]) -> Unit {
+pub fn[T] rev_inplace(self : Slice[T]) -> Unit {
   let mid_len = self.length() / 2
   for i = 0; i < mid_len; i = i + 1 {
     let j = self.length() - i - 1
@@ -245,7 +245,7 @@ pub fn rev_inplace[T](self : Slice[T]) -> Unit {
 }
 
 ///|
-pub fn each[T](self : Slice[T], f : (T) -> Unit) -> Unit {
+pub fn[T] each(self : Slice[T], f : (T) -> Unit) -> Unit {
   for i = 0; i < self.length(); i = i + 1 {
     f(self[i])
   }

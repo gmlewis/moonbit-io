@@ -99,7 +99,6 @@ test "randomized/buffer_generated the bytes should be 0" {
 test "discard" {
   let b = @io.Buffer::from_slice(Slice::new([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
   guard @io.copy(@io.discard, b) is (10, None)
-
 }
 
 ///|

@@ -141,7 +141,6 @@ pub fn[A] iter(self : Slice[A]) -> Iter[A] {
     for i = 0; i < self.len; i = i + 1 {
       let v = self.buf[self.start + i]
       guard yield_fn(v) is IterContinue else { break IterEnd }
-
     } else {
       IterContinue
     }
@@ -154,7 +153,6 @@ pub fn[A] iter2(self : Slice[A]) -> Iter2[Int, A] {
     for i = 0; i < self.len; i = i + 1 {
       let v = self.buf[self.start + i]
       guard yield_fn(i, v) is IterContinue else { break IterEnd }
-
     } else {
       IterContinue
     }

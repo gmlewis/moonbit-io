@@ -3,7 +3,7 @@
 /// It returns the Json value, the number of bytes copied, and any error that occurred during the process.
 pub fn copy_json(src : &ByteReader) -> (Json, Int64, IOError?) {
   let ctx = ParseContext::make(src)
-  let val = try ctx.parse_value!() catch {
+  let val = ctx.parse_value() catch {
     ParseError(e) => return (Json::null(), 0, Some(IOError(e.to_string())))
   }
   (val, ctx.offset.to_int64(), None)
@@ -26,27 +26,27 @@ pub fn copy_json(src : &ByteReader) -> (Json, Int64, IOError?) {
 // limitations under the License.
 
 ///|
-priv type! ParseError String derive(Show, Eq)
+priv suberror ParseError String derive(Show, Eq)
 
 ///|
-fn ParseContext::parse_value(ctx : ParseContext) -> Json!ParseError {
-  let tok = ctx.lex_value!(allow_rbracket=false)
-  ctx.parse_value2!(tok)
+fn ParseContext::parse_value(ctx : ParseContext) -> Json raise ParseError {
+  let tok = ctx.lex_value(allow_rbracket=false)
+  ctx.parse_value2(tok)
 }
 
 ///|
 fn ParseContext::parse_value2(
   ctx : ParseContext,
   tok : Token
-) -> Json!ParseError {
+) -> Json raise ParseError {
   match tok {
     Null => Json::null()
     True => true.to_json()
     False => false.to_json()
     Number(n) => n.to_json()
     String(s) => s.to_json()
-    LBrace => ctx.parse_object!()
-    LBracket => ctx.parse_array!()
+    LBrace => ctx.parse_object()
+    LBracket => ctx.parse_array()
     RBracket | RBrace | Comma =>
       raise ParseError(
         "invalid JSON: unexpected '\{tok}' at offset \{ctx.offset}",
@@ -55,15 +55,15 @@ fn ParseContext::parse_value2(
 }
 
 ///|
-fn ParseContext::parse_object(ctx : ParseContext) -> Json!ParseError {
+fn ParseContext::parse_object(ctx : ParseContext) -> Json raise ParseError {
   let map = Map::new()
-  loop ctx.lex_property_name!() {
+  loop ctx.lex_property_name() {
     RBrace => map.to_json()
     String(name) => {
-      ctx.lex_after_property_name!()
-      map[name] = ctx.parse_value!()
-      match ctx.lex_after_object_value!() {
-        Comma => continue ctx.lex_property_name2!()
+      ctx.lex_after_property_name()
+      map[name] = ctx.parse_value()
+      match ctx.lex_after_object_value() {
+        Comma => continue ctx.lex_property_name2()
         RBrace => map.to_json()
         tok =>
           raise ParseError(
@@ -79,15 +79,15 @@ fn ParseContext::parse_object(ctx : ParseContext) -> Json!ParseError {
 }
 
 ///|
-fn ParseContext::parse_array(ctx : ParseContext) -> Json!ParseError {
+fn ParseContext::parse_array(ctx : ParseContext) -> Json raise ParseError {
   let vec = []
-  loop ctx.lex_value!(allow_rbracket=true) {
+  loop ctx.lex_value(allow_rbracket=true) {
     RBracket => vec.to_json()
     tok => {
-      vec.push(ctx.parse_value2!(tok))
-      let tok2 = ctx.lex_after_array_value!()
+      vec.push(ctx.parse_value2(tok))
+      let tok2 = ctx.lex_after_array_value()
       match tok2 {
-        Comma => continue ctx.lex_value!(allow_rbracket=false)
+        Comma => continue ctx.lex_value(allow_rbracket=false)
         RBracket => vec.to_json()
         _ => raise ParseError("unexpected '\{tok2}' at offset \{ctx.offset}")
       }
@@ -166,7 +166,7 @@ let non_ascii_whitespace : CharClass = CharClass::of([
 fn ParseContext::lex_value(
   ctx : ParseContext,
   allow_rbracket~ : Bool
-) -> Token!ParseError {
+) -> Token raise ParseError {
   for {
     match ctx.read_char() {
       Some('\t' | ' ' | '\n' | '\r') => continue
@@ -176,59 +176,59 @@ fn ParseContext::lex_value(
         if allow_rbracket {
           return RBracket
         } else {
-          ctx.invalid_char!(']', shift=-1)
+          ctx.invalid_char(']', shift=-1)
         }
       Some('n') => {
-        ctx.expect_ascii_char!(b'u')
-        ctx.expect_ascii_char!(b'l')
-        ctx.expect_ascii_char!(b'l')
+        ctx.expect_ascii_char(b'u')
+        ctx.expect_ascii_char(b'l')
+        ctx.expect_ascii_char(b'l')
         return Null
       }
       Some('t') => {
-        ctx.expect_ascii_char!(b'r')
-        ctx.expect_ascii_char!(b'u')
-        ctx.expect_ascii_char!(b'e')
+        ctx.expect_ascii_char(b'r')
+        ctx.expect_ascii_char(b'u')
+        ctx.expect_ascii_char(b'e')
         return True
       }
       Some('f') => {
-        ctx.expect_ascii_char!(b'a')
-        ctx.expect_ascii_char!(b'l')
-        ctx.expect_ascii_char!(b's')
-        ctx.expect_ascii_char!(b'e')
+        ctx.expect_ascii_char(b'a')
+        ctx.expect_ascii_char(b'l')
+        ctx.expect_ascii_char(b's')
+        ctx.expect_ascii_char(b'e')
         return False
       }
       Some('-') =>
         match ctx.read_char() {
           Some('0') => {
-            let n = ctx.lex_zero!(start=ctx.offset - 2)
+            let n = ctx.lex_zero(start=ctx.offset - 2)
             return Number(n)
           }
           Some(c2) => {
             if c2 is ('1'..='9') {
-              let n = ctx.lex_decimal_integer!(start=ctx.offset - 2)
+              let n = ctx.lex_decimal_integer(start=ctx.offset - 2)
               return Number(n)
             }
-            ctx.invalid_char!(c2, shift=-1)
+            ctx.invalid_char(c2, shift=-1)
           }
           None => raise ParseError("invalid eof")
         }
       Some('0') => {
-        let n = ctx.lex_zero!(start=ctx.offset - 1)
+        let n = ctx.lex_zero(start=ctx.offset - 1)
         return Number(n)
       }
       Some('1'..='9') => {
-        let n = ctx.lex_decimal_integer!(start=ctx.offset - 1)
+        let n = ctx.lex_decimal_integer(start=ctx.offset - 1)
         return Number(n)
       }
       Some('"') => {
-        let s = ctx.lex_string!()
+        let s = ctx.lex_string()
         return String(s)
       }
       Some(c) => {
         if c > '\u{7f}' && non_ascii_whitespace.contains(c) {
           continue
         }
-        ctx.invalid_char!(c, shift=-1)
+        ctx.invalid_char(c, shift=-1)
       }
       None => raise ParseError("invalid eof") // InvalidEof
     }
@@ -240,7 +240,7 @@ fn[T] ParseContext::invalid_char(
   ctx : ParseContext,
   c : Char,
   shift~ : Int = 0
-) -> T!ParseError {
+) -> T raise ParseError {
   ctx.offset += shift
   raise ParseError("invalid JSON: unexpected '\{c}' at offset \{ctx.offset}")
 }
@@ -278,7 +278,10 @@ fn ParseContext::read_char(ctx : ParseContext) -> Char? {
 /// `ctx.expect_char(c)` check the current context is c,
 /// if it is, consume the character and return `()`,
 /// otherwise raise an error, when it is an error, the position is unspecified.
-fn ParseContext::expect_char(ctx : ParseContext, c : Char) -> Unit!ParseError {
+fn ParseContext::expect_char(
+  ctx : ParseContext,
+  c : Char
+) -> Unit raise ParseError {
   // guard ctx.offset < ctx.end_offset else { raise ParseError("invalid eof") }
   // let c1 = ctx.input.unsafe_charcode_at(ctx.offset)
   // ctx.offset += 1
@@ -320,14 +323,14 @@ fn ParseContext::expect_char(ctx : ParseContext, c : Char) -> Unit!ParseError {
 fn ParseContext::expect_ascii_char(
   ctx : ParseContext,
   c : Byte
-) -> Unit!ParseError {
+) -> Unit raise ParseError {
   // guard ctx.offset < ctx.end_offset else { raise ParseError("invalid eof") }
   // let c1 = ctx.input.unsafe_charcode_at(ctx.offset)
   // ctx.offset += 1
   // if c.to_int() != c1 {
   //   ctx.invalid_char!(c, shift=-1)
   // }
-  ParseContext::expect_char!(ctx, Int::unsafe_to_char(c.to_int()))
+  ParseContext::expect_char(ctx, Int::unsafe_to_char(c.to_int()))
 }
 
 ///|
@@ -335,11 +338,11 @@ test "expect_char" {
   let buf = Buffer::new(size_hint=3)
   buf.write_string("abc") |> ignore()
   let ctx = ParseContext::make(buf)
-  ctx.expect_char!('a')
-  ctx.expect_char!('b')
-  ctx.expect_char!('c')
-  inspect!(
-    ctx.expect_char?('d').to_string(),
+  ctx.expect_char('a')
+  ctx.expect_char('b')
+  ctx.expect_char('c')
+  inspect(
+    try? ctx.expect_char('d').to_string(),
     content=
       #|Err(ParseError("invalid eof"))
     ,
@@ -364,33 +367,39 @@ fn ParseContext::lex_skip_whitespace(ctx : ParseContext) -> Unit {
 }
 
 ///|
-fn ParseContext::lex_after_array_value(ctx : ParseContext) -> Token!ParseError {
+fn ParseContext::lex_after_array_value(
+  ctx : ParseContext
+) -> Token raise ParseError {
   ctx.lex_skip_whitespace()
   match ctx.read_char() {
     Some(']') => RBracket
     Some(',') => Comma
-    Some(c) => ctx.invalid_char!(c, shift=-1)
+    Some(c) => ctx.invalid_char(c, shift=-1)
     None => raise ParseError("invalid eof")
   }
 }
 
 ///|
-fn ParseContext::lex_after_property_name(ctx : ParseContext) -> Unit!ParseError {
+fn ParseContext::lex_after_property_name(
+  ctx : ParseContext
+) -> Unit raise ParseError {
   ctx.lex_skip_whitespace()
   match ctx.read_char() {
     Some(':') => ()
-    Some(c) => ctx.invalid_char!(c, shift=-1)
+    Some(c) => ctx.invalid_char(c, shift=-1)
     None => raise ParseError("invalid eof")
   }
 }
 
 ///|
-fn ParseContext::lex_after_object_value(ctx : ParseContext) -> Token!ParseError {
+fn ParseContext::lex_after_object_value(
+  ctx : ParseContext
+) -> Token raise ParseError {
   ctx.lex_skip_whitespace()
   match ctx.read_char() {
     Some('}') => RBrace
     Some(',') => Comma
-    Some(c) => ctx.invalid_char!(c, shift=-1)
+    Some(c) => ctx.invalid_char(c, shift=-1)
     None => raise ParseError("invalid eof")
   }
 }
@@ -398,15 +407,17 @@ fn ParseContext::lex_after_object_value(ctx : ParseContext) -> Token!ParseError 
 ///|
 /// In the context of `{`, try to lex token `}` or a property name,
 /// otherwise raise an error.
-fn ParseContext::lex_property_name(ctx : ParseContext) -> Token!ParseError {
+fn ParseContext::lex_property_name(
+  ctx : ParseContext
+) -> Token raise ParseError {
   ctx.lex_skip_whitespace()
   match ctx.read_char() {
     Some('}') => RBrace
     Some('"') => {
-      let s = ctx.lex_string!()
+      let s = ctx.lex_string()
       String(s)
     }
-    Some(c) => ctx.invalid_char!(c, shift=-1)
+    Some(c) => ctx.invalid_char(c, shift=-1)
     None => raise ParseError("invalid eof")
   }
 }
@@ -415,14 +426,16 @@ fn ParseContext::lex_property_name(ctx : ParseContext) -> Token!ParseError {
 /// In the context of `{ ...,` try to lex a property name,
 /// otherwise raise an error.
 /// since it is in comma context, `}` is not allowed.
-fn ParseContext::lex_property_name2(ctx : ParseContext) -> Token!ParseError {
+fn ParseContext::lex_property_name2(
+  ctx : ParseContext
+) -> Token raise ParseError {
   ctx.lex_skip_whitespace()
   match ctx.read_char() {
     Some('"') => {
-      let s = ctx.lex_string!()
+      let s = ctx.lex_string()
       String(s)
     }
-    Some(c) => ctx.invalid_char!(c, shift=-1)
+    Some(c) => ctx.invalid_char(c, shift=-1)
     None => raise ParseError("invalid eof")
   }
 }
@@ -431,19 +444,19 @@ fn ParseContext::lex_property_name2(ctx : ParseContext) -> Token!ParseError {
 fn ParseContext::lex_decimal_integer(
   ctx : ParseContext,
   start~ : Int
-) -> Double!ParseError {
+) -> Double raise ParseError {
   for {
     match ctx.read_char() {
-      Some('.') => return ctx.lex_decimal_point!(start~)
-      Some('e' | 'E') => return ctx.lex_decimal_exponent!(start~)
+      Some('.') => return ctx.lex_decimal_point(start~)
+      Some('e' | 'E') => return ctx.lex_decimal_exponent(start~)
       Some(c) => {
         if c >= '0' && c <= '9' {
           continue
         }
         ctx.offset -= 1
-        return ctx.lex_number_end!(start, ctx.offset)
+        return ctx.lex_number_end(start, ctx.offset)
       }
-      None => return ctx.lex_number_end!(start, ctx.offset)
+      None => return ctx.lex_number_end(start, ctx.offset)
     }
   }
 }
@@ -452,13 +465,13 @@ fn ParseContext::lex_decimal_integer(
 fn ParseContext::lex_decimal_point(
   ctx : ParseContext,
   start~ : Int
-) -> Double!ParseError {
+) -> Double raise ParseError {
   match ctx.read_char() {
     Some(c) =>
       if c >= '0' && c <= '9' {
-        ctx.lex_decimal_fraction!(start~)
+        ctx.lex_decimal_fraction(start~)
       } else {
-        ctx.invalid_char!(c, shift=-1)
+        ctx.invalid_char(c, shift=-1)
       }
     None => raise ParseError("invalid eof")
   }
@@ -468,18 +481,18 @@ fn ParseContext::lex_decimal_point(
 fn ParseContext::lex_decimal_fraction(
   ctx : ParseContext,
   start~ : Int
-) -> Double!ParseError {
+) -> Double raise ParseError {
   for {
     match ctx.read_char() {
-      Some('e' | 'E') => return ctx.lex_decimal_exponent!(start~)
+      Some('e' | 'E') => return ctx.lex_decimal_exponent(start~)
       Some(c) => {
         if c >= '0' && c <= '9' {
           continue
         }
         ctx.offset -= 1
-        return ctx.lex_number_end!(start, ctx.offset)
+        return ctx.lex_number_end(start, ctx.offset)
       }
-      None => return ctx.lex_number_end!(start, ctx.offset)
+      None => return ctx.lex_number_end(start, ctx.offset)
     }
   }
 }
@@ -488,14 +501,14 @@ fn ParseContext::lex_decimal_fraction(
 fn ParseContext::lex_decimal_exponent(
   ctx : ParseContext,
   start~ : Int
-) -> Double!ParseError {
+) -> Double raise ParseError {
   match ctx.read_char() {
-    Some('+') | Some('-') => return ctx.lex_decimal_exponent_sign!(start~)
+    Some('+') | Some('-') => return ctx.lex_decimal_exponent_sign(start~)
     Some(c) => {
       if c >= '0' && c <= '9' {
-        return ctx.lex_decimal_exponent_integer!(start~)
+        return ctx.lex_decimal_exponent_integer(start~)
       }
-      ctx.invalid_char!(c, shift=-1)
+      ctx.invalid_char(c, shift=-1)
     }
     None => raise ParseError("invalid eof")
   }
@@ -505,13 +518,13 @@ fn ParseContext::lex_decimal_exponent(
 fn ParseContext::lex_decimal_exponent_sign(
   ctx : ParseContext,
   start~ : Int
-) -> Double!ParseError {
+) -> Double raise ParseError {
   match ctx.read_char() {
     Some(c) => {
       if c >= '0' && c <= '9' {
-        return ctx.lex_decimal_exponent_integer!(start~)
+        return ctx.lex_decimal_exponent_integer(start~)
       }
-      ctx.invalid_char!(c, shift=-1)
+      ctx.invalid_char(c, shift=-1)
     }
     None => raise ParseError("invalid eof")
   }
@@ -521,7 +534,7 @@ fn ParseContext::lex_decimal_exponent_sign(
 fn ParseContext::lex_decimal_exponent_integer(
   ctx : ParseContext,
   start~ : Int
-) -> Double!ParseError {
+) -> Double raise ParseError {
   for {
     match ctx.read_char() {
       Some(c) => {
@@ -529,9 +542,9 @@ fn ParseContext::lex_decimal_exponent_integer(
           continue
         }
         ctx.offset -= 1
-        return ctx.lex_number_end!(start, ctx.offset)
+        return ctx.lex_number_end(start, ctx.offset)
       }
-      None => return ctx.lex_number_end!(start, ctx.offset)
+      None => return ctx.lex_number_end(start, ctx.offset)
     }
   }
 }
@@ -540,18 +553,18 @@ fn ParseContext::lex_decimal_exponent_integer(
 fn ParseContext::lex_zero(
   ctx : ParseContext,
   start~ : Int
-) -> Double!ParseError {
+) -> Double raise ParseError {
   match ctx.read_char() {
-    Some('.') => ctx.lex_decimal_point!(start~)
-    Some('e' | 'E') => ctx.lex_decimal_exponent!(start~)
+    Some('.') => ctx.lex_decimal_point(start~)
+    Some('e' | 'E') => ctx.lex_decimal_exponent(start~)
     Some(c) => {
       if c >= '0' && c <= '9' {
-        ctx.invalid_char!(c, shift=-1)
+        ctx.invalid_char(c, shift=-1)
       }
       ctx.offset -= 1
-      return ctx.lex_number_end!(start, ctx.offset)
+      return ctx.lex_number_end(start, ctx.offset)
     }
-    None => return ctx.lex_number_end!(start, ctx.offset)
+    None => return ctx.lex_number_end(start, ctx.offset)
   }
 }
 
@@ -560,15 +573,15 @@ fn ParseContext::lex_number_end(
   ctx : ParseContext,
   start : Int,
   end : Int
-) -> Double!ParseError {
+) -> Double raise ParseError {
   let s = ctx.buf.substring(start~, end~)
-  try @strconv.parse_double!(s) catch {
+  @strconv.parse_double(s) catch {
     _ => raise ParseError("invalid number '\{s}' at offsets \{start}:\{end}") // InvalidNumber(offset_to_position(ctx.input, start), s)
   }
 }
 
 ///|
-fn ParseContext::lex_string(ctx : ParseContext) -> String!ParseError {
+fn ParseContext::lex_string(ctx : ParseContext) -> String raise ParseError {
   let buf = StringBuilder::new()
   let mut start = ctx.offset
   fn flush(end : Int) {
@@ -584,7 +597,7 @@ fn ParseContext::lex_string(ctx : ParseContext) -> String!ParseError {
         flush(ctx.offset - 1)
         break
       }
-      Some('\n' | '\r') as c => ctx.invalid_char!(c.unwrap(), shift=-1)
+      Some('\n' | '\r') as c => ctx.invalid_char(c.unwrap(), shift=-1)
       Some('\\') => {
         flush(ctx.offset - 1)
         match ctx.read_char() {
@@ -597,17 +610,17 @@ fn ParseContext::lex_string(ctx : ParseContext) -> String!ParseError {
           Some('\\') => buf.write_char('\\')
           Some('/') => buf.write_char('/')
           Some('u') => {
-            let c = ctx.lex_hex_digits!(4)
+            let c = ctx.lex_hex_digits(4)
             buf.write_char(Int::unsafe_to_char(c))
           }
-          Some(c) => ctx.invalid_char!(c, shift=-1)
+          Some(c) => ctx.invalid_char(c, shift=-1)
           None => raise ParseError("invalid eof")
         }
         start = ctx.offset
       }
       Some(ch) =>
         if ch.to_int() < 32 {
-          ctx.invalid_char!(ch, shift=-1)
+          ctx.invalid_char(ch, shift=-1)
         } else {
           continue
         }
@@ -618,7 +631,10 @@ fn ParseContext::lex_string(ctx : ParseContext) -> String!ParseError {
 }
 
 ///|
-fn ParseContext::lex_hex_digits(ctx : ParseContext, n : Int) -> Int!ParseError {
+fn ParseContext::lex_hex_digits(
+  ctx : ParseContext,
+  n : Int
+) -> Int raise ParseError {
   let mut r = 0
   for i in 0..<n {
     match ctx.read_char() {
@@ -626,17 +642,17 @@ fn ParseContext::lex_hex_digits(ctx : ParseContext, n : Int) -> Int!ParseError {
         if c >= 'A' {
           let d = (c.to_int() & (32).lnot()) - 'A'.to_int() + 10
           if d > 15 {
-            ctx.invalid_char!(c, shift=-1)
+            ctx.invalid_char(c, shift=-1)
           }
           r = (r << 4) | d
         } else if c >= '0' {
           let d = c.to_int() - '0'.to_int()
           if d > 9 {
-            ctx.invalid_char!(c, shift=-1)
+            ctx.invalid_char(c, shift=-1)
           }
           r = (r << 4) | d
         } else {
-          ctx.invalid_char!(c, shift=-1)
+          ctx.invalid_char(c, shift=-1)
         }
       None => raise ParseError("invalid eof")
     }

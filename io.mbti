@@ -71,7 +71,7 @@ fn[A, B] rev_foldi(Slice[A], init~ : B, (Int, B, A) -> B) -> B
 
 fn[T] rev_inplace(Slice[T]) -> Unit
 
-fn substring(Buffer, start~ : Int = .., end~ : Int = ..) -> String
+fn substring(Buffer, start~ : Int = .., end? : Int) -> String
 
 fn[T] swap(Slice[T], Int, Int) -> Unit
 
@@ -95,7 +95,7 @@ fn Buffer::new(size_hint~ : Int = ..) -> Self
 fn Buffer::op_get(Self, Int) -> Byte
 fn Buffer::read_from(Self, &Reader) -> (Int64, IOError?)
 fn Buffer::reset(Self, size_hint~ : Int = ..) -> Unit
-fn Buffer::substring(Self, start~ : Int = .., end~ : Int = ..) -> String
+fn Buffer::substring(Self, start~ : Int = .., end? : Int) -> String
 fn Buffer::to_bytes(Self) -> Bytes
 fn Buffer::to_slice(Self) -> Slice[Byte]
 fn Buffer::write_byte(Self, Byte) -> (Int, IOError?)
@@ -111,7 +111,7 @@ type Discard
 impl Reader for Discard
 impl Writer for Discard
 
-pub(all) type! IOError String
+pub(all) suberror IOError String
 impl Eq for IOError
 impl Show for IOError
 

@@ -164,11 +164,11 @@ pub fn Buffer::op_get(self : Buffer, index : Int) -> Byte {
 }
 
 ///|
-pub fn substring(
-  self : Buffer,
-  start~ : Int = 0,
-  end~ : Int = self.b.length()
-) -> String {
+pub fn substring(self : Buffer, start~ : Int = 0, end? : Int) -> String {
+  let end = match end {
+    None => self.b.length()
+    Some(x) => x
+  }
   guard start >= 0 && start <= end && end <= self.b.length() else {
     abort(
       "Buffer::substring(start=\{start}, end=\{end}) out of bounds for length=\{self.b.length()})",
@@ -182,9 +182,9 @@ pub fn substring(
 test "Buffer::substring" {
   let buf = Buffer::new()
   buf.write_string("hello world") |> ignore()
-  inspect!(buf.substring(), content="hello world")
-  inspect!(buf.substring(start=6), content="world")
-  inspect!(buf.substring(start=0, end=5), content="hello")
+  inspect(buf.substring(), content="hello world")
+  inspect(buf.substring(start=6), content="world")
+  inspect(buf.substring(start=0, end=5), content="hello")
 }
 
 ///|
@@ -214,6 +214,6 @@ test "panic Buffer::substring/out-of-bounds 4" {
 ///|
 test "Buffer::substring/empty" {
   let buf = Buffer::new()
-  inspect!(buf.substring(), content="")
-  inspect!(buf.substring(start=0, end=0), content="")
+  inspect(buf.substring(), content="")
+  inspect(buf.substring(start=0, end=0), content="")
 }

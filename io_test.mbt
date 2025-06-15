@@ -13,7 +13,7 @@ test "TestCopy" {
   let wb = @io.Buffer::new()
   guard rb.write_bytes(b"hello, world.") is (13, None)
   guard @io.copy(wb, rb) is (13, None)
-  assert_eq!(wb.to_bytes(), b"hello, world.")
+  assert_eq(wb.to_bytes(), b"hello, world.")
 
   // reuse buffers
   rb.reset()
@@ -21,7 +21,7 @@ test "TestCopy" {
   guard rb.write_bytes(b"hello, world.") is (13, None)
   guard rb.write_bytes(b"hello, world.") is (13, None)
   guard @io.copy(wb, rb) is (26, None)
-  assert_eq!(wb.to_bytes(), b"hello, world.hello, world.")
+  assert_eq(wb.to_bytes(), b"hello, world.hello, world.")
 }
 
 // test "TestCopyNegative" {
@@ -45,7 +45,7 @@ test "TestCopyBuffer" {
   let wb = @io.Buffer::new()
   guard rb.write_bytes(b"hello, world.") is (13, None)
   guard @io.copy_buffer(wb, rb, Some(@io.Slice::new([0]))) is (13, None)  // Tiny buffer to keep it honest.
-  assert_eq!(wb.to_bytes(), b"hello, world.")
+  assert_eq(wb.to_bytes(), b"hello, world.")
 }
 
 ///|
@@ -54,7 +54,7 @@ test "TestCopyBufferNone" {
   let wb = @io.Buffer::new()
   guard rb.write_bytes(b"hello, world.") is (13, None)
   guard @io.copy_buffer(wb, rb, None) is (13, None)  // Should allocate a buffer.
-  assert_eq!(wb.to_bytes(), b"hello, world.")
+  assert_eq(wb.to_bytes(), b"hello, world.")
 }
 
 // test "TestCopyReadFrom" {
@@ -137,7 +137,7 @@ test "TestCopyN" {
   let wb = @io.Buffer::new()
   guard rb.write_bytes(b"hello, world.") is (13, None)
   guard @io.copy_n(wb, rb, 5) is (5, None)
-  assert_eq!(wb.to_bytes(), b"hello")
+  assert_eq(wb.to_bytes(), b"hello")
 }
 
 // test "TestCopyNReadFrom" {
@@ -694,8 +694,8 @@ impl @io.Reader for EmptyReader with read(_self, _b) {
 test "edge case: empty read" {
   let reader : EmptyReader = EmptyReader::{  }
   let (result, err) = @io.read_all(reader)
-  inspect!(result, content="[]")
-  inspect!(err, content="None")
+  inspect(result, content="[]")
+  inspect(err, content="None")
 }
 
 // test "read_all: basic functionality" {

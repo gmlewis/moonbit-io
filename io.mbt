@@ -27,7 +27,7 @@ pub(all) enum Whence {
 
 ///|
 /// An IOError can be tested with equality checks.
-pub(all) type! IOError String derive(Show, Eq)
+pub(all) suberror IOError String derive(Show, Eq)
 
 ///|
 /// err_short_write means that a write accepted fewer bytes than requested

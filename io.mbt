@@ -508,7 +508,7 @@ struct SectionReader {
 }
 
 ///|
-fn SectionReader::read(
+pub fn SectionReader::read(
   self : SectionReader,
   p : Slice[Byte]
 ) -> (Int, IOError?) {
@@ -532,7 +532,7 @@ pub let err_whence : IOError = IOError("Seek: invalid whence")
 pub let err_offset : IOError = IOError("Seek: invalid offset")
 
 ///|
-fn seek(
+pub fn seek(
   self : SectionReader,
   offset : Int64,
   whence : Whence
@@ -551,7 +551,7 @@ fn seek(
 }
 
 ///|
-fn read_at(
+pub fn read_at(
   self : SectionReader,
   p : Slice[Byte],
   off : Int64
@@ -586,7 +586,7 @@ fn size(self : SectionReader) -> Int64 {
 ///
 /// The returned values are the same that were passed to [SectionReader::new]
 /// when the [SectionReader] was created.
-fn outer(self : SectionReader) -> (&ReaderAt, Int64, Int64) {
+pub fn outer(self : SectionReader) -> (&ReaderAt, Int64, Int64) {
   (self.r, self.base, self.n)
 }
 
@@ -606,14 +606,17 @@ pub fn OffsetWriter::new(w : &WriterAt, off : Int64) -> OffsetWriter {
 }
 
 ///|
-fn OffsetWriter::write(self : OffsetWriter, p : Slice[Byte]) -> (Int, IOError?) {
+pub fn OffsetWriter::write(
+  self : OffsetWriter,
+  p : Slice[Byte]
+) -> (Int, IOError?) {
   let (n, err) = self.w.write_at(p, self.off)
   self.off += n.to_int64()
   (n, err)
 }
 
 ///|
-fn write_at(
+pub fn write_at(
   self : OffsetWriter,
   p : Slice[Byte],
   off : Int64
@@ -626,7 +629,7 @@ fn write_at(
 }
 
 ///|
-fn OffsetWriter::seek(
+pub fn OffsetWriter::seek(
   self : OffsetWriter,
   offset : Int64,
   whence : Whence
@@ -706,7 +709,7 @@ pub impl Writer for Discard with write(_self, p) {
 }
 
 ///|
-fn Discard::read_from(_self : Discard, r : &Reader) -> (Int64, IOError?) {
+pub fn Discard::read_from(_self : Discard, r : &Reader) -> (Int64, IOError?) {
   let buf = Slice::new(Array::make(8192, b'\x00'))
   let mut n = 0L
   for {

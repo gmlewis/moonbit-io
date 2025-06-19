@@ -1,12 +1,6 @@
 package "gmlewis/io"
 
 // Values
-fn[T] append(Slice[T], Slice[T]) -> Slice[T]
-
-fn[T] as_array_view(Slice[T]) -> ArrayView[T]
-
-fn[T] cap(Slice[T]) -> Int
-
 fn copy(&Writer, &Reader) -> (Int64, IOError?)
 
 fn copy_buffer(&Writer, &Reader, Slice[Byte]?) -> (Int64, IOError?)
@@ -20,8 +14,6 @@ fn copy_size(&Writer, &ByteReader, Int64) -> (Int64, IOError?)
 fn copy_until(&Writer, &ByteReader, Byte) -> (Int64, IOError?)
 
 let discard : Discard
-
-fn[T] each(Slice[T], (T) -> Unit) -> Unit
 
 let eof : IOError
 
@@ -39,51 +31,9 @@ let err_unexpected_eof : IOError
 
 let err_whence : IOError
 
-fn[A, B] fold(Slice[A], init~ : B, (B, A) -> B) -> B
-
-fn[A, B] foldi(Slice[A], init~ : B, (Int, B, A) -> B) -> B
-
-fn[A] iter(Slice[A]) -> Iter[A]
-
-fn[A] iter2(Slice[A]) -> Iter2[Int, A]
-
-fn length(Buffer) -> Int
-
-fn[T] op_as_view(Slice[T], start~ : Int = .., end? : Int) -> Slice[T]
-
-fn[T] op_get(Slice[T], Int) -> T
-
-fn[T] op_set(Slice[T], Int, T) -> Unit
-
-fn[T] push(Slice[T], T) -> Slice[T]
-
 fn read_all(&Reader) -> (Slice[Byte], IOError?)
 
-fn read_from(Buffer, &Reader) -> (Int64, IOError?)
-
 fn read_full(&Reader, Slice[Byte]) -> (Int, IOError?)
-
-fn reset(Buffer, size_hint~ : Int = ..) -> Unit
-
-fn[A, B] rev_fold(Slice[A], init~ : B, (B, A) -> B) -> B
-
-fn[A, B] rev_foldi(Slice[A], init~ : B, (Int, B, A) -> B) -> B
-
-fn[T] rev_inplace(Slice[T]) -> Unit
-
-fn substring(Buffer, start~ : Int = .., end? : Int) -> String
-
-fn[T] swap(Slice[T], Int, Int) -> Unit
-
-fn to_bytes(Buffer) -> Bytes
-
-fn to_slice(Buffer) -> Slice[Byte]
-
-fn write_byte(Buffer, Byte) -> (Int, IOError?)
-
-fn write_bytes(Buffer, Bytes) -> (Int, IOError?)
-
-fn write_string(Buffer, String) -> (Int, IOError?)
 
 // Types and methods
 type Buffer
@@ -108,6 +58,7 @@ impl Eq for Buffer
 impl Show for Buffer
 
 type Discard
+fn Discard::read_from(Self, &Reader) -> (Int64, IOError?)
 impl Reader for Discard
 impl Writer for Discard
 
@@ -126,9 +77,16 @@ impl Reader for NopCloser
 
 type OffsetWriter
 fn OffsetWriter::new(&WriterAt, Int64) -> Self
+fn OffsetWriter::seek(Self, Int64, Whence) -> (Int64, IOError?)
+fn OffsetWriter::write(Self, Slice[Byte]) -> (Int, IOError?)
+fn OffsetWriter::write_at(Self, Slice[Byte], Int64) -> (Int, IOError?)
 
 type SectionReader
 fn SectionReader::new(&ReaderAt, Int64, Int64) -> Self
+fn SectionReader::outer(Self) -> (&ReaderAt, Int64, Int64)
+fn SectionReader::read(Self, Slice[Byte]) -> (Int, IOError?)
+fn SectionReader::read_at(Self, Slice[Byte], Int64) -> (Int, IOError?)
+fn SectionReader::seek(Self, Int64, Whence) -> (Int64, IOError?)
 
 type Slice[T]
 fn[T] Slice::append(Self[T], Self[T]) -> Self[T]

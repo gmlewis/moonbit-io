@@ -17,9 +17,9 @@ test "copy_until" {
   let got = copy_until(dst, src, b'\n')
   inspect(
     got,
-    content=
+    content=(
       #|(3, Some(IOError("eof")))
-    ,
+    ),
   )
   inspect(dst.to_string(), content="{}\r")
 }
@@ -43,9 +43,9 @@ test "copy_size" {
   let got = copy_size(dst, src, 4)
   inspect(
     got,
-    content=
+    content=(
       #|(3, Some(IOError("eof")))
-    ,
+    ),
   )
   inspect(dst.to_string(), content="{}\r")
 }

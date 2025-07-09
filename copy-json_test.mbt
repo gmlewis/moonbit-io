@@ -16,35 +16,37 @@ test "copy_json" {
 
   // Test nested JSON object
   let buf = Buffer::from_string(
-    #|{"a":1,"b":true}
-    ,
+    (
+      #|{"a":1,"b":true}
+    ),
   )
   let (json, bytes, err) = copy_json(buf)
   inspect(
     json,
-    content=
+    content=(
       #|Object({"a": Number(1), "b": True})
-    ,
+    ),
   )
   inspect(bytes, content="16")
   inspect(err, content="None")
 
   // Test nested JSON object with extra whitespace and UTF-8
   let buf = Buffer::from_string(
-    #|
-    #|{
-    #|  "a": 1,
-    #|  "b": true,
-    #|  "utf-8": "✓ Hello, 世界! 🌍"
-    #|}
-    ,
+    (
+      #|
+      #|{
+      #|  "a": 1,
+      #|  "b": true,
+      #|  "utf-8": "✓ Hello, 世界! 🌍"
+      #|}
+    ),
   )
   let (json, bytes, err) = copy_json(buf)
   inspect(
     json,
-    content=
+    content=(
       #|Object({"a": Number(1), "b": True, "utf-8": String("✓ Hello, 世界! 🌍")})
-    ,
+    ),
   )
   inspect(bytes, content="64")
   inspect(err, content="None")
@@ -75,29 +77,31 @@ test "copy_json/empty" {
 ///|
 test "copy_json/jsonrpc2" {
   let buf = Buffer::from_string(
-    #|{"jsonrpc":"2.0","method":"foo","params":[1,2,3],"id":1}
-    ,
+    (
+      #|{"jsonrpc":"2.0","method":"foo","params":[1,2,3],"id":1}
+    ),
   )
   let (json, bytes, err) = copy_json(buf)
   inspect(
     json,
-    content=
+    content=(
       #|Object({"jsonrpc": String("2.0"), "method": String("foo"), "params": Array([Number(1), Number(2), Number(3)]), "id": Number(1)})
-    ,
+    ),
   )
   inspect(bytes, content="56")
   inspect(err, content="None")
   //
   let buf = Buffer::from_string(
-    #|{"jsonrpc":"2.0","id":1,"method":"test","params":{}}
-    ,
+    (
+      #|{"jsonrpc":"2.0","id":1,"method":"test","params":{}}
+    ),
   )
   let (json, bytes, err) = copy_json(buf)
   inspect(
     json,
-    content=
+    content=(
       #|Object({"jsonrpc": String("2.0"), "id": Number(1), "method": String("test"), "params": Object({})})
-    ,
+    ),
   )
   inspect(bytes, content="52")
   inspect(err, content="None")

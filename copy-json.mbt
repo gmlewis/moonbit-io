@@ -26,7 +26,7 @@ pub fn copy_json(src : &ByteReader) -> (Json, Int64, IOError?) {
 // limitations under the License.
 
 ///|
-priv suberror ParseError String derive(Show, Eq)
+priv suberror ParseError String derive(Show)
 
 ///|
 fn ParseContext::parse_value(ctx : ParseContext) -> Json raise ParseError {
@@ -148,7 +148,7 @@ priv enum Token {
   RBracket
   Comma
   // Colon
-} derive(Eq, Show)
+} derive(Show)
 
 ///|
 let non_ascii_whitespace : CharClass = CharClass::of([
@@ -343,9 +343,9 @@ test "expect_char" {
   ctx.expect_char('c')
   inspect(
     try? ctx.expect_char('d').to_string(),
-    content=
+    content=(
       #|Err(ParseError("invalid eof"))
-    ,
+    ),
   )
 }
 

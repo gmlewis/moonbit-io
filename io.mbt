@@ -374,7 +374,7 @@ pub fn copy(dst : &Writer, src : &Reader) -> (Int64, IOError?) {
 pub fn copy_buffer(
   dst : &Writer,
   src : &Reader,
-  buf : Slice[Byte]?
+  buf : Slice[Byte]?,
 ) -> (Int64, IOError?) {
   if buf != None && buf.unwrap().length() == 0 {
     return (0, Some(IOError("empty buffer in copy_buffer")))
@@ -483,7 +483,7 @@ pub impl Reader for LimitedReader with read(self, p) {
 pub fn SectionReader::new(
   r : &ReaderAt,
   off : Int64,
-  n : Int64
+  n : Int64,
 ) -> SectionReader {
   let mut remaining = 0L
   if off <= @int64.max_value - n {
@@ -510,7 +510,7 @@ struct SectionReader {
 ///|
 pub fn SectionReader::read(
   self : SectionReader,
-  p : Slice[Byte]
+  p : Slice[Byte],
 ) -> (Int, IOError?) {
   if self.off >= self.limit {
     return (0, Some(eof))
@@ -535,7 +535,7 @@ pub let err_offset : IOError = IOError("Seek: invalid offset")
 pub fn seek(
   self : SectionReader,
   offset : Int64,
-  whence : Whence
+  whence : Whence,
 ) -> (Int64, IOError?) {
   let mut offset = offset
   match whence {
@@ -554,7 +554,7 @@ pub fn seek(
 pub fn read_at(
   self : SectionReader,
   p : Slice[Byte],
-  off : Int64
+  off : Int64,
 ) -> (Int, IOError?) {
   let mut off = off
   if off < 0 || off >= self.size() {
@@ -608,7 +608,7 @@ pub fn OffsetWriter::new(w : &WriterAt, off : Int64) -> OffsetWriter {
 ///|
 pub fn OffsetWriter::write(
   self : OffsetWriter,
-  p : Slice[Byte]
+  p : Slice[Byte],
 ) -> (Int, IOError?) {
   let (n, err) = self.w.write_at(p, self.off)
   self.off += n.to_int64()
@@ -619,7 +619,7 @@ pub fn OffsetWriter::write(
 pub fn write_at(
   self : OffsetWriter,
   p : Slice[Byte],
-  off : Int64
+  off : Int64,
 ) -> (Int, IOError?) {
   if off < 0 {
     return (0, Some(err_offset))
@@ -632,7 +632,7 @@ pub fn write_at(
 pub fn OffsetWriter::seek(
   self : OffsetWriter,
   offset : Int64,
-  whence : Whence
+  whence : Whence,
 ) -> (Int64, IOError?) {
   let mut offset = offset
   match whence {

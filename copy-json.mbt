@@ -37,7 +37,7 @@ fn ParseContext::parse_value(ctx : ParseContext) -> Json raise ParseError {
 ///|
 fn ParseContext::parse_value2(
   ctx : ParseContext,
-  tok : Token
+  tok : Token,
 ) -> Json raise ParseError {
   match tok {
     Null => Json::null()
@@ -165,7 +165,7 @@ let non_ascii_whitespace : CharClass = CharClass::of([
 ///|
 fn ParseContext::lex_value(
   ctx : ParseContext,
-  allow_rbracket~ : Bool
+  allow_rbracket~ : Bool,
 ) -> Token raise ParseError {
   for {
     match ctx.read_char() {
@@ -239,7 +239,7 @@ fn ParseContext::lex_value(
 fn[T] ParseContext::invalid_char(
   ctx : ParseContext,
   c : Char,
-  shift~ : Int = 0
+  shift~ : Int = 0,
 ) -> T raise ParseError {
   ctx.offset += shift
   raise ParseError("invalid JSON: unexpected '\{c}' at offset \{ctx.offset}")
@@ -280,7 +280,7 @@ fn ParseContext::read_char(ctx : ParseContext) -> Char? {
 /// otherwise raise an error, when it is an error, the position is unspecified.
 fn ParseContext::expect_char(
   ctx : ParseContext,
-  c : Char
+  c : Char,
 ) -> Unit raise ParseError {
   // guard ctx.offset < ctx.end_offset else { raise ParseError("invalid eof") }
   // let c1 = ctx.input.unsafe_charcode_at(ctx.offset)
@@ -322,7 +322,7 @@ fn ParseContext::expect_char(
 ///
 fn ParseContext::expect_ascii_char(
   ctx : ParseContext,
-  c : Byte
+  c : Byte,
 ) -> Unit raise ParseError {
   // guard ctx.offset < ctx.end_offset else { raise ParseError("invalid eof") }
   // let c1 = ctx.input.unsafe_charcode_at(ctx.offset)
@@ -368,7 +368,7 @@ fn ParseContext::lex_skip_whitespace(ctx : ParseContext) -> Unit {
 
 ///|
 fn ParseContext::lex_after_array_value(
-  ctx : ParseContext
+  ctx : ParseContext,
 ) -> Token raise ParseError {
   ctx.lex_skip_whitespace()
   match ctx.read_char() {
@@ -381,7 +381,7 @@ fn ParseContext::lex_after_array_value(
 
 ///|
 fn ParseContext::lex_after_property_name(
-  ctx : ParseContext
+  ctx : ParseContext,
 ) -> Unit raise ParseError {
   ctx.lex_skip_whitespace()
   match ctx.read_char() {
@@ -393,7 +393,7 @@ fn ParseContext::lex_after_property_name(
 
 ///|
 fn ParseContext::lex_after_object_value(
-  ctx : ParseContext
+  ctx : ParseContext,
 ) -> Token raise ParseError {
   ctx.lex_skip_whitespace()
   match ctx.read_char() {
@@ -408,7 +408,7 @@ fn ParseContext::lex_after_object_value(
 /// In the context of `{`, try to lex token `}` or a property name,
 /// otherwise raise an error.
 fn ParseContext::lex_property_name(
-  ctx : ParseContext
+  ctx : ParseContext,
 ) -> Token raise ParseError {
   ctx.lex_skip_whitespace()
   match ctx.read_char() {
@@ -427,7 +427,7 @@ fn ParseContext::lex_property_name(
 /// otherwise raise an error.
 /// since it is in comma context, `}` is not allowed.
 fn ParseContext::lex_property_name2(
-  ctx : ParseContext
+  ctx : ParseContext,
 ) -> Token raise ParseError {
   ctx.lex_skip_whitespace()
   match ctx.read_char() {
@@ -443,7 +443,7 @@ fn ParseContext::lex_property_name2(
 ///|
 fn ParseContext::lex_decimal_integer(
   ctx : ParseContext,
-  start~ : Int
+  start~ : Int,
 ) -> Double raise ParseError {
   for {
     match ctx.read_char() {
@@ -464,7 +464,7 @@ fn ParseContext::lex_decimal_integer(
 ///|
 fn ParseContext::lex_decimal_point(
   ctx : ParseContext,
-  start~ : Int
+  start~ : Int,
 ) -> Double raise ParseError {
   match ctx.read_char() {
     Some(c) =>
@@ -480,7 +480,7 @@ fn ParseContext::lex_decimal_point(
 ///|
 fn ParseContext::lex_decimal_fraction(
   ctx : ParseContext,
-  start~ : Int
+  start~ : Int,
 ) -> Double raise ParseError {
   for {
     match ctx.read_char() {
@@ -500,7 +500,7 @@ fn ParseContext::lex_decimal_fraction(
 ///|
 fn ParseContext::lex_decimal_exponent(
   ctx : ParseContext,
-  start~ : Int
+  start~ : Int,
 ) -> Double raise ParseError {
   match ctx.read_char() {
     Some('+') | Some('-') => return ctx.lex_decimal_exponent_sign(start~)
@@ -517,7 +517,7 @@ fn ParseContext::lex_decimal_exponent(
 ///|
 fn ParseContext::lex_decimal_exponent_sign(
   ctx : ParseContext,
-  start~ : Int
+  start~ : Int,
 ) -> Double raise ParseError {
   match ctx.read_char() {
     Some(c) => {
@@ -533,7 +533,7 @@ fn ParseContext::lex_decimal_exponent_sign(
 ///|
 fn ParseContext::lex_decimal_exponent_integer(
   ctx : ParseContext,
-  start~ : Int
+  start~ : Int,
 ) -> Double raise ParseError {
   for {
     match ctx.read_char() {
@@ -552,7 +552,7 @@ fn ParseContext::lex_decimal_exponent_integer(
 ///|
 fn ParseContext::lex_zero(
   ctx : ParseContext,
-  start~ : Int
+  start~ : Int,
 ) -> Double raise ParseError {
   match ctx.read_char() {
     Some('.') => ctx.lex_decimal_point(start~)
@@ -572,7 +572,7 @@ fn ParseContext::lex_zero(
 fn ParseContext::lex_number_end(
   ctx : ParseContext,
   start : Int,
-  end : Int
+  end : Int,
 ) -> Double raise ParseError {
   let s = ctx.buf.substring(start~, end~)
   @strconv.parse_double(s) catch {
@@ -633,7 +633,7 @@ fn ParseContext::lex_string(ctx : ParseContext) -> String raise ParseError {
 ///|
 fn ParseContext::lex_hex_digits(
   ctx : ParseContext,
-  n : Int
+  n : Int,
 ) -> Int raise ParseError {
   let mut r = 0
   for i in 0..<n {

@@ -5,7 +5,7 @@
 pub fn copy_until(
   dst : &Writer,
   src : &ByteReader,
-  until : Byte
+  until : Byte,
 ) -> (Int64, IOError?) {
   let mut total = 0L
   for {
@@ -27,7 +27,7 @@ pub fn copy_until(
 pub fn copy_size(
   dst : &Writer,
   src : &ByteReader,
-  size : Int64
+  size : Int64,
 ) -> (Int64, IOError?) {
   let mut total = 0L
   for {

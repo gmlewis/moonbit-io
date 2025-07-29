@@ -36,6 +36,11 @@ fn read_all(&Reader) -> (Slice[Byte], IOError?)
 
 fn read_full(&Reader, Slice[Byte]) -> (Int, IOError?)
 
+// Errors
+pub(all) suberror IOError String
+impl Eq for IOError
+impl Show for IOError
+
 // Types and methods
 type Buffer
 fn Buffer::from_bytes(Bytes) -> Self
@@ -62,10 +67,6 @@ type Discard
 fn Discard::read_from(Self, &Reader) -> (Int64, IOError?)
 impl Reader for Discard
 impl Writer for Discard
-
-pub(all) suberror IOError String
-impl Eq for IOError
-impl Show for IOError
 
 type LimitedReader
 fn LimitedReader::new(&Reader, Int64) -> Self

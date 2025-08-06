@@ -111,7 +111,7 @@ fn ParseContext::make(r : &ByteReader) -> ParseContext {
 }
 
 ///|
-priv type CharClass Array[(Char, Char)]
+priv struct CharClass(Array[(Char, Char)])
 
 ///|
 fn CharClass::of(array : Array[(Char, Char)]) -> CharClass {

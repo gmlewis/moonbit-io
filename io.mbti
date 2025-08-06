@@ -47,11 +47,11 @@ fn Buffer::from_bytes(Bytes) -> Self
 fn Buffer::from_slice(Slice[Byte]) -> Self
 fn Buffer::from_string(String) -> Self
 fn Buffer::length(Self) -> Int
-fn Buffer::new(size_hint~ : Int = ..) -> Self
+fn Buffer::new(size_hint? : Int) -> Self
 fn Buffer::op_get(Self, Int) -> Byte
 fn Buffer::read_from(Self, &Reader) -> (Int64, IOError?)
-fn Buffer::reset(Self, size_hint~ : Int = ..) -> Unit
-fn Buffer::substring(Self, start~ : Int = .., end? : Int) -> String
+fn Buffer::reset(Self, size_hint? : Int) -> Unit
+fn Buffer::substring(Self, start? : Int, end? : Int) -> String
 fn Buffer::to_bytes(Self) -> Bytes
 fn Buffer::to_slice(Self) -> Slice[Byte]
 fn Buffer::write_byte(Self, Byte) -> (Int, IOError?)
@@ -100,8 +100,8 @@ fn[A, B] Slice::foldi(Self[A], init~ : B, (Int, B, A) -> B) -> B
 fn[A] Slice::iter(Self[A]) -> Iter[A]
 fn[A] Slice::iter2(Self[A]) -> Iter2[Int, A]
 fn[T] Slice::length(Self[T]) -> Int
-fn[T] Slice::new(Array[T], start~ : Int = .., end? : Int) -> Self[T]
-fn[T] Slice::op_as_view(Self[T], start~ : Int = .., end? : Int) -> Self[T]
+fn[T] Slice::new(Array[T], start? : Int, end? : Int) -> Self[T]
+fn[T] Slice::op_as_view(Self[T], start? : Int, end? : Int) -> Self[T]
 fn[T] Slice::op_get(Self[T], Int) -> T
 fn[T] Slice::op_set(Self[T], Int, T) -> Unit
 fn[T] Slice::push(Self[T], T) -> Self[T]

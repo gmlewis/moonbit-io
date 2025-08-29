@@ -239,7 +239,7 @@ fn ParseContext::lex_value(
 fn[T] ParseContext::invalid_char(
   ctx : ParseContext,
   c : Char,
-  shift~ : Int = 0,
+  shift? : Int = 0,
 ) -> T raise ParseError {
   ctx.offset += shift
   raise ParseError("invalid JSON: unexpected '\{c}' at offset \{ctx.offset}")

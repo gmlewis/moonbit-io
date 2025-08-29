@@ -66,7 +66,7 @@ pub fn[T] swap(self : Slice[T], i : Int, j : Int) -> Unit {
 }
 
 ///|
-pub fn[T] Slice::new(buf : Array[T], start~ : Int = 0, end? : Int) -> Slice[T] {
+pub fn[T] Slice::new(buf : Array[T], start? : Int = 0, end? : Int) -> Slice[T] {
   let len = buf.length()
   let end = match end {
     None => len
@@ -85,7 +85,7 @@ pub fn[T] as_array_view(self : Slice[T]) -> ArrayView[T] {
 }
 
 ///|
-pub fn[T] op_as_view(self : Slice[T], start~ : Int = 0, end? : Int) -> Slice[T] {
+pub fn[T] op_as_view(self : Slice[T], start? : Int = 0, end? : Int) -> Slice[T] {
   let len = self.buf.length()
   let end = match end {
     None => self.len

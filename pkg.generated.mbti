@@ -1,0 +1,196 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "gmlewis/io"
+
+// Values
+fn copy(&Writer, &Reader) -> (Int64, IOError?)
+
+fn copy_buffer(&Writer, &Reader, Slice[Byte]?) -> (Int64, IOError?)
+
+fn copy_json(&ByteReader) -> (Json, Int64, IOError?)
+
+fn copy_n(&Writer, &Reader, Int64) -> (Int64, IOError?)
+
+fn copy_size(&Writer, &ByteReader, Int64) -> (Int64, IOError?)
+
+fn copy_until(&Writer, &ByteReader, Byte) -> (Int64, IOError?)
+
+let discard : Discard
+
+let eof : IOError
+
+let err_invalid_write : IOError
+
+let err_no_progress : IOError
+
+let err_offset : IOError
+
+let err_short_buffer : IOError
+
+let err_short_write : IOError
+
+let err_unexpected_eof : IOError
+
+let err_whence : IOError
+
+fn read_all(&Reader) -> (Slice[Byte], IOError?)
+
+fn read_full(&Reader, Slice[Byte]) -> (Int, IOError?)
+
+// Errors
+pub(all) suberror IOError String
+impl Eq for IOError
+impl Show for IOError
+
+// Types and methods
+type Buffer
+fn Buffer::from_bytes(Bytes) -> Self
+fn Buffer::from_slice(Slice[Byte]) -> Self
+fn Buffer::from_string(String) -> Self
+fn Buffer::length(Self) -> Int
+fn Buffer::new(size_hint? : Int) -> Self
+fn Buffer::op_get(Self, Int) -> Byte
+fn Buffer::read_from(Self, &Reader) -> (Int64, IOError?)
+fn Buffer::reset(Self, size_hint? : Int) -> Unit
+fn Buffer::substring(Self, start? : Int, end? : Int) -> String
+fn Buffer::to_bytes(Self) -> Bytes
+fn Buffer::to_slice(Self) -> Slice[Byte]
+fn Buffer::write_byte(Self, Byte) -> (Int, IOError?)
+fn Buffer::write_bytes(Self, Bytes) -> (Int, IOError?)
+fn Buffer::write_string(Self, String) -> (Int, IOError?)
+impl ByteReader for Buffer
+impl Reader for Buffer
+impl Writer for Buffer
+impl Eq for Buffer
+impl Show for Buffer
+
+type Discard
+fn Discard::read_from(Self, &Reader) -> (Int64, IOError?)
+impl Reader for Discard
+impl Writer for Discard
+
+type LimitedReader
+fn LimitedReader::new(&Reader, Int64) -> Self
+impl Reader for LimitedReader
+
+type NopCloser
+fn NopCloser::new(&Reader) -> Self
+impl Closer for NopCloser
+impl Reader for NopCloser
+
+type OffsetWriter
+fn OffsetWriter::new(&WriterAt, Int64) -> Self
+fn OffsetWriter::seek(Self, Int64, Whence) -> (Int64, IOError?)
+fn OffsetWriter::write(Self, Slice[Byte]) -> (Int, IOError?)
+fn OffsetWriter::write_at(Self, Slice[Byte], Int64) -> (Int, IOError?)
+
+type SectionReader
+fn SectionReader::new(&ReaderAt, Int64, Int64) -> Self
+fn SectionReader::outer(Self) -> (&ReaderAt, Int64, Int64)
+fn SectionReader::read(Self, Slice[Byte]) -> (Int, IOError?)
+fn SectionReader::read_at(Self, Slice[Byte], Int64) -> (Int, IOError?)
+fn SectionReader::seek(Self, Int64, Whence) -> (Int64, IOError?)
+
+type Slice[T]
+fn[T] Slice::append(Self[T], Self[T]) -> Self[T]
+fn[T] Slice::as_array_view(Self[T]) -> ArrayView[T]
+fn[T] Slice::cap(Self[T]) -> Int
+fn[T] Slice::each(Self[T], (T) -> Unit) -> Unit
+fn[A, B] Slice::fold(Self[A], init~ : B, (B, A) -> B) -> B
+fn[A, B] Slice::foldi(Self[A], init~ : B, (Int, B, A) -> B) -> B
+fn[A] Slice::iter(Self[A]) -> Iter[A]
+fn[A] Slice::iter2(Self[A]) -> Iter2[Int, A]
+fn[T] Slice::length(Self[T]) -> Int
+fn[T] Slice::new(Array[T], start? : Int, end? : Int) -> Self[T]
+fn[T] Slice::op_as_view(Self[T], start? : Int, end? : Int) -> Self[T]
+fn[T] Slice::op_get(Self[T], Int) -> T
+fn[T] Slice::op_set(Self[T], Int, T) -> Unit
+fn[T] Slice::push(Self[T], T) -> Self[T]
+fn[A, B] Slice::rev_fold(Self[A], init~ : B, (B, A) -> B) -> B
+fn[A, B] Slice::rev_foldi(Self[A], init~ : B, (Int, B, A) -> B) -> B
+fn[T] Slice::rev_inplace(Self[T]) -> Unit
+fn[T] Slice::swap(Self[T], Int, Int) -> Unit
+fn Slice::to_bytes(Self[Byte]) -> Bytes
+impl[T : Eq] Eq for Slice[T]
+impl[X : Show] Show for Slice[X]
+
+type TeeReader
+fn TeeReader::new(&Reader, &Writer) -> Self
+impl Reader for TeeReader
+
+pub(all) enum Whence {
+  SeekStart
+  SeekCurrent
+  SeekEnd
+}
+
+// Type aliases
+
+// Traits
+pub(open) trait ByteReader {
+  read_byte(Self) -> (Byte, IOError?)
+}
+
+pub(open) trait ByteScanner : ByteReader {
+  unread_byte(Self) -> IOError?
+}
+
+pub(open) trait ByteWriter {
+  write_byte(Self, Byte) -> IOError?
+}
+
+pub(open) trait Closer {
+  close(Self) -> IOError?
+}
+
+pub(open) trait ReadCloser : Reader + Closer {
+}
+
+pub(open) trait ReadSeekCloser : Reader + Seeker + Closer {
+}
+
+pub(open) trait ReadSeeker : Reader + Seeker {
+}
+
+pub(open) trait ReadWriteCloser : Reader + Writer + Closer {
+}
+
+pub(open) trait ReadWriteSeeker : Reader + Writer + Seeker {
+}
+
+pub(open) trait ReadWriter : Reader + Writer {
+}
+
+pub(open) trait Reader {
+  read(Self, Slice[Byte]) -> (Int, IOError?)
+}
+
+pub(open) trait ReaderAt {
+  read_at(Self, Slice[Byte], Int64) -> (Int, IOError?)
+}
+
+pub(open) trait ReaderFrom {
+  read_from(Self, &Reader) -> (Int64, IOError?)
+}
+
+pub(open) trait Seeker {
+  seek(Self, Int64, Whence) -> (Int64, IOError?)
+}
+
+pub(open) trait WriteCloser : Writer + Closer {
+}
+
+pub(open) trait WriteSeeker : Writer + Seeker {
+}
+
+pub(open) trait Writer {
+  write(Self, Slice[Byte]) -> (Int, IOError?)
+}
+
+pub(open) trait WriterAt {
+  write_at(Self, Slice[Byte], Int64) -> (Int, IOError?)
+}
+
+pub(open) trait WriterTo {
+  write_to(Self, &Writer) -> (Int64, IOError?)
+}
+

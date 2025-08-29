@@ -11,7 +11,7 @@ struct Buffer {
 /// Buffer::new creates a new empty Buffer with an optional size hint.
 /// The size hint is used to preallocate memory for the buffer, which can
 /// improve performance when the size of the data to be written is known in advance.
-pub fn Buffer::new(size_hint~ : Int = 0) -> Buffer {
+pub fn Buffer::new(size_hint? : Int = 0) -> Buffer {
   let b = Slice::new(Array::make(size_hint, b'\x00'), start=0, end=0)
   { b, off: 0 }
 }
@@ -44,7 +44,7 @@ pub fn Buffer::from_string(s : String) -> Buffer {
 }
 
 ///|
-pub fn reset(self : Buffer, size_hint~ : Int = 0) -> Unit {
+pub fn reset(self : Buffer, size_hint? : Int = 0) -> Unit {
   self.b = Slice::new(Array::make(size_hint, b'\x00'), start=0, end=0)
   self.off = 0
 }
@@ -164,7 +164,7 @@ pub fn Buffer::op_get(self : Buffer, index : Int) -> Byte {
 }
 
 ///|
-pub fn substring(self : Buffer, start~ : Int = 0, end? : Int) -> String {
+pub fn substring(self : Buffer, start? : Int = 0, end? : Int) -> String {
   let end = match end {
     None => self.b.length()
     Some(x) => x

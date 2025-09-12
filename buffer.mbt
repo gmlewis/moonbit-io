@@ -136,7 +136,7 @@ pub impl Show for Buffer with output(self, logger) {
 }
 
 ///|
-pub impl Eq for Buffer with op_equal(self, other) {
+pub impl Eq for Buffer with equal(self, other) {
   if self.b.length() != other.b.length() {
     return false
   }

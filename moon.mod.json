@@ -1,8 +1,8 @@
 {
   "name": "gmlewis/io",
-  "version": "0.22.14",
+  "version": "0.22.15",
   "deps": {
-    "gmlewis/base64": "0.15.1"
+    "gmlewis/base64": "0.15.2"
   },
   "readme": "README.md",
   "repository": "https://github.com/gmlewis/moonbit-io",

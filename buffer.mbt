@@ -44,7 +44,7 @@ pub fn Buffer::from_string(s : String) -> Buffer {
 }
 
 ///|
-pub fn reset(self : Buffer, size_hint? : Int = 0) -> Unit {
+pub fn Buffer::reset(self : Buffer, size_hint? : Int = 0) -> Unit {
   self.b = Slice::new(Array::make(size_hint, b'\x00'), start=0, end=0)
   self.off = 0
 }
@@ -66,19 +66,19 @@ pub impl Writer for Buffer with write(self, buf) {
 }
 
 ///|
-pub fn write_bytes(self : Buffer, buf : Bytes) -> (Int, IOError?) {
+pub fn Buffer::write_bytes(self : Buffer, buf : Bytes) -> (Int, IOError?) {
   self.write(Slice::new(buf.to_array()))
 }
 
 ///|
-pub fn write_byte(self : Buffer, b : Byte) -> (Int, IOError?) {
+pub fn Buffer::write_byte(self : Buffer, b : Byte) -> (Int, IOError?) {
   self.write(Slice::new([b]))
 }
 
 ///|
 /// `write_string` converts the MoonBit UTF-16 String to UTF-8 and
 /// writes the bytes to the buffer.
-pub fn write_string(self : Buffer, s : String) -> (Int, IOError?) {
+pub fn Buffer::write_string(self : Buffer, s : String) -> (Int, IOError?) {
   let b = @base64.str2bytes(s)
   self.write_bytes(b)
 }
@@ -107,7 +107,7 @@ pub impl ByteReader for Buffer with read_byte(self) {
 }
 
 ///|
-pub fn read_from(self : Buffer, r : &Reader) -> (Int64, IOError?) {
+pub fn Buffer::read_from(self : Buffer, r : &Reader) -> (Int64, IOError?) {
   copy(self, r)
 }
 
@@ -121,7 +121,7 @@ fn minimum(a : Int, b : Int) -> Int {
 }
 
 ///|
-pub fn to_bytes(self : Buffer) -> Bytes {
+pub fn Buffer::to_bytes(self : Buffer) -> Bytes {
   Bytes::from_array(self.b.buf)
 }
 
@@ -149,12 +149,12 @@ pub impl Eq for Buffer with equal(self, other) {
 }
 
 ///|
-pub fn to_slice(self : Buffer) -> Slice[Byte] {
+pub fn Buffer::to_slice(self : Buffer) -> Slice[Byte] {
   Slice::new(self.b.buf)
 }
 
 ///|
-pub fn length(self : Buffer) -> Int {
+pub fn Buffer::length(self : Buffer) -> Int {
   self.b.length()
 }
 
@@ -164,7 +164,7 @@ pub fn Buffer::op_get(self : Buffer, index : Int) -> Byte {
 }
 
 ///|
-pub fn substring(self : Buffer, start? : Int = 0, end? : Int) -> String {
+pub fn Buffer::substring(self : Buffer, start? : Int = 0, end? : Int) -> String {
   let end = match end {
     None => self.b.length()
     Some(x) => x

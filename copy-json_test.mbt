@@ -1,12 +1,12 @@
 ///|
-test "copy_json" {
+test "copy_json 1" {
   let src = Buffer::from_string("{}\r\n{extra bytes}")
   let got = copy_json(src)
   inspect(got, content="(Object({}), 2, None)")
 }
 
 ///|
-test "copy_json" {
+test "copy_json 2" {
   // Test basic JSON value parsing
   let buf = Buffer::from_string("42")
   let (json, bytes, err) = copy_json(buf)

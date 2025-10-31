@@ -532,7 +532,7 @@ pub let err_whence : IOError = IOError("Seek: invalid whence")
 pub let err_offset : IOError = IOError("Seek: invalid offset")
 
 ///|
-pub fn seek(
+pub fn SectionReader::seek(
   self : SectionReader,
   offset : Int64,
   whence : Whence,
@@ -551,7 +551,7 @@ pub fn seek(
 }
 
 ///|
-pub fn read_at(
+pub fn SectionReader::read_at(
   self : SectionReader,
   p : Slice[Byte],
   off : Int64,
@@ -577,7 +577,7 @@ pub fn read_at(
 
 ///|
 /// Size returns the size of the section in bytes.
-fn size(self : SectionReader) -> Int64 {
+fn SectionReader::size(self : SectionReader) -> Int64 {
   return self.limit - self.base
 }
 
@@ -586,7 +586,7 @@ fn size(self : SectionReader) -> Int64 {
 ///
 /// The returned values are the same that were passed to [SectionReader::new]
 /// when the [SectionReader] was created.
-pub fn outer(self : SectionReader) -> (&ReaderAt, Int64, Int64) {
+pub fn SectionReader::outer(self : SectionReader) -> (&ReaderAt, Int64, Int64) {
   (self.r, self.base, self.n)
 }
 
@@ -616,7 +616,7 @@ pub fn OffsetWriter::write(
 }
 
 ///|
-pub fn write_at(
+pub fn OffsetWriter::write_at(
   self : OffsetWriter,
   p : Slice[Byte],
   off : Int64,

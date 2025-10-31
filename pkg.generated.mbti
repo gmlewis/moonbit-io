@@ -38,35 +38,22 @@ fn read_full(&Reader, Slice[Byte]) -> (Int, IOError?)
 
 // Errors
 pub(all) suberror IOError String
-fn IOError::equal(Self, Self) -> Bool // from trait `Eq`
-#deprecated
-fn IOError::op_equal(Self, Self) -> Bool // from trait `Eq`
-fn IOError::output(Self, &Logger) -> Unit // from trait `Show`
-fn IOError::to_string(Self) -> String // from trait `Show`
 impl Eq for IOError
 impl Show for IOError
 
 // Types and methods
 type Buffer
-fn Buffer::equal(Self, Self) -> Bool // from trait `Eq`
 fn Buffer::from_bytes(Bytes) -> Self
 fn Buffer::from_slice(Slice[Byte]) -> Self
 fn Buffer::from_string(String) -> Self
 fn Buffer::length(Self) -> Int
 fn Buffer::new(size_hint? : Int) -> Self
-#deprecated
-fn Buffer::op_equal(Self, Self) -> Bool // from trait `Eq`
 fn Buffer::op_get(Self, Int) -> Byte
-fn Buffer::output(Self, &Logger) -> Unit // from trait `Show`
-fn Buffer::read(Self, Slice[Byte]) -> (Int, IOError?) // from trait `Reader`
-fn Buffer::read_byte(Self) -> (Byte, IOError?) // from trait `ByteReader`
 fn Buffer::read_from(Self, &Reader) -> (Int64, IOError?)
 fn Buffer::reset(Self, size_hint? : Int) -> Unit
 fn Buffer::substring(Self, start? : Int, end? : Int) -> String
 fn Buffer::to_bytes(Self) -> Bytes
 fn Buffer::to_slice(Self) -> Slice[Byte]
-fn Buffer::to_string(Self) -> String // from trait `Show`
-fn Buffer::write(Self, Slice[Byte]) -> (Int, IOError?) // from trait `Writer`
 fn Buffer::write_byte(Self, Byte) -> (Int, IOError?)
 fn Buffer::write_bytes(Self, Bytes) -> (Int, IOError?)
 fn Buffer::write_string(Self, String) -> (Int, IOError?)
@@ -77,21 +64,16 @@ impl Eq for Buffer
 impl Show for Buffer
 
 type Discard
-fn Discard::read(Self, Slice[Byte]) -> (Int, IOError?) // from trait `Reader`
 fn Discard::read_from(Self, &Reader) -> (Int64, IOError?)
-fn Discard::write(Self, Slice[Byte]) -> (Int, IOError?) // from trait `Writer`
 impl Reader for Discard
 impl Writer for Discard
 
 type LimitedReader
 fn LimitedReader::new(&Reader, Int64) -> Self
-fn LimitedReader::read(Self, Slice[Byte]) -> (Int, IOError?) // from trait `Reader`
 impl Reader for LimitedReader
 
 type NopCloser
-fn NopCloser::close(Self) -> IOError? // from trait `Closer`
 fn NopCloser::new(&Reader) -> Self
-fn NopCloser::read(Self, Slice[Byte]) -> (Int, IOError?) // from trait `Reader`
 impl Closer for NopCloser
 impl Reader for NopCloser
 
@@ -113,7 +95,6 @@ fn[T] Slice::append(Self[T], Self[T]) -> Self[T]
 fn[T] Slice::as_array_view(Self[T]) -> ArrayView[T]
 fn[T] Slice::cap(Self[T]) -> Int
 fn[T] Slice::each(Self[T], (T) -> Unit) -> Unit
-fn[T : Eq] Slice::equal(Self[T], Self[T]) -> Bool // from trait `Eq`
 fn[A, B] Slice::fold(Self[A], init~ : B, (B, A) -> B) -> B
 fn[A, B] Slice::foldi(Self[A], init~ : B, (Int, B, A) -> B) -> B
 fn[A] Slice::iter(Self[A]) -> Iter[A]
@@ -121,24 +102,19 @@ fn[A] Slice::iter2(Self[A]) -> Iter2[Int, A]
 fn[T] Slice::length(Self[T]) -> Int
 fn[T] Slice::new(Array[T], start? : Int, end? : Int) -> Self[T]
 fn[T] Slice::op_as_view(Self[T], start? : Int, end? : Int) -> Self[T]
-#deprecated
-fn[T : Eq] Slice::op_equal(Self[T], Self[T]) -> Bool // from trait `Eq`
 fn[T] Slice::op_get(Self[T], Int) -> T
 fn[T] Slice::op_set(Self[T], Int, T) -> Unit
-fn[X : Show] Slice::output(Self[X], &Logger) -> Unit // from trait `Show`
 fn[T] Slice::push(Self[T], T) -> Self[T]
 fn[A, B] Slice::rev_fold(Self[A], init~ : B, (B, A) -> B) -> B
 fn[A, B] Slice::rev_foldi(Self[A], init~ : B, (Int, B, A) -> B) -> B
 fn[T] Slice::rev_inplace(Self[T]) -> Unit
 fn[T] Slice::swap(Self[T], Int, Int) -> Unit
 fn Slice::to_bytes(Self[Byte]) -> Bytes
-fn[X : Show] Slice::to_string(Self[X]) -> String // from trait `Show`
 impl[T : Eq] Eq for Slice[T]
 impl[X : Show] Show for Slice[X]
 
 type TeeReader
 fn TeeReader::new(&Reader, &Writer) -> Self
-fn TeeReader::read(Self, Slice[Byte]) -> (Int, IOError?) // from trait `Reader`
 impl Reader for TeeReader
 
 pub(all) enum Whence {

@@ -45,22 +45,22 @@ test "swap" {
 }
 
 ///|
-test "panic array_as_view_start_index_error" {
+test "panic array_as_view_start_index_error 1" {
   Slice::new([1, 2, 3])[-1:0] |> ignore
 }
 
 ///|
-test "panic array_as_view_start_index_error" {
+test "panic array_as_view_start_index_error 2" {
   Slice::new([1, 2, 3])[-1:0] |> ignore
 }
 
 ///|
-test "panic array_as_view_end_index_error" {
+test "panic array_as_view_end_index_error 1" {
   Slice::new([1, 2, 3])[:-1] |> ignore
 }
 
 ///|
-test "panic array_as_view_end_index_error" {
+test "panic array_as_view_end_index_error 2" {
   Slice::new([1, 2, 3])[:-1] |> ignore
 }
 
@@ -70,22 +70,22 @@ test "panic array_as_view_length_index_error" {
 }
 
 ///|
-test "panic view_as_view_start_index_error" {
+test "panic view_as_view_start_index_error 1" {
   Slice::new([1, 2, 3])[-1:0] |> ignore
 }
 
 ///|
-test "panic view_as_view_start_index_error" {
+test "panic view_as_view_start_index_error 2" {
   Slice::new([1, 2, 3])[-1:0] |> ignore
 }
 
 ///|
-test "panic view_as_view_end_index_error" {
+test "panic view_as_view_end_index_error 1" {
   Slice::new([1, 2, 3])[:-1] |> ignore
 }
 
 ///|
-test "panic view_as_view_end_index_error" {
+test "panic view_as_view_end_index_error 2" {
   Slice::new([1, 2, 3])[:-1] |> ignore
 }
 

@@ -141,26 +141,12 @@ pub fn[T] Slice::push(self : Slice[T], e : T) -> Slice[T] {
 
 ///|
 pub fn[A] Slice::iter(self : Slice[A]) -> Iter[A] {
-  Iter::new(fn(yield_fn) {
-    for i = 0; i < self.len; i = i + 1 {
-      let v = self.buf[self.start + i]
-      guard yield_fn(v) is IterContinue else { break IterEnd }
-    } else {
-      IterContinue
-    }
-  })
+  self.buf[self.start:self.start + self.len].iterator().iter()
 }
 
 ///|
 pub fn[A] Slice::iter2(self : Slice[A]) -> Iter2[Int, A] {
-  Iter2::new(fn(yield_fn) {
-    for i = 0; i < self.len; i = i + 1 {
-      let v = self.buf[self.start + i]
-      guard yield_fn(i, v) is IterContinue else { break IterEnd }
-    } else {
-      IterContinue
-    }
-  })
+  self.buf[self.start:self.start + self.len].iterator().iter2()
 }
 
 ///|

@@ -37,7 +37,9 @@ pub fn read_all(&Reader) -> (Slice[Byte], IOError?)
 pub fn read_full(&Reader, Slice[Byte]) -> (Int, IOError?)
 
 // Errors
-pub(all) suberror IOError String
+pub(all) suberror IOError {
+  IOError(String)
+}
 pub impl Eq for IOError
 pub impl Show for IOError
 

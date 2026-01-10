@@ -26,7 +26,9 @@ pub fn copy_json(src : &ByteReader) -> (Json, Int64, IOError?) {
 // limitations under the License.
 
 ///|
-priv suberror ParseError String derive(Show)
+priv suberror ParseError {
+  ParseError(String)
+} derive(Show)
 
 ///|
 fn ParseContext::parse_value(ctx : ParseContext) -> Json raise ParseError {

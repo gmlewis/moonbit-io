@@ -141,12 +141,12 @@ pub fn[T] Slice::push(self : Slice[T], e : T) -> Slice[T] {
 
 ///|
 pub fn[A] Slice::iter(self : Slice[A]) -> Iter[A] {
-  self.buf[self.start:self.start + self.len].iterator().iter()
+  self.buf[self.start:self.start + self.len].iter()
 }
 
 ///|
 pub fn[A] Slice::iter2(self : Slice[A]) -> Iter2[Int, A] {
-  self.buf[self.start:self.start + self.len].iterator().iter2()
+  self.buf[self.start:self.start + self.len].iter2()
 }
 
 ///|

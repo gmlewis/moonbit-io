@@ -95,7 +95,7 @@ pub fn[T] Slice::op_as_view(
     None => self.len
     Some(end) => end
   }
-  guard self.start + start >= 0 && start <= end && end <= len else {
+  guard self.start + start >= 0 && start <= end && self.start + end <= len else {
     abort("View start index out of bounds")
   }
   Slice::{ buf: self.buf, start: self.start + start, len: end - start }

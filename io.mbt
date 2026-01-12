@@ -788,7 +788,7 @@ pub fn read_all(r : &Reader) -> (Slice[Byte], IOError?) {
   let mut arr = Array::make(cap, b'\x00')
   let mut b = Slice::new(arr, end=0)
   for {
-    let (n, err) = r.read(b[b.length():cap])
+    let (n, err) = r.read(b[b.length():b.cap()])
     let mut err = err
     b = b[:b.length() + n]
     if err != None {
@@ -805,10 +805,10 @@ pub fn read_all(r : &Reader) -> (Slice[Byte], IOError?) {
         // thereafter, just add another 1<<20
         cap += mb
       }
-      let new_arr = Array::new(capacity=cap)
+      let new_arr = Array::make(cap, b'\x00')
       // Array::unsafe_blit(new_arr, 0, arr, 0, b.length())  // Doesn't work on wasm, wasm-gc, native
       for i in 0..<b.length() {
-        new_arr.push(arr[i])
+        new_arr[i] = arr[i]
       }
       arr = new_arr
       b = Slice::new(arr)[:b.length()]

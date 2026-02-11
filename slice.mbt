@@ -154,7 +154,7 @@ pub fn[A] Slice::iter2(self : Slice[A]) -> Iter2[Int, A] {
 pub fn[A, B] Slice::fold(self : Slice[A], init~ : B, f : (B, A) -> B) -> B {
   for i = 0, acc = init; i < self.length(); {
     continue i + 1, f(acc, self[i])
-  } else {
+  } nobreak {
     acc
   }
 }
@@ -170,7 +170,7 @@ test "fold" {
 pub fn[A, B] Slice::rev_fold(self : Slice[A], init~ : B, f : (B, A) -> B) -> B {
   for i = self.length() - 1, acc = init; i >= 0; {
     continue i - 1, f(acc, self[i])
-  } else {
+  } nobreak {
     acc
   }
 }
@@ -190,7 +190,7 @@ pub fn[A, B] Slice::foldi(
 ) -> B {
   for i = 0, acc = init; i < self.length(); {
     continue i + 1, f(i, acc, self[i])
-  } else {
+  } nobreak {
     acc
   }
 }
@@ -213,7 +213,7 @@ pub fn[A, B] Slice::rev_foldi(
   let len = self.length()
   for i = len - 1, acc = init; i >= 0; {
     continue i - 1, f(len - i - 1, acc, self[i])
-  } else {
+  } nobreak {
     acc
   }
 }

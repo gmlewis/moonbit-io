@@ -412,7 +412,7 @@ pub fn copy_buffer(
   //
   let mut written = 0L
   let mut err = None
-  for {
+  for ;; {
     let (nr, er) = src.read(buf)
     if nr > 0 {
       let (nw, ew) = dst.write(buf[:nr])
@@ -714,7 +714,7 @@ pub impl Writer for Discard with write(_self, p) {
 pub fn Discard::read_from(_self : Discard, r : &Reader) -> (Int64, IOError?) {
   let buf = Slice::new(Array::make(8192, b'\x00'))
   let mut n = 0L
-  for {
+  for ;; {
     let v = r.read(buf)
     n += v.0.to_int64()
     let err = v.1
@@ -740,10 +740,6 @@ pub fn NopCloser::new(r : &Reader) -> NopCloser {
   // }
   { r, }
 }
-
-///|
-/// `NopCloser` satisfies the `ReadCloser` trait.
-let _NopCloser : &ReadCloser = NopCloser::new(Buffer::new())
 
 ///|
 pub impl Reader for NopCloser with read(self, b) {
@@ -787,7 +783,7 @@ pub fn read_all(r : &Reader) -> (Slice[Byte], IOError?) {
   let mut cap = 512
   let mut arr = Array::make(cap, b'\x00')
   let mut b = Slice::new(arr, end=0)
-  for {
+  for ;; {
     let (n, err) = r.read(b[b.length():b.cap()])
     let mut err = err
     b = b[:b.length() + n]

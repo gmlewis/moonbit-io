@@ -8,7 +8,7 @@ pub fn copy_until(
   until : Byte,
 ) -> (Int64, IOError?) {
   let mut total = 0L
-  for {
+  for ;; {
     let (b, err) = src.read_byte()
     guard err is None else { return (total, err) }
     let (_, err) = dst.write(Slice::new([b]))
@@ -30,7 +30,7 @@ pub fn copy_size(
   size : Int64,
 ) -> (Int64, IOError?) {
   let mut total = 0L
-  for {
+  for ;; {
     let (b, err) = src.read_byte()
     guard err is None else { return (total, err) }
     let (_, err) = dst.write(Slice::new([b]))

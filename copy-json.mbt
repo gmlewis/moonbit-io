@@ -169,7 +169,7 @@ fn ParseContext::lex_value(
   ctx : ParseContext,
   allow_rbracket~ : Bool,
 ) -> Token raise ParseError {
-  for {
+  for ;; {
     match ctx.read_char() {
       Some('\t' | ' ' | '\n' | '\r') => continue
       Some('{') => return LBrace
@@ -353,7 +353,7 @@ test "expect_char" {
 
 ///|
 fn ParseContext::lex_skip_whitespace(ctx : ParseContext) -> Unit {
-  for {
+  for ;; {
     match ctx.read_char() {
       Some('\t' | ' ' | '\n' | '\r') => continue
       Some(c) => {
@@ -447,7 +447,7 @@ fn ParseContext::lex_decimal_integer(
   ctx : ParseContext,
   start~ : Int,
 ) -> Double raise ParseError {
-  for {
+  for ;; {
     match ctx.read_char() {
       Some('.') => return ctx.lex_decimal_point(start~)
       Some('e' | 'E') => return ctx.lex_decimal_exponent(start~)
@@ -484,7 +484,7 @@ fn ParseContext::lex_decimal_fraction(
   ctx : ParseContext,
   start~ : Int,
 ) -> Double raise ParseError {
-  for {
+  for ;; {
     match ctx.read_char() {
       Some('e' | 'E') => return ctx.lex_decimal_exponent(start~)
       Some(c) => {
@@ -537,7 +537,7 @@ fn ParseContext::lex_decimal_exponent_integer(
   ctx : ParseContext,
   start~ : Int,
 ) -> Double raise ParseError {
-  for {
+  for ;; {
     match ctx.read_char() {
       Some(c) => {
         if c >= '0' && c <= '9' {
@@ -593,7 +593,7 @@ fn ParseContext::lex_string(ctx : ParseContext) -> String raise ParseError {
     }
   }
 
-  for {
+  for ;; {
     match ctx.read_char() {
       Some('"') => {
         flush(ctx.offset - 1)
@@ -638,7 +638,7 @@ fn ParseContext::lex_hex_digits(
   n : Int,
 ) -> Int raise ParseError {
   let mut r = 0
-  for i in 0..<n {
+  for _ in 0..<n {
     match ctx.read_char() {
       Some(c) =>
         if c >= 'A' {

@@ -577,7 +577,7 @@ fn ParseContext::lex_number_end(
   end : Int,
 ) -> Double raise ParseError {
   let s = ctx.buf.substring(start~, end~)
-  @strconv.parse_double(s) catch {
+  @string.parse_double(s) catch {
     _ => raise ParseError("invalid number '\{s}' at offsets \{start}:\{end}") // InvalidNumber(offset_to_position(ctx.input, start), s)
   }
 }

@@ -488,12 +488,12 @@ pub fn SectionReader::new(
   n : Int64,
 ) -> SectionReader {
   let mut remaining = 0L
-  if off <= @int64.max_value - n {
+  if off <= @int64.MAX_VALUE - n {
     remaining = n + off
   } else {
     // Overflow, with no way to return error.
     // Assume we can read up to an offset of 1<<63 - 1.
-    remaining = @int64.max_value
+    remaining = @int64.MAX_VALUE
   }
   { r, base: off, off, limit: remaining, n }
 }

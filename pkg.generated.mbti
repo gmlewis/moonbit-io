@@ -39,7 +39,8 @@ pub fn read_full(&Reader, Slice[Byte]) -> (Int, IOError?)
 // Errors
 pub(all) suberror IOError {
   IOError(String)
-} derive(Eq, Show)
+} derive(Eq)
+pub impl Show for IOError
 
 // Types and methods
 type Buffer

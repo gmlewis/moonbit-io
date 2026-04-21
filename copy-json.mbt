@@ -1,14 +1,3 @@
-///|
-/// copy_json copies bytes from a source reader until a valid JSON value is completed.
-/// It returns the Json value, the number of bytes copied, and any error that occurred during the process.
-pub fn copy_json(src : &ByteReader) -> (Json, Int64, IOError?) {
-  let ctx = ParseContext::make(src)
-  let val = ctx.parse_value() catch {
-    ParseError(e) => return (Json::null(), 0, Some(IOError(e.to_string())))
-  }
-  (val, ctx.offset.to_int64(), None)
-}
-
 // The following code is based upon: https://github.com/moonbitlang/core/blob/main/json/parse.mbt
 // which has the following license:
 // Copyright 2025 International Digital Economy Academy
@@ -26,9 +15,30 @@ pub fn copy_json(src : &ByteReader) -> (Json, Int64, IOError?) {
 // limitations under the License.
 
 ///|
+/// copy_json copies bytes from a source reader until a valid JSON value is completed.
+/// It returns the Json value, the number of bytes copied, and any error that occurred during the process.
+pub fn copy_json(src : &ByteReader) -> (Json, Int64, IOError?) {
+  let ctx = ParseContext::make(src)
+  let val = ctx.parse_value() catch {
+    ParseError(e) => return (Json::null(), 0, Some(IOError(e.to_string())))
+  }
+  (val, ctx.offset.to_int64(), None)
+}
+
+///|
 priv suberror ParseError {
   ParseError(String)
-} derive(Show)
+}
+
+///|
+impl Show for ParseError with output(self, logger) {
+  let ParseError(msg) = self
+  logger.write_string(
+    (
+      $|ParseError("\{msg}")
+    ),
+  )
+}
 
 ///|
 fn ParseContext::parse_value(ctx : ParseContext) -> Json raise ParseError {
@@ -59,39 +69,43 @@ fn ParseContext::parse_value2(
 ///|
 fn ParseContext::parse_object(ctx : ParseContext) -> Json raise ParseError {
   let map = Map::new()
-  loop ctx.lex_property_name() {
-    RBrace => map.to_json()
-    String(name) => {
-      ctx.lex_after_property_name()
-      map[name] = ctx.parse_value()
-      match ctx.lex_after_object_value() {
-        Comma => continue ctx.lex_property_name2()
-        RBrace => map.to_json()
-        tok =>
-          raise ParseError(
-            "invalid JSON: expected ',' or '}' at offset \{ctx.offset}, got '\{tok}'",
-          )
+  for tok = ctx.lex_property_name() {
+    match tok {
+      RBrace => break map.to_json()
+      String(name) => {
+        ctx.lex_after_property_name()
+        map[name] = ctx.parse_value()
+        match ctx.lex_after_object_value() {
+          Comma => continue ctx.lex_property_name2()
+          RBrace => break map.to_json()
+          tok =>
+            raise ParseError(
+              "invalid JSON: expected ',' or '}' at offset \{ctx.offset}, got '\{tok}'",
+            )
+        }
       }
+      tok =>
+        raise ParseError(
+          "invalid JSON: expected '}' or property name at offset \{ctx.offset}, got '\{tok}'",
+        )
     }
-    tok =>
-      raise ParseError(
-        "invalid JSON: expected '}' or property name at offset \{ctx.offset}, got '\{tok}'",
-      )
   }
 }
 
 ///|
 fn ParseContext::parse_array(ctx : ParseContext) -> Json raise ParseError {
   let vec = []
-  loop ctx.lex_value(allow_rbracket=true) {
-    RBracket => vec.to_json()
-    tok => {
-      vec.push(ctx.parse_value2(tok))
-      let tok2 = ctx.lex_after_array_value()
-      match tok2 {
-        Comma => continue ctx.lex_value(allow_rbracket=false)
-        RBracket => vec.to_json()
-        _ => raise ParseError("unexpected '\{tok2}' at offset \{ctx.offset}")
+  for tok = ctx.lex_value(allow_rbracket=true) {
+    match tok {
+      RBracket => break vec.to_json()
+      _ => {
+        vec.push(ctx.parse_value2(tok))
+        let tok2 = ctx.lex_after_array_value()
+        match tok2 {
+          Comma => continue ctx.lex_value(allow_rbracket=false)
+          RBracket => break vec.to_json()
+          _ => raise ParseError("unexpected '\{tok2}' at offset \{ctx.offset}")
+        }
       }
     }
   }
@@ -150,7 +164,25 @@ priv enum Token {
   RBracket
   Comma
   // Colon
-} derive(Show)
+}
+
+///|
+impl Show for Token with output(self, logger) {
+  logger.write_string(
+    match self {
+      Null => "Null"
+      True => "True"
+      False => "False"
+      Number(n) => "Number(\{n})"
+      String(s) => "String(\{s})"
+      LBrace => "'{'"
+      RBrace => "'}'"
+      LBracket => "'['"
+      RBracket => "']'"
+      Comma => "','"
+    },
+  )
+}
 
 ///|
 let non_ascii_whitespace : CharClass = CharClass::of([

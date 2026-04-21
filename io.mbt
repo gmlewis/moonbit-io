@@ -29,7 +29,17 @@ pub(all) enum Whence {
 /// An IOError can be tested with equality checks.
 pub(all) suberror IOError {
   IOError(String)
-} derive(Show, Eq)
+} derive(Eq)
+
+///|
+pub impl Show for IOError with output(self, logger) {
+  let IOError(msg) = self
+  logger.write_string(
+    (
+      $|IOError("\{msg}")
+    ),
+  )
+}
 
 ///|
 /// err_short_write means that a write accepted fewer bytes than requested

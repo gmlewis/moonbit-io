@@ -35,7 +35,7 @@ impl Show for ParseError with output(self, logger) {
   let ParseError(msg) = self
   logger.write_string(
     (
-      $|ParseError("\{msg}")
+      $|ParseError(\{msg.escape(quote=true)})
     ),
   )
 }

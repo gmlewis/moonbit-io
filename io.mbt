@@ -36,7 +36,20 @@ pub impl Show for IOError with output(self, logger) {
   let IOError(msg) = self
   logger.write_string(
     (
-      $|IOError("\{msg}")
+      $|IOError(\{msg.escape(quote=true)})
+    ),
+  )
+}
+
+///|
+test "IOError show interface" {
+  let err = IOError("test error")
+  inspect(err, content="IOError(\"test error\")")
+  let err = IOError("test error with \"quotes\" and \\backslashes\\")
+  inspect(
+    err,
+    content=(
+      #|IOError("test error with \"quotes\" and \\backslashes\\")
     ),
   )
 }

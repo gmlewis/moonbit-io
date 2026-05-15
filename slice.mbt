@@ -25,7 +25,7 @@ struct Slice[T] {
   buf : Array[T]
   start : Int
   len : Int
-}
+} derive(Debug)
 
 ///|
 /// length returns the length of the slice.

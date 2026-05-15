@@ -3,9 +3,9 @@ test "write basic functionality" {
   let buffer = @io.Buffer::new()
   let input : @io.Slice[Byte] = @io.Slice::new([b'A', b'B', b'C'])
   let result = buffer.write(input)
-  inspect(result, content="(3, None)")
-  assert_eq(buffer.to_bytes(), b"ABC")
-  assert_eq(buffer.to_string(), "ABC")
+  @debug.debug_inspect(result, content="(3, None)")
+  @debug.assert_eq(buffer.to_bytes(), b"ABC")
+  @debug.assert_eq(buffer.to_string(), "ABC")
 }
 
 ///|
@@ -13,24 +13,24 @@ test "write basic functionality with size_hint" {
   let buffer = @io.Buffer::new(size_hint=100)
   let input : @io.Slice[Byte] = @io.Slice::new([b'A', b'B', b'C'])
   let result = buffer.write(input)
-  inspect(result, content="(3, None)")
-  assert_eq(buffer.to_bytes(), b"ABC")
-  assert_eq(buffer.to_string(), "ABC")
+  @debug.debug_inspect(result, content="(3, None)")
+  @debug.assert_eq(buffer.to_bytes(), b"ABC")
+  @debug.assert_eq(buffer.to_string(), "ABC")
 }
 
 ///|
 test "write_string basic functionality" {
   let buffer = @io.Buffer::new()
   let result = buffer.write_string("ABC\r\nDEF")
-  inspect(result, content="(8, None)")
-  assert_eq(buffer.length(), 8)
-  assert_eq(
+  @debug.debug_inspect(result, content="(8, None)")
+  @debug.assert_eq(buffer.length(), 8)
+  @debug.assert_eq(
     buffer.to_slice(),
     @io.Slice::new([b'A', b'B', b'C', b'\r', b'\n', b'D', b'E', b'F']),
   )
-  assert_eq(buffer.to_slice().to_bytes(), b"ABC\r\nDEF")
-  assert_eq(buffer.to_bytes(), b"ABC\r\nDEF")
-  assert_eq(buffer.to_string(), "ABC\r\nDEF")
+  @debug.assert_eq(buffer.to_slice().to_bytes(), b"ABC\r\nDEF")
+  @debug.assert_eq(buffer.to_bytes(), b"ABC\r\nDEF")
+  @debug.assert_eq(buffer.to_string(), "ABC\r\nDEF")
 }
 
 ///|
@@ -42,8 +42,8 @@ test "write with different lengths" {
   ])
   let short_result = buffer.write(short_input)
   let long_result = buffer.write(long_input)
-  inspect(short_result, content="(1, None)")
-  inspect(long_result, content="(5, None)")
+  @debug.debug_inspect(short_result, content="(1, None)")
+  @debug.debug_inspect(long_result, content="(5, None)")
 }
 
 ///|
@@ -51,7 +51,7 @@ test "write boundary test" {
   let buffer = @io.Buffer::new()
   let max_bytes : @io.Slice[Byte] = @io.Slice::new(Array::make(1024, b'A'))
   let result = buffer.write(max_bytes)
-  inspect(result, content="(1024, None)")
+  @debug.debug_inspect(result, content="(1024, None)")
 }
 
 ///|
@@ -63,23 +63,23 @@ test "write random test cases" {
   ])
   let result1 = buffer1.write(input)
   let result2 = buffer2.write(input)
-  inspect(result1, content="(6, None)")
-  inspect(result2, content="(6, None)")
+  @debug.debug_inspect(result1, content="(6, None)")
+  @debug.debug_inspect(result2, content="(6, None)")
 }
 
 ///|
 test "boundary test: read from an empty buffer" {
   let buffer = @io.Buffer::new()
   let (byte, error) = buffer.read_byte()
-  inspect(byte.to_int(), content="0")
-  inspect(error, content="Some(IOError(\"eof\"))")
+  @debug.debug_inspect(byte.to_int(), content="0")
+  @debug.debug_inspect(error, content="Some(IOError(\"eof\"))")
 }
 
 ///|
 test "convert empty Bytes" {
   let buf = @io.Buffer::new()
   let bytes = buf.to_bytes()
-  assert_eq(bytes.length(), 0)
+  @debug.assert_eq(bytes.length(), 0)
 }
 
 ///|
@@ -90,7 +90,7 @@ test "randomized/buffer_generated the bytes should be 0" {
     let bytes = buf.to_bytes()
     for j = 0; j < bytes.length(); j = j + 1 {
       let byte = bytes[j]
-      inspect(byte.to_int(), content="0")
+      @debug.debug_inspect(byte.to_int(), content="0")
     }
   }
 }
@@ -105,5 +105,5 @@ test "discard" {
 test "buffer::to_slice" {
   let b = @io.Buffer::from_slice(Slice::new([1, 2, 3]))
   let got = b.to_slice()
-  assert_eq(got.to_bytes(), b"\x01\x02\x03")
+  @debug.assert_eq(got.to_bytes(), b"\x01\x02\x03")
 }

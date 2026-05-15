@@ -29,7 +29,7 @@ pub(all) enum Whence {
 /// An IOError can be tested with equality checks.
 pub(all) suberror IOError {
   IOError(String)
-} derive(Eq)
+} derive(Debug, Eq)
 
 ///|
 pub impl Show for IOError with output(self, logger) {

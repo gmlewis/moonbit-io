@@ -1,6 +1,7 @@
 import {
   "gmlewis/base64",
   "moonbitlang/core/builtin",
+  "moonbitlang/core/debug",
   "moonbitlang/core/int64",
   "moonbitlang/core/string",
 }

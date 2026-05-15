@@ -28,7 +28,7 @@ pub fn copy_json(src : &ByteReader) -> (Json, Int64, IOError?) {
 ///|
 priv suberror ParseError {
   ParseError(String)
-}
+} derive(Debug)
 
 ///|
 impl Show for ParseError with output(self, logger) {
@@ -68,7 +68,7 @@ fn ParseContext::parse_value2(
 
 ///|
 fn ParseContext::parse_object(ctx : ParseContext) -> Json raise ParseError {
-  let map = Map::new()
+  let map = Map([])
   for tok = ctx.lex_property_name() {
     match tok {
       RBrace => break map.to_json()
@@ -375,7 +375,7 @@ test "expect_char" {
   ctx.expect_char('a')
   ctx.expect_char('b')
   ctx.expect_char('c')
-  inspect(
+  @debug.debug_inspect(
     try? ctx.expect_char('d').to_string(),
     content=(
       #|Err(ParseError("invalid eof"))

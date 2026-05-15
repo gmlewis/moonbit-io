@@ -1,6 +1,10 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "gmlewis/io"
 
+import {
+  "moonbitlang/core/debug",
+}
+
 // Values
 pub fn copy(&Writer, &Reader) -> (Int64, IOError?)
 
@@ -39,7 +43,7 @@ pub fn read_full(&Reader, Slice[Byte]) -> (Int, IOError?)
 // Errors
 pub(all) suberror IOError {
   IOError(String)
-} derive(Eq)
+} derive(Eq, @debug.Debug)
 pub impl Show for IOError
 
 // Types and methods
@@ -91,7 +95,7 @@ pub fn SectionReader::read(Self, Slice[Byte]) -> (Int, IOError?)
 pub fn SectionReader::read_at(Self, Slice[Byte], Int64) -> (Int, IOError?)
 pub fn SectionReader::seek(Self, Int64, Whence) -> (Int64, IOError?)
 
-type Slice[T]
+type Slice[T] derive(@debug.Debug)
 pub fn[T] Slice::append(Self[T], Self[T]) -> Self[T]
 pub fn[T] Slice::as_array_view(Self[T]) -> ArrayView[T]
 pub fn[T] Slice::cap(Self[T]) -> Int

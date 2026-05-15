@@ -695,7 +695,7 @@ test "edge case: empty read" {
   let reader : EmptyReader = EmptyReader::{  }
   let (result, err) = @io.read_all(reader)
   inspect(result, content="[]")
-  inspect(err, content="None")
+  @debug.debug_inspect(err, content="None")
 }
 
 // test "read_all: basic functionality" {

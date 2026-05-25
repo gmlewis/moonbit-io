@@ -31,7 +31,7 @@ priv suberror ParseError {
 } derive(Debug)
 
 ///|
-impl Show for ParseError with output(self, logger) {
+impl Show for ParseError with fn output(self, logger) {
   let ParseError(msg) = self
   logger.write_string(
     (
@@ -167,7 +167,7 @@ priv enum Token {
 }
 
 ///|
-impl Show for Token with output(self, logger) {
+impl Show for Token with fn output(self, logger) {
   logger.write_string(
     match self {
       Null => "Null"

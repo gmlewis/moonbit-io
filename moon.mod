@@ -1,0 +1,17 @@
+name = "gmlewis/io"
+
+version = "0.23.11"
+
+import {
+  "gmlewis/base64@0.16.10",
+}
+
+readme = "README.md"
+
+repository = "https://github.com/gmlewis/moonbit-io"
+
+license = "Apache-2.0"
+
+keywords = [ "io", "moonbit" ]
+
+description = "MoonBit io: provide simplified I/O abstractions similar to Go."

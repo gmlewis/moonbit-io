@@ -686,7 +686,7 @@ test "TestCopyN" {
 struct EmptyReader {}
 
 ///|
-impl @io.Reader for EmptyReader with read(_self, _b) {
+impl @io.Reader for EmptyReader with fn read(_self, _b) {
   (0, Some(@io.eof))
 }
 

@@ -227,7 +227,7 @@ test "rev_foldi" {
 }
 
 ///|
-pub impl[X : Show] Show for Slice[X] with output(self, logger) {
+pub impl[X : Show] Show for Slice[X] with fn output(self, logger) {
   logger.write_iter(self.iter())
 }
 
@@ -253,7 +253,7 @@ pub fn[T] Slice::each(self : Slice[T], f : (T) -> Unit) -> Unit {
 
 ///|
 /// Compares two slices for equality.
-pub impl[T : Eq] Eq for Slice[T] with equal(self, other) {
+pub impl[T : Eq] Eq for Slice[T] with fn equal(self, other) {
   guard self.length() == other.length() else { return false }
   for i = 0 {
     // CR: format issue

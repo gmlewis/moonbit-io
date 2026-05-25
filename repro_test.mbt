@@ -4,7 +4,7 @@ struct MultiReader {
 }
 
 ///|
-impl @io.Reader for MultiReader with read(self, buf) {
+impl @io.Reader for MultiReader with fn read(self, buf) {
   if self.count >= 2 {
     return (0, Some(@io.eof))
   }

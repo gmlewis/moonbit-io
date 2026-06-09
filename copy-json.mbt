@@ -375,12 +375,15 @@ test "expect_char" {
   ctx.expect_char('a')
   ctx.expect_char('b')
   ctx.expect_char('c')
-  @debug.debug_inspect(
-    try? ctx.expect_char('d').to_string(),
-    content=(
-      #|Err(ParseError("invalid eof"))
-    ),
-  )
+  ctx.expect_char('d') catch {
+    e =>
+      @debug.debug_inspect(
+        e,
+        content=(
+          #|ParseError("invalid eof")
+        ),
+      )
+  }
 }
 
 ///|

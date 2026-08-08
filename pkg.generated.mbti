@@ -198,4 +198,3 @@ pub(open) trait WriterAt {
 pub(open) trait WriterTo {
   fn write_to(Self, &Writer) -> (Int64, IOError?)
 }
-

@@ -11,16 +11,16 @@
 test "TestCopy" {
   let rb = @io.Buffer::new()
   let wb = @io.Buffer::new()
-  guard rb.write_bytes(b"hello, world.") is (13, None)
-  guard @io.copy(wb, rb) is (13, None)
+  guard! rb.write_bytes(b"hello, world.") is (13, None)
+  guard! @io.copy(wb, rb) is (13, None)
   assert_eq(wb.to_bytes(), b"hello, world.")
 
   // reuse buffers
   rb.reset()
   wb.reset()
-  guard rb.write_bytes(b"hello, world.") is (13, None)
-  guard rb.write_bytes(b"hello, world.") is (13, None)
-  guard @io.copy(wb, rb) is (26, None)
+  guard! rb.write_bytes(b"hello, world.") is (13, None)
+  guard! rb.write_bytes(b"hello, world.") is (13, None)
+  guard! @io.copy(wb, rb) is (26, None)
   assert_eq(wb.to_bytes(), b"hello, world.hello, world.")
 }
 
@@ -43,8 +43,8 @@ test "TestCopy" {
 test "TestCopyBuffer" {
   let rb = @io.Buffer::new()
   let wb = @io.Buffer::new()
-  guard rb.write_bytes(b"hello, world.") is (13, None)
-  guard @io.copy_buffer(wb, rb, Some(@io.Slice::new([0]))) is (13, None)  // Tiny buffer to keep it honest.
+  guard! rb.write_bytes(b"hello, world.") is (13, None)
+  guard! @io.copy_buffer(wb, rb, Some(@io.Slice::new([0]))) is (13, None)  // Tiny buffer to keep it honest.
   assert_eq(wb.to_bytes(), b"hello, world.")
 }
 
@@ -52,8 +52,8 @@ test "TestCopyBuffer" {
 test "TestCopyBufferNone" {
   let rb = @io.Buffer::new()
   let wb = @io.Buffer::new()
-  guard rb.write_bytes(b"hello, world.") is (13, None)
-  guard @io.copy_buffer(wb, rb, None) is (13, None)  // Should allocate a buffer.
+  guard! rb.write_bytes(b"hello, world.") is (13, None)
+  guard! @io.copy_buffer(wb, rb, None) is (13, None)  // Should allocate a buffer.
   assert_eq(wb.to_bytes(), b"hello, world.")
 }
 
@@ -135,8 +135,8 @@ test "TestCopyBufferNone" {
 test "TestCopyN" {
   let rb = @io.Buffer::new()
   let wb = @io.Buffer::new()
-  guard rb.write_bytes(b"hello, world.") is (13, None)
-  guard @io.copy_n(wb, rb, 5) is (5, None)
+  guard! rb.write_bytes(b"hello, world.") is (13, None)
+  guard! @io.copy_n(wb, rb, 5) is (5, None)
   assert_eq(wb.to_bytes(), b"hello")
 }
 
@@ -701,7 +701,7 @@ test "edge case: empty read" {
 // test "read_all: basic functionality" {
 //   let data = Bytes::from_array(Array::make(10, b'a'))
 //   let reader = @io.Buffer::new()
-//   guard let (10, None) = reader.write_bytes(data)
+//   guard! let (10, None) = reader.write_bytes(data)
 //   let (result, err) = @io.read_all(reader)
 //   let got = result.to_bytes().to_array()
 //   inspect!(got, content="[97, 97, 97, 97, 97, 97, 97, 97, 97, 97]")

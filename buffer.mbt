@@ -67,12 +67,12 @@ pub impl Writer for Buffer with fn write(self, buf) {
 
 ///|
 pub fn Buffer::write_bytes(self : Buffer, buf : Bytes) -> (Int, IOError?) {
-  self.write(Slice::new(buf.to_array()))
+  Writer::write(self, Slice::new(buf.to_array()))
 }
 
 ///|
 pub fn Buffer::write_byte(self : Buffer, b : Byte) -> (Int, IOError?) {
-  self.write(Slice::new([b]))
+  Writer::write(self, Slice::new([b]))
 }
 
 ///|
@@ -132,7 +132,7 @@ pub impl Show for Buffer with fn to_string(self) {
 
 ///|
 pub impl Show for Buffer with fn output(self, logger) {
-  logger.write_string(self.to_string())
+  logger.write_string(Show::to_string(self))
 }
 
 ///|
@@ -159,7 +159,8 @@ pub fn Buffer::length(self : Buffer) -> Int {
 }
 
 ///|
-pub fn Buffer::op_get(self : Buffer, index : Int) -> Byte {
+#alias("_[_]")
+pub fn Buffer::get(self : Buffer, index : Int) -> Byte {
   self.b[index]
 }
 

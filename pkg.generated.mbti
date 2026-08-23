@@ -51,9 +51,10 @@ type Buffer
 pub fn Buffer::from_bytes(Bytes) -> Self
 pub fn Buffer::from_slice(Slice[Byte]) -> Self
 pub fn Buffer::from_string(String) -> Self
+#alias("_[_]")
+pub fn Buffer::get(Self, Int) -> Byte
 pub fn Buffer::length(Self) -> Int
 pub fn Buffer::new(size_hint? : Int) -> Self
-pub fn Buffer::op_get(Self, Int) -> Byte
 pub fn Buffer::read_from(Self, &Reader) -> (Int64, IOError?)
 pub fn Buffer::reset(Self, size_hint? : Int) -> Unit
 pub fn Buffer::substring(Self, start? : Int, end? : Int) -> String
@@ -102,17 +103,20 @@ pub fn[T] Slice::cap(Self[T]) -> Int
 pub fn[T] Slice::each(Self[T], (T) -> Unit) -> Unit
 pub fn[A, B] Slice::fold(Self[A], init~ : B, (B, A) -> B) -> B
 pub fn[A, B] Slice::foldi(Self[A], init~ : B, (Int, B, A) -> B) -> B
+#alias("_[_]")
+pub fn[T] Slice::get(Self[T], Int) -> T
 pub fn[A] Slice::iter(Self[A]) -> Iter[A]
 pub fn[A] Slice::iter2(Self[A]) -> Iter2[Int, A]
 pub fn[T] Slice::length(Self[T]) -> Int
 pub fn[T] Slice::new(Array[T], start? : Int, end? : Int) -> Self[T]
-pub fn[T] Slice::op_as_view(Self[T], start? : Int, end? : Int) -> Self[T]
-pub fn[T] Slice::op_get(Self[T], Int) -> T
-pub fn[T] Slice::op_set(Self[T], Int, T) -> Unit
 pub fn[T] Slice::push(Self[T], T) -> Self[T]
 pub fn[A, B] Slice::rev_fold(Self[A], init~ : B, (B, A) -> B) -> B
 pub fn[A, B] Slice::rev_foldi(Self[A], init~ : B, (Int, B, A) -> B) -> B
 pub fn[T] Slice::rev_inplace(Self[T]) -> Unit
+#alias("_[_]=_")
+pub fn[T] Slice::set(Self[T], Int, T) -> Unit
+#alias("_[_:_]")
+pub fn[T] Slice::sub(Self[T], start? : Int, end? : Int) -> Self[T]
 pub fn[T] Slice::swap(Self[T], Int, Int) -> Unit
 pub fn Slice::to_bytes(Self[Byte]) -> Bytes
 pub impl[T : Eq] Eq for Slice[T]

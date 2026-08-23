@@ -34,7 +34,8 @@ pub fn[T] Slice::length(self : Slice[T]) -> Int {
 }
 
 ///|
-pub fn[T] Slice::op_get(self : Slice[T], index : Int) -> T {
+#alias("_[_]")
+pub fn[T] Slice::get(self : Slice[T], index : Int) -> T {
   guard index >= 0 && index < self.len else {
     abort(
       "index out of bounds: the len is from 0 to \{self.len} but the index is \{index}",
@@ -44,7 +45,8 @@ pub fn[T] Slice::op_get(self : Slice[T], index : Int) -> T {
 }
 
 ///|
-pub fn[T] Slice::op_set(self : Slice[T], index : Int, value : T) -> Unit {
+#alias("_[_]=_")
+pub fn[T] Slice::set(self : Slice[T], index : Int, value : T) -> Unit {
   guard index >= 0 && index < self.len else {
     abort(
       "index out of bounds: the len is from 0 to \{self.len} but the index is \{index}",
@@ -85,11 +87,8 @@ pub fn[T] Slice::as_array_view(self : Slice[T]) -> ArrayView[T] {
 }
 
 ///|
-pub fn[T] Slice::op_as_view(
-  self : Slice[T],
-  start? : Int = 0,
-  end? : Int,
-) -> Slice[T] {
+#alias("_[_:_]")
+pub fn[T] Slice::sub(self : Slice[T], start? : Int = 0, end? : Int) -> Slice[T] {
   let len = self.buf.length()
   let end = match end {
     None => self.len

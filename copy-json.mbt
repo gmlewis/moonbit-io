@@ -123,7 +123,7 @@ const DEFAULT_BUFFER_SIZE = 1024
 
 ///|
 fn ParseContext::make(r : &ByteReader) -> ParseContext {
-  { r, buf: Buffer::new(size_hint=DEFAULT_BUFFER_SIZE), offset: 0 }
+  { r, buf: Buffer::new(size_hint=DEFAULT_BUFFER_SIZE), offset: 0, }
 }
 
 ///|
@@ -619,7 +619,7 @@ fn ParseContext::lex_number_end(
 
 ///|
 fn ParseContext::lex_string(ctx : ParseContext) -> String raise ParseError {
-  let buf = StringBuilder::new()
+  let buf = StringBuilder()
   let mut start = ctx.offset
   fn flush(end : Int) {
     if start > 0 && end > start {

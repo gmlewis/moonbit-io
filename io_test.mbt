@@ -692,7 +692,7 @@ impl @io.Reader for EmptyReader with fn read(_self, _b) {
 
 ///|
 test "edge case: empty read" {
-  let reader : EmptyReader = EmptyReader::{  }
+  let reader : EmptyReader = EmptyReader::{ }
   let (result, err) = @io.read_all(reader)
   inspect(result, content="[]")
   @debug.debug_inspect(err, content="None")

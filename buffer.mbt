@@ -13,7 +13,7 @@ struct Buffer {
 /// improve performance when the size of the data to be written is known in advance.
 pub fn Buffer::new(size_hint? : Int = 0) -> Buffer {
   let b = Slice::new(Array::make(size_hint, b'\x00'), start=0, end=0)
-  { b, off: 0 }
+  { b, off: 0, }
 }
 
 ///|
@@ -25,13 +25,13 @@ let _trait5 : &Writer = Buffer::new()
 ///|
 pub fn Buffer::from_slice(s : Slice[Byte]) -> Buffer {
   let b = Slice::new(s.to_bytes().to_array())
-  { b, off: 0 }
+  { b, off: 0, }
 }
 
 ///|
 pub fn Buffer::from_bytes(b : Bytes) -> Buffer {
   let buf = Slice::new(b.to_array())
-  { b: buf, off: 0 }
+  { b: buf, off: 0, }
 }
 
 ///|
@@ -40,7 +40,7 @@ pub fn Buffer::from_bytes(b : Bytes) -> Buffer {
 pub fn Buffer::from_string(s : String) -> Buffer {
   let b = @base64.str2bytes(s)
   let buf = Slice::new(b.to_array())
-  { b: buf, off: 0 }
+  { b: buf, off: 0, }
 }
 
 ///|

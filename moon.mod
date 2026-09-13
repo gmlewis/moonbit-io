@@ -1,6 +1,6 @@
 name = "gmlewis/io"
 
-version = "0.23.16"
+version = "0.23.17"
 
 import {
   "gmlewis/base64@0.16.12",

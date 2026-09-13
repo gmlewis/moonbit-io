@@ -120,7 +120,7 @@ pub fn[T] Slice::append(self : Slice[T], s : Slice[T]) -> Slice[T] {
     return { buf: self.buf, start: self.start, len: self.len + s.length(), }
   }
   // reallocate array, copy the data, then return the new slice
-  let arr = Array::new(capacity=self.length() + s.length())
+  let arr = Array(capacity=self.length() + s.length())
   let idx = self.length()
   for i in 0..<idx {
     arr.push(self.buf[i + self.start])

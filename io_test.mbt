@@ -762,7 +762,7 @@ test "edge case: empty read" {
 // }
 
 // test "edge case: nonzero-size read with eof" {
-//   let arr = Array::new([7, 3])
+//   let arr = Array([7, 3])
 //   arr[0] = b'1'
 //   arr[1] = b'1'
 //   let reader = @io.NopCloser::new(

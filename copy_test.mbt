@@ -2,7 +2,7 @@
 test "copy_until" {
   let src = @io.Buffer::from_string("{}\r\n{extra bytes}")
   let dst = @io.Buffer::new()
-  let got = copy_until(dst, src, b'\n')
+  let got = @io.copy_until(dst, src, b'\n')
   @debug.debug_inspect(got, content="(4, None)")
   @debug.debug_inspect(
     dst.to_string(),
@@ -13,7 +13,7 @@ test "copy_until" {
   // exact size
   let src = @io.Buffer::from_string("{}\r\n")
   let dst = @io.Buffer::new()
-  let got = copy_until(dst, src, b'\n')
+  let got = @io.copy_until(dst, src, b'\n')
   @debug.debug_inspect(got, content="(4, None)")
   @debug.debug_inspect(
     dst.to_string(),
@@ -24,7 +24,7 @@ test "copy_until" {
   // character not found
   let src = @io.Buffer::from_string("{}\r")
   let dst = @io.Buffer::new()
-  let got = copy_until(dst, src, b'\n')
+  let got = @io.copy_until(dst, src, b'\n')
   @debug.debug_inspect(
     got,
     content=(
@@ -43,7 +43,7 @@ test "copy_until" {
 test "copy_size" {
   let src = @io.Buffer::from_string("{}\r\n{extra bytes}")
   let dst = @io.Buffer::new()
-  let got = copy_size(dst, src, 4)
+  let got = @io.copy_size(dst, src, 4)
   @debug.debug_inspect(got, content="(4, None)")
   @debug.debug_inspect(
     dst.to_string(),
@@ -54,7 +54,7 @@ test "copy_size" {
   // exact size
   let src = @io.Buffer::from_string("{}\r\n")
   let dst = @io.Buffer::new()
-  let got = copy_size(dst, src, 4)
+  let got = @io.copy_size(dst, src, 4)
   @debug.debug_inspect(got, content="(4, None)")
   @debug.debug_inspect(
     dst.to_string(),
@@ -65,7 +65,7 @@ test "copy_size" {
   // not enough bytes
   let src = @io.Buffer::from_string("{}\r")
   let dst = @io.Buffer::new()
-  let got = copy_size(dst, src, 4)
+  let got = @io.copy_size(dst, src, 4)
   @debug.debug_inspect(
     got,
     content=(

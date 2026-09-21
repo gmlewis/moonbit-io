@@ -50,6 +50,9 @@ pub fn Buffer::reset(self : Buffer, size_hint? : Int = 0) -> Unit {
 }
 
 ///|
+pub extend Buffer with Writer::{write}
+
+///|
 pub impl Writer for Buffer with fn write(self, buf) {
   let blen = self.b.length()
   let buflen = buf.length()
@@ -84,6 +87,9 @@ pub fn Buffer::write_string(self : Buffer, s : String) -> (Int, IOError?) {
 }
 
 ///|
+pub extend Buffer with Reader::{read}
+
+///|
 pub impl Reader for Buffer with fn read(self, buf) {
   let remaining = self.b.length() - self.off
   if remaining <= 0 || buf.length() == 0 {
@@ -94,6 +100,9 @@ pub impl Reader for Buffer with fn read(self, buf) {
   self.off += n
   (n, None)
 }
+
+///|
+pub extend Buffer with ByteReader::{read_byte}
 
 ///|
 pub impl ByteReader for Buffer with fn read_byte(self) {
@@ -126,6 +135,14 @@ pub fn Buffer::to_bytes(self : Buffer) -> Bytes {
 }
 
 ///|
+pub extend Buffer with Show::{to_string}
+
+///|
+#deprecated("Use `Show::output` via the trait or `to_string` instead", skip_current_package=true)
+#doc(hidden)
+pub extend Buffer with Show::{output}
+
+///|
 pub impl Show for Buffer with fn to_string(self) {
   @base64.bytes2str(Bytes::from_array(self.b.buf))
 }
@@ -134,6 +151,14 @@ pub impl Show for Buffer with fn to_string(self) {
 pub impl Show for Buffer with fn output(self, logger) {
   logger.write_string(Show::to_string(self))
 }
+
+///|
+pub extend Buffer with Eq::{equal}
+
+///|
+#deprecated("Use `!=` instead", skip_current_package=true)
+#doc(hidden)
+pub extend Buffer with Eq::{not_equal}
 
 ///|
 pub impl Eq for Buffer with fn equal(self, other) {

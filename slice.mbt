@@ -28,6 +28,12 @@ struct Slice[T] {
 } derive(Debug)
 
 ///|
+/// `to_repr` is promoted explicitly because `derive(Debug)` promotes it
+/// implicitly, which is deprecated. It is deliberately not deprecated itself,
+/// because `Slice::to_repr` is part of the published API.
+pub extend Slice with @debug.Debug::{to_repr}
+
+///|
 /// length returns the length of the slice.
 pub fn[T] Slice::length(self : Slice[T]) -> Int {
   self.len
@@ -226,6 +232,14 @@ test "rev_foldi" {
 }
 
 ///|
+pub extend Slice with Show::{to_string}
+
+///|
+#deprecated("Use `Show::output` via the trait or `to_string` instead", skip_current_package=true)
+#doc(hidden)
+pub extend Slice with Show::{output}
+
+///|
 pub impl[X : Show] Show for Slice[X] with fn output(self, logger) {
   logger.write_iter(self.iter())
 }
@@ -249,6 +263,14 @@ pub fn[T] Slice::each(self : Slice[T], f : (T) -> Unit) -> Unit {
     f(self[i])
   }
 }
+
+///|
+pub extend Slice with Eq::{equal}
+
+///|
+#deprecated("Use `!=` instead", skip_current_package=true)
+#doc(hidden)
+pub extend Slice with Eq::{not_equal}
 
 ///|
 /// Compares two slices for equality.

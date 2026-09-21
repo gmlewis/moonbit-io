@@ -97,13 +97,15 @@ test "randomized/buffer_generated the bytes should be 0" {
 
 ///|
 test "discard" {
-  let b = @io.Buffer::from_slice(Slice::new([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
+  let b = @io.Buffer::from_slice(
+    @io.Slice::new([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+  )
   guard! @io.copy(@io.discard, b) is (10, None)
 }
 
 ///|
 test "buffer::to_slice" {
-  let b = @io.Buffer::from_slice(Slice::new([1, 2, 3]))
+  let b = @io.Buffer::from_slice(@io.Slice::new([1, 2, 3]))
   let got = b.to_slice()
   @debug.assert_eq(got.to_bytes(), b"\x01\x02\x03")
 }

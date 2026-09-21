@@ -32,6 +32,29 @@ pub(all) suberror IOError {
 } derive(Debug, Eq)
 
 ///|
+pub extend IOError with Eq::{equal}
+
+///|
+#deprecated("Use `!=` instead", skip_current_package=true)
+#doc(hidden)
+pub extend IOError with Eq::{not_equal}
+
+///|
+/// `to_repr` is promoted explicitly because `derive(Debug)` promotes it
+/// implicitly, which is deprecated. It is deliberately not deprecated itself:
+/// other packages call `IOError::to_repr` directly to report an `IOError` in a
+/// test failure message.
+pub extend IOError with @debug.Debug::{to_repr}
+
+///|
+pub extend IOError with Show::{to_string}
+
+///|
+#deprecated("Use `Show::output` via the trait or `to_string` instead", skip_current_package=true)
+#doc(hidden)
+pub extend IOError with Show::{output}
+
+///|
 pub impl Show for IOError with fn output(self, logger) {
   let IOError(msg) = self
   logger.write_string(
@@ -489,6 +512,9 @@ struct LimitedReader {
 }
 
 ///|
+pub extend LimitedReader with Reader::{read}
+
+///|
 pub impl Reader for LimitedReader with fn read(self, p) {
   if self.n <= 0 {
     return (0, Some(eof))
@@ -692,6 +718,9 @@ struct TeeReader {
 let _trait : &Reader = TeeReader::new(discard, discard)
 
 ///|
+pub extend TeeReader with Reader::{read}
+
+///|
 pub impl Reader for TeeReader with fn read(self, p) {
   let (n, err) = self.r.read(p)
   if n > 0 {
@@ -720,9 +749,15 @@ let _discardIsReader : &Reader = discard
 struct Discard {}
 
 ///|
+pub extend Discard with Reader::{read}
+
+///|
 pub impl Reader for Discard with fn read(_self, _b) {
   (0, Some(eof))
 }
+
+///|
+pub extend Discard with Writer::{write}
 
 ///|
 /// Discard implements ReaderFrom as an optimization so copy to
@@ -765,6 +800,9 @@ pub fn NopCloser::new(r : &Reader) -> NopCloser {
 }
 
 ///|
+pub extend NopCloser with Reader::{read}
+
+///|
 pub impl Reader for NopCloser with fn read(self, b) {
   self.r.read(b)
 }
@@ -773,6 +811,9 @@ pub impl Reader for NopCloser with fn read(self, b) {
 struct NopCloser {
   r : &Reader
 }
+
+///|
+pub extend NopCloser with Closer::{close}
 
 ///|
 pub impl Closer for NopCloser with fn close(_self) {

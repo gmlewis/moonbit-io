@@ -1,26 +1,26 @@
 ///|
 test "copy_json 1" {
-  let src = Buffer::from_string("{}\r\n{extra bytes}")
-  let got = copy_json(src)
+  let src = @io.Buffer::from_string("{}\r\n{extra bytes}")
+  let got = @io.copy_json(src)
   @debug.debug_inspect(got, content="(Object({}), 2, None)")
 }
 
 ///|
 test "copy_json 2" {
   // Test basic JSON value parsing
-  let buf = Buffer::from_string("42")
-  let (json, bytes, err) = copy_json(buf)
+  let buf = @io.Buffer::from_string("42")
+  let (json, bytes, err) = @io.copy_json(buf)
   @debug.debug_inspect(json, content="Number(42)")
   @debug.debug_inspect(bytes, content="2")
   @debug.debug_inspect(err, content="None")
 
   // Test nested JSON object
-  let buf = Buffer::from_string(
+  let buf = @io.Buffer::from_string(
     (
       #|{"a":1,"b":true}
     ),
   )
-  let (json, bytes, err) = copy_json(buf)
+  let (json, bytes, err) = @io.copy_json(buf)
   @debug.debug_inspect(
     json,
     content=(
@@ -31,7 +31,7 @@ test "copy_json 2" {
   @debug.debug_inspect(err, content="None")
 
   // Test nested JSON object with extra whitespace and UTF-8
-  let buf = Buffer::from_string(
+  let buf = @io.Buffer::from_string(
     (
       #|
       #|{
@@ -41,7 +41,7 @@ test "copy_json 2" {
       #|}
     ),
   )
-  let (json, bytes, err) = copy_json(buf)
+  let (json, bytes, err) = @io.copy_json(buf)
   @debug.debug_inspect(
     json,
     content=(
@@ -54,9 +54,9 @@ test "copy_json 2" {
 
 ///|
 test "copy_json/invalid_json" {
-  let buf = Buffer::new()
+  let buf = @io.Buffer::new()
   buf.write_string("{invalid}") |> ignore()
-  let (json, bytes, err) = copy_json(buf)
+  let (json, bytes, err) = @io.copy_json(buf)
   @debug.debug_inspect(json, content="Null")
   @debug.debug_inspect(bytes, content="0")
   @debug.debug_inspect(
@@ -67,8 +67,8 @@ test "copy_json/invalid_json" {
 
 ///|
 test "copy_json/empty" {
-  let buf = Buffer::new()
-  let (json, bytes, err) = copy_json(buf)
+  let buf = @io.Buffer::new()
+  let (json, bytes, err) = @io.copy_json(buf)
   @debug.debug_inspect(json, content="Null")
   @debug.debug_inspect(bytes, content="0")
   @debug.debug_inspect(err, content="Some(IOError(\"invalid eof\"))")
@@ -76,12 +76,12 @@ test "copy_json/empty" {
 
 ///|
 test "copy_json/jsonrpc2" {
-  let buf = Buffer::from_string(
+  let buf = @io.Buffer::from_string(
     (
       #|{"jsonrpc":"2.0","method":"foo","params":[1,2,3],"id":1}
     ),
   )
-  let (json, bytes, err) = copy_json(buf)
+  let (json, bytes, err) = @io.copy_json(buf)
   @debug.debug_inspect(
     json,
     content=(
@@ -98,12 +98,12 @@ test "copy_json/jsonrpc2" {
   @debug.debug_inspect(bytes, content="56")
   @debug.debug_inspect(err, content="None")
   //
-  let buf = Buffer::from_string(
+  let buf = @io.Buffer::from_string(
     (
       #|{"jsonrpc":"2.0","id":1,"method":"test","params":{}}
     ),
   )
-  let (json, bytes, err) = copy_json(buf)
+  let (json, bytes, err) = @io.copy_json(buf)
   @debug.debug_inspect(
     json,
     content=(

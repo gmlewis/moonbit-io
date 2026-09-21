@@ -44,10 +44,14 @@ pub fn read_full(&Reader, Slice[Byte]) -> (Int, IOError?)
 pub(all) suberror IOError {
   IOError(String)
 } derive(Eq, @debug.Debug)
+pub fn IOError::equal(Self, Self) -> Bool
+pub fn IOError::to_repr(Self) -> @debug.Repr
+pub fn IOError::to_string(Self) -> String
 pub impl Show for IOError
 
 // Types and methods
 type Buffer
+pub fn Buffer::equal(Self, Self) -> Bool
 pub fn Buffer::from_bytes(Bytes) -> Self
 pub fn Buffer::from_slice(Slice[Byte]) -> Self
 pub fn Buffer::from_string(String) -> Self
@@ -55,11 +59,15 @@ pub fn Buffer::from_string(String) -> Self
 pub fn Buffer::get(Self, Int) -> Byte
 pub fn Buffer::length(Self) -> Int
 pub fn Buffer::new(size_hint? : Int) -> Self
+pub fn Buffer::read(Self, Slice[Byte]) -> (Int, IOError?)
+pub fn Buffer::read_byte(Self) -> (Byte, IOError?)
 pub fn Buffer::read_from(Self, &Reader) -> (Int64, IOError?)
 pub fn Buffer::reset(Self, size_hint? : Int) -> Unit
 pub fn Buffer::substring(Self, start? : Int, end? : Int) -> String
 pub fn Buffer::to_bytes(Self) -> Bytes
 pub fn Buffer::to_slice(Self) -> Slice[Byte]
+pub fn Buffer::to_string(Self) -> String
+pub fn Buffer::write(Self, Slice[Byte]) -> (Int, IOError?)
 pub fn Buffer::write_byte(Self, Byte) -> (Int, IOError?)
 pub fn Buffer::write_bytes(Self, Bytes) -> (Int, IOError?)
 pub fn Buffer::write_string(Self, String) -> (Int, IOError?)
@@ -70,16 +78,21 @@ pub impl Eq for Buffer
 pub impl Show for Buffer
 
 type Discard
+pub fn Discard::read(Self, Slice[Byte]) -> (Int, IOError?)
 pub fn Discard::read_from(Self, &Reader) -> (Int64, IOError?)
+pub fn Discard::write(Self, Slice[Byte]) -> (Int, IOError?)
 pub impl Reader for Discard
 pub impl Writer for Discard
 
 type LimitedReader
 pub fn LimitedReader::new(&Reader, Int64) -> Self
+pub fn LimitedReader::read(Self, Slice[Byte]) -> (Int, IOError?)
 pub impl Reader for LimitedReader
 
 type NopCloser
+pub fn NopCloser::close(Self) -> IOError?
 pub fn NopCloser::new(&Reader) -> Self
+pub fn NopCloser::read(Self, Slice[Byte]) -> (Int, IOError?)
 pub impl Closer for NopCloser
 pub impl Reader for NopCloser
 
@@ -101,6 +114,7 @@ pub fn[T] Slice::append(Self[T], Self[T]) -> Self[T]
 pub fn[T] Slice::as_array_view(Self[T]) -> ArrayView[T]
 pub fn[T] Slice::cap(Self[T]) -> Int
 pub fn[T] Slice::each(Self[T], (T) -> Unit) -> Unit
+pub fn[T : Eq] Slice::equal(Self[T], Self[T]) -> Bool
 pub fn[A, B] Slice::fold(Self[A], init~ : B, (B, A) -> B) -> B
 pub fn[A, B] Slice::foldi(Self[A], init~ : B, (Int, B, A) -> B) -> B
 #alias("_[_]")
@@ -119,11 +133,14 @@ pub fn[T] Slice::set(Self[T], Int, T) -> Unit
 pub fn[T] Slice::sub(Self[T], start? : Int, end? : Int) -> Self[T]
 pub fn[T] Slice::swap(Self[T], Int, Int) -> Unit
 pub fn Slice::to_bytes(Self[Byte]) -> Bytes
+pub fn[T : @debug.Debug] Slice::to_repr(Self[T]) -> @debug.Repr
+pub fn[X : Show] Slice::to_string(Self[X]) -> String
 pub impl[T : Eq] Eq for Slice[T]
 pub impl[X : Show] Show for Slice[X]
 
 type TeeReader
 pub fn TeeReader::new(&Reader, &Writer) -> Self
+pub fn TeeReader::read(Self, Slice[Byte]) -> (Int, IOError?)
 pub impl Reader for TeeReader
 
 pub(all) enum Whence {

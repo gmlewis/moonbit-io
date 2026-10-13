@@ -4,14 +4,14 @@ struct Buffer {
   // off represent the current read/write position in the buffer.
   // It is recommended to use the buffer as a reader or writer
   // but not both at the same time.
-  mut off : Int
+  mut off : Int32
 }
 
 ///|
 /// Buffer::new creates a new empty Buffer with an optional size hint.
 /// The size hint is used to preallocate memory for the buffer, which can
 /// improve performance when the size of the data to be written is known in advance.
-pub fn Buffer::new(size_hint? : Int = 0) -> Buffer {
+pub fn Buffer::new(size_hint~ : Int32 = 0) -> Buffer {
   let b = Slice::new(Array::make(size_hint, b'\x00'), start=0, end=0)
   { b, off: 0, }
 }
@@ -44,7 +44,7 @@ pub fn Buffer::from_string(s : String) -> Buffer {
 }
 
 ///|
-pub fn Buffer::reset(self : Buffer, size_hint? : Int = 0) -> Unit {
+pub fn Buffer::reset(self : Buffer, size_hint~ : Int32 = 0) -> Unit {
   self.b = Slice::new(Array::make(size_hint, b'\x00'), start=0, end=0)
   self.off = 0
 }
@@ -69,19 +69,19 @@ pub impl Writer for Buffer with fn write(self, buf) {
 }
 
 ///|
-pub fn Buffer::write_bytes(self : Buffer, buf : Bytes) -> (Int, IOError?) {
+pub fn Buffer::write_bytes(self : Buffer, buf : Bytes) -> (Int32, IOError?) {
   Writer::write(self, Slice::new(buf.to_array()))
 }
 
 ///|
-pub fn Buffer::write_byte(self : Buffer, b : Byte) -> (Int, IOError?) {
+pub fn Buffer::write_byte(self : Buffer, b : Byte) -> (Int32, IOError?) {
   Writer::write(self, Slice::new([b]))
 }
 
 ///|
 /// `write_string` converts the MoonBit UTF-16 String to UTF-8 and
 /// writes the bytes to the buffer.
-pub fn Buffer::write_string(self : Buffer, s : String) -> (Int, IOError?) {
+pub fn Buffer::write_string(self : Buffer, s : String) -> (Int32, IOError?) {
   let b = @base64.str2bytes(s)
   self.write_bytes(b)
 }
@@ -121,7 +121,7 @@ pub fn Buffer::read_from(self : Buffer, r : &Reader) -> (Int64, IOError?) {
 }
 
 ///|
-fn minimum(a : Int, b : Int) -> Int {
+fn minimum(a : Int32, b : Int32) -> Int32 {
   if a < b {
     a
   } else {
@@ -179,18 +179,22 @@ pub fn Buffer::to_slice(self : Buffer) -> Slice[Byte] {
 }
 
 ///|
-pub fn Buffer::length(self : Buffer) -> Int {
+pub fn Buffer::length(self : Buffer) -> Int32 {
   self.b.length()
 }
 
 ///|
 #alias("_[_]")
-pub fn Buffer::get(self : Buffer, index : Int) -> Byte {
+pub fn Buffer::get(self : Buffer, index : Int32) -> Byte {
   self.b[index]
 }
 
 ///|
-pub fn Buffer::substring(self : Buffer, start? : Int = 0, end? : Int) -> String {
+pub fn Buffer::substring(
+  self : Buffer,
+  start~ : Int32 = 0,
+  end? : Int32,
+) -> String {
   let end = match end {
     None => self.b.length()
     Some(x) => x

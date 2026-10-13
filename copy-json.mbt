@@ -53,10 +53,10 @@ fn ParseContext::parse_value2(
 ) -> Json raise ParseError {
   match tok {
     Null => Json::null()
-    True => true.to_json()
-    False => false.to_json()
-    Number(n) => n.to_json()
-    String(s) => s.to_json()
+    True => Json(true)
+    False => Json(false)
+    Number(n) => Json(n)
+    String(s) => Json(s)
     LBrace => ctx.parse_object()
     LBracket => ctx.parse_array()
     RBracket | RBrace | Comma =>
@@ -71,13 +71,13 @@ fn ParseContext::parse_object(ctx : ParseContext) -> Json raise ParseError {
   let map = Map([])
   for tok = ctx.lex_property_name() {
     match tok {
-      RBrace => break map.to_json()
+      RBrace => break Json(map)
       String(name) => {
         ctx.lex_after_property_name()
         map[name] = ctx.parse_value()
         match ctx.lex_after_object_value() {
           Comma => continue ctx.lex_property_name2()
-          RBrace => break map.to_json()
+          RBrace => break Json(map)
           tok =>
             raise ParseError(
               "invalid JSON: expected ',' or '}' at offset \{ctx.offset}, got '\{tok}'",
@@ -97,13 +97,13 @@ fn ParseContext::parse_array(ctx : ParseContext) -> Json raise ParseError {
   let vec = []
   for tok = ctx.lex_value(allow_rbracket=true) {
     match tok {
-      RBracket => break vec.to_json()
+      RBracket => break Json(vec)
       _ => {
         vec.push(ctx.parse_value2(tok))
         let tok2 = ctx.lex_after_array_value()
         match tok2 {
           Comma => continue ctx.lex_value(allow_rbracket=false)
-          RBracket => break vec.to_json()
+          RBracket => break Json(vec)
           _ => raise ParseError("unexpected '\{tok2}' at offset \{ctx.offset}")
         }
       }
@@ -115,7 +115,7 @@ fn ParseContext::parse_array(ctx : ParseContext) -> Json raise ParseError {
 priv struct ParseContext {
   r : &ByteReader
   buf : Buffer
-  mut offset : Int
+  mut offset : Int32
 }
 
 ///|
@@ -238,7 +238,7 @@ fn ParseContext::lex_value(
             return Number(n)
           }
           Some(c2) => {
-            if c2 is ('1'..='9') {
+            if c2 is ('1'..<='9') {
               let n = ctx.lex_decimal_integer(start=ctx.offset - 2)
               return Number(n)
             }
@@ -250,7 +250,7 @@ fn ParseContext::lex_value(
         let n = ctx.lex_zero(start=ctx.offset - 1)
         return Number(n)
       }
-      Some('1'..='9') => {
+      Some('1'..<='9') => {
         let n = ctx.lex_decimal_integer(start=ctx.offset - 1)
         return Number(n)
       }
@@ -273,7 +273,7 @@ fn ParseContext::lex_value(
 fn[T] ParseContext::invalid_char(
   ctx : ParseContext,
   c : Char,
-  shift? : Int = 0,
+  shift~ : Int32 = 0,
 ) -> T raise ParseError {
   ctx.offset += shift
   raise ParseError("invalid JSON: unexpected '\{c}' at offset \{ctx.offset}")
@@ -286,7 +286,7 @@ fn ParseContext::read_new_byte(self : ParseContext) -> Char? {
   self.offset += 1
   let (_, err) = self.buf.write_byte(b)
   guard err is None else { return None }
-  let current = Int::unsafe_to_char(b.to_int())
+  let current = Int32::unsafe_to_char(b.to_int())
   Some(current)
 }
 
@@ -295,7 +295,7 @@ fn ParseContext::read_char(ctx : ParseContext) -> Char? {
   if ctx.offset < ctx.buf.length() {
     let b = ctx.buf[ctx.offset]
     ctx.offset += 1
-    return Some(Int::unsafe_to_char(b.to_int()))
+    return Some(Int32::unsafe_to_char(b.to_int()))
   }
   ParseContext::read_new_byte(ctx)
 }
@@ -364,7 +364,7 @@ fn ParseContext::expect_ascii_char(
   // if c.to_int() != c1 {
   //   ctx.invalid_char!(c, shift=-1)
   // }
-  ParseContext::expect_char(ctx, Int::unsafe_to_char(c.to_int()))
+  ParseContext::expect_char(ctx, Int32::unsafe_to_char(c.to_int()))
 }
 
 ///|
@@ -480,7 +480,7 @@ fn ParseContext::lex_property_name2(
 ///|
 fn ParseContext::lex_decimal_integer(
   ctx : ParseContext,
-  start~ : Int,
+  start~ : Int32,
 ) -> Double raise ParseError {
   for ;; {
     match ctx.read_char() {
@@ -501,7 +501,7 @@ fn ParseContext::lex_decimal_integer(
 ///|
 fn ParseContext::lex_decimal_point(
   ctx : ParseContext,
-  start~ : Int,
+  start~ : Int32,
 ) -> Double raise ParseError {
   match ctx.read_char() {
     Some(c) =>
@@ -517,7 +517,7 @@ fn ParseContext::lex_decimal_point(
 ///|
 fn ParseContext::lex_decimal_fraction(
   ctx : ParseContext,
-  start~ : Int,
+  start~ : Int32,
 ) -> Double raise ParseError {
   for ;; {
     match ctx.read_char() {
@@ -537,7 +537,7 @@ fn ParseContext::lex_decimal_fraction(
 ///|
 fn ParseContext::lex_decimal_exponent(
   ctx : ParseContext,
-  start~ : Int,
+  start~ : Int32,
 ) -> Double raise ParseError {
   match ctx.read_char() {
     Some('+') | Some('-') => return ctx.lex_decimal_exponent_sign(start~)
@@ -554,7 +554,7 @@ fn ParseContext::lex_decimal_exponent(
 ///|
 fn ParseContext::lex_decimal_exponent_sign(
   ctx : ParseContext,
-  start~ : Int,
+  start~ : Int32,
 ) -> Double raise ParseError {
   match ctx.read_char() {
     Some(c) => {
@@ -570,7 +570,7 @@ fn ParseContext::lex_decimal_exponent_sign(
 ///|
 fn ParseContext::lex_decimal_exponent_integer(
   ctx : ParseContext,
-  start~ : Int,
+  start~ : Int32,
 ) -> Double raise ParseError {
   for ;; {
     match ctx.read_char() {
@@ -589,7 +589,7 @@ fn ParseContext::lex_decimal_exponent_integer(
 ///|
 fn ParseContext::lex_zero(
   ctx : ParseContext,
-  start~ : Int,
+  start~ : Int32,
 ) -> Double raise ParseError {
   match ctx.read_char() {
     Some('.') => ctx.lex_decimal_point(start~)
@@ -608,8 +608,8 @@ fn ParseContext::lex_zero(
 ///|
 fn ParseContext::lex_number_end(
   ctx : ParseContext,
-  start : Int,
-  end : Int,
+  start : Int32,
+  end : Int32,
 ) -> Double raise ParseError {
   let s = ctx.buf.substring(start~, end~)
   @string.parse_double(s) catch {
@@ -621,7 +621,7 @@ fn ParseContext::lex_number_end(
 fn ParseContext::lex_string(ctx : ParseContext) -> String raise ParseError {
   let buf = StringBuilder()
   let mut start = ctx.offset
-  fn flush(end : Int) {
+  fn flush(end : Int32) {
     if start > 0 && end > start {
       // buf.write_substring(ctx.input, start, end - start)
       buf.write_string(ctx.buf.substring(start~, end~))
@@ -648,7 +648,7 @@ fn ParseContext::lex_string(ctx : ParseContext) -> String raise ParseError {
           Some('/') => buf.write_char('/')
           Some('u') => {
             let c = ctx.lex_hex_digits(4)
-            buf.write_char(Int::unsafe_to_char(c))
+            buf.write_char(Int32::unsafe_to_char(c))
           }
           Some(c) => ctx.invalid_char(c, shift=-1)
           None => raise ParseError("invalid eof")
@@ -670,8 +670,8 @@ fn ParseContext::lex_string(ctx : ParseContext) -> String raise ParseError {
 ///|
 fn ParseContext::lex_hex_digits(
   ctx : ParseContext,
-  n : Int,
-) -> Int raise ParseError {
+  n : Int32,
+) -> Int32 raise ParseError {
   let mut r = 0
   for _ in 0..<n {
     match ctx.read_char() {

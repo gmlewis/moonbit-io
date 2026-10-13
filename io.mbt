@@ -146,7 +146,7 @@ pub let err_no_progress : IOError = IOError(
 ///
 /// Implementations must not retain p.
 pub(open) trait Reader {
-  fn read(Self, Slice[Byte]) -> (Int, IOError?)
+  fn read(Self, Slice[Byte]) -> (Int32, IOError?)
 }
 
 ///|
@@ -160,7 +160,7 @@ pub(open) trait Reader {
 ///
 /// Implementations must not retain p.
 pub(open) trait Writer {
-  fn write(Self, Slice[Byte]) -> (Int, IOError?)
+  fn write(Self, Slice[Byte]) -> (Int32, IOError?)
 }
 
 ///|
@@ -277,7 +277,7 @@ pub(open) trait WriterTo {
 ///
 /// Implementations must not retain p.
 pub(open) trait ReaderAt {
-  fn read_at(Self, Slice[Byte], Int64) -> (Int, IOError?)
+  fn read_at(Self, Slice[Byte], Int64) -> (Int32, IOError?)
 }
 
 ///|
@@ -297,7 +297,7 @@ pub(open) trait ReaderAt {
 ///
 /// Implementations must not retain p.
 pub(open) trait WriterAt {
-  fn write_at(Self, Slice[Byte], Int64) -> (Int, IOError?)
+  fn write_at(Self, Slice[Byte], Int64) -> (Int32, IOError?)
 }
 
 ///|
@@ -342,7 +342,11 @@ pub(open) trait ByteWriter {
 /// If min is greater than the length of buf, read_at_least returns [err_short_buffer].
 /// On return, n >= min if and only if err == None.
 /// If r returns an error having read at least min bytes, the error is dropped.
-fn read_at_least(r : &Reader, buf : Slice[Byte], min : Int) -> (Int, IOError?) {
+fn read_at_least(
+  r : &Reader,
+  buf : Slice[Byte],
+  min : Int32,
+) -> (Int32, IOError?) {
   let mut n = 0
   let mut err = None
   if buf.length() < min {
@@ -369,7 +373,7 @@ fn read_at_least(r : &Reader, buf : Slice[Byte], min : Int) -> (Int, IOError?) {
 /// read_full returns [err_unexpected_eof].
 /// On return, n == len(buf) if and only if err == None.
 /// If r returns an error having read at least len(buf) bytes, the error is dropped.
-pub fn read_full(r : &Reader, buf : Slice[Byte]) -> (Int, IOError?) {
+pub fn read_full(r : &Reader, buf : Slice[Byte]) -> (Int32, IOError?) {
   read_at_least(r, buf, buf.length())
 }
 
@@ -562,7 +566,7 @@ struct SectionReader {
 pub fn SectionReader::read(
   self : SectionReader,
   p : Slice[Byte],
-) -> (Int, IOError?) {
+) -> (Int32, IOError?) {
   if self.off >= self.limit {
     return (0, Some(eof))
   }
@@ -606,7 +610,7 @@ pub fn SectionReader::read_at(
   self : SectionReader,
   p : Slice[Byte],
   off : Int64,
-) -> (Int, IOError?) {
+) -> (Int32, IOError?) {
   let mut off = off
   if off < 0 || off >= self.size() {
     return (0, Some(eof))
@@ -660,7 +664,7 @@ pub fn OffsetWriter::new(w : &WriterAt, off : Int64) -> OffsetWriter {
 pub fn OffsetWriter::write(
   self : OffsetWriter,
   p : Slice[Byte],
-) -> (Int, IOError?) {
+) -> (Int32, IOError?) {
   let (n, err) = self.w.write_at(p, self.off)
   self.off += n.to_int64()
   (n, err)
@@ -671,7 +675,7 @@ pub fn OffsetWriter::write_at(
   self : OffsetWriter,
   p : Slice[Byte],
   off : Int64,
-) -> (Int, IOError?) {
+) -> (Int32, IOError?) {
   if off < 0 {
     return (0, Some(err_offset))
   }

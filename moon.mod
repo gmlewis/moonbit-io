@@ -1,9 +1,9 @@
 name = "gmlewis/io"
 
-version = "0.23.18"
+version = "0.23.19"
 
 import {
-  "gmlewis/base64@0.16.13",
+  "gmlewis/base64@0.16.14",
 }
 
 readme = "README.md"

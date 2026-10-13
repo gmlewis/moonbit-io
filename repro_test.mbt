@@ -1,6 +1,6 @@
 ///|
 struct MultiReader {
-  mut count : Int
+  mut count : Int32
 }
 
 ///|

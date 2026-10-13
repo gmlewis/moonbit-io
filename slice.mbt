@@ -23,8 +23,8 @@
 /// limitations under the License.
 struct Slice[T] {
   buf : Array[T]
-  start : Int
-  len : Int
+  start : Int32
+  len : Int32
 } derive(Debug)
 
 ///|
@@ -35,13 +35,13 @@ pub extend Slice with @debug.Debug::{to_repr}
 
 ///|
 /// length returns the length of the slice.
-pub fn[T] Slice::length(self : Slice[T]) -> Int {
+pub fn[T] Slice::length(self : Slice[T]) -> Int32 {
   self.len
 }
 
 ///|
 #alias("_[_]")
-pub fn[T] Slice::get(self : Slice[T], index : Int) -> T {
+pub fn[T] Slice::get(self : Slice[T], index : Int32) -> T {
   guard index >= 0 && index < self.len else {
     abort(
       "index out of bounds: the len is from 0 to \{self.len} but the index is \{index}",
@@ -52,7 +52,7 @@ pub fn[T] Slice::get(self : Slice[T], index : Int) -> T {
 
 ///|
 #alias("_[_]=_")
-pub fn[T] Slice::set(self : Slice[T], index : Int, value : T) -> Unit {
+pub fn[T] Slice::set(self : Slice[T], index : Int32, value : T) -> Unit {
   guard index >= 0 && index < self.len else {
     abort(
       "index out of bounds: the len is from 0 to \{self.len} but the index is \{index}",
@@ -62,7 +62,7 @@ pub fn[T] Slice::set(self : Slice[T], index : Int, value : T) -> Unit {
 }
 
 ///|
-pub fn[T] Slice::swap(self : Slice[T], i : Int, j : Int) -> Unit {
+pub fn[T] Slice::swap(self : Slice[T], i : Int32, j : Int32) -> Unit {
   guard i >= 0 && i < self.len && j >= 0 && j < self.len else {
     abort(
       "index out of bounds: the len is from 0 to \{self.len} but the index is (\{i}, \{j})",
@@ -74,7 +74,11 @@ pub fn[T] Slice::swap(self : Slice[T], i : Int, j : Int) -> Unit {
 }
 
 ///|
-pub fn[T] Slice::new(buf : Array[T], start? : Int = 0, end? : Int) -> Slice[T] {
+pub fn[T] Slice::new(
+  buf : Array[T],
+  start~ : Int32 = 0,
+  end? : Int32,
+) -> Slice[T] {
   let len = buf.length()
   let end = match end {
     None => len
@@ -94,7 +98,11 @@ pub fn[T] Slice::as_array_view(self : Slice[T]) -> ArrayView[T] {
 
 ///|
 #alias("_[_:_]")
-pub fn[T] Slice::sub(self : Slice[T], start? : Int = 0, end? : Int) -> Slice[T] {
+pub fn[T] Slice::sub(
+  self : Slice[T],
+  start~ : Int32 = 0,
+  end? : Int32,
+) -> Slice[T] {
   let len = self.buf.length()
   let end = match end {
     None => self.len
@@ -108,7 +116,7 @@ pub fn[T] Slice::sub(self : Slice[T], start? : Int = 0, end? : Int) -> Slice[T] 
 
 ///|
 /// cap returns the total capacity of the slice regardless of the current length.
-pub fn[T] Slice::cap(self : Slice[T]) -> Int {
+pub fn[T] Slice::cap(self : Slice[T]) -> Int32 {
   self.buf.length() - self.start
 }
 
@@ -150,7 +158,7 @@ pub fn[A] Slice::iter(self : Slice[A]) -> Iter[A] {
 }
 
 ///|
-pub fn[A] Slice::iter2(self : Slice[A]) -> Iter2[Int, A] {
+pub fn[A] Slice::iter2(self : Slice[A]) -> Iter2[Int32, A] {
   self.buf[self.start:self.start + self.len].iter2()
 }
 
@@ -191,7 +199,7 @@ test "rev_fold" {
 pub fn[A, B] Slice::foldi(
   self : Slice[A],
   init~ : B,
-  f : (Int, B, A) -> B,
+  f : (Int32, B, A) -> B,
 ) -> B {
   for i = 0, acc = init; i < self.length(); {
     continue i + 1, f(i, acc, self[i])
@@ -213,7 +221,7 @@ test "foldi" {
 pub fn[A, B] Slice::rev_foldi(
   self : Slice[A],
   init~ : B,
-  f : (Int, B, A) -> B,
+  f : (Int32, B, A) -> B,
 ) -> B {
   let len = self.length()
   for i = len - 1, acc = init; i >= 0; {

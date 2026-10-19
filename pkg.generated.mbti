@@ -38,7 +38,7 @@ pub let err_whence : IOError
 
 pub fn read_all(&Reader) -> (Slice[Byte], IOError?)
 
-pub fn read_full(&Reader, Slice[Byte]) -> (Int, IOError?)
+pub fn read_full(&Reader, Slice[Byte]) -> (Int32, IOError?)
 
 // Errors
 pub(all) suberror IOError {
@@ -56,21 +56,21 @@ pub fn Buffer::from_bytes(Bytes) -> Self
 pub fn Buffer::from_slice(Slice[Byte]) -> Self
 pub fn Buffer::from_string(String) -> Self
 #alias("_[_]")
-pub fn Buffer::get(Self, Int) -> Byte
-pub fn Buffer::length(Self) -> Int
-pub fn Buffer::new(size_hint? : Int) -> Self
-pub fn Buffer::read(Self, Slice[Byte]) -> (Int, IOError?)
+pub fn Buffer::get(Self, Int32) -> Byte
+pub fn Buffer::length(Self) -> Int32
+pub fn Buffer::new(size_hint? : Int32) -> Self
+pub fn Buffer::read(Self, Slice[Byte]) -> (Int32, IOError?)
 pub fn Buffer::read_byte(Self) -> (Byte, IOError?)
 pub fn Buffer::read_from(Self, &Reader) -> (Int64, IOError?)
-pub fn Buffer::reset(Self, size_hint? : Int) -> Unit
-pub fn Buffer::substring(Self, start? : Int, end? : Int) -> String
+pub fn Buffer::reset(Self, size_hint? : Int32) -> Unit
+pub fn Buffer::substring(Self, start? : Int32, end? : Int32) -> String
 pub fn Buffer::to_bytes(Self) -> Bytes
 pub fn Buffer::to_slice(Self) -> Slice[Byte]
 pub fn Buffer::to_string(Self) -> String
-pub fn Buffer::write(Self, Slice[Byte]) -> (Int, IOError?)
-pub fn Buffer::write_byte(Self, Byte) -> (Int, IOError?)
-pub fn Buffer::write_bytes(Self, Bytes) -> (Int, IOError?)
-pub fn Buffer::write_string(Self, String) -> (Int, IOError?)
+pub fn Buffer::write(Self, Slice[Byte]) -> (Int32, IOError?)
+pub fn Buffer::write_byte(Self, Byte) -> (Int32, IOError?)
+pub fn Buffer::write_bytes(Self, Bytes) -> (Int32, IOError?)
+pub fn Buffer::write_string(Self, String) -> (Int32, IOError?)
 pub impl ByteReader for Buffer
 pub impl Reader for Buffer
 pub impl Writer for Buffer
@@ -78,60 +78,60 @@ pub impl Eq for Buffer
 pub impl Show for Buffer
 
 type Discard
-pub fn Discard::read(Self, Slice[Byte]) -> (Int, IOError?)
+pub fn Discard::read(Self, Slice[Byte]) -> (Int32, IOError?)
 pub fn Discard::read_from(Self, &Reader) -> (Int64, IOError?)
-pub fn Discard::write(Self, Slice[Byte]) -> (Int, IOError?)
+pub fn Discard::write(Self, Slice[Byte]) -> (Int32, IOError?)
 pub impl Reader for Discard
 pub impl Writer for Discard
 
 type LimitedReader
 pub fn LimitedReader::new(&Reader, Int64) -> Self
-pub fn LimitedReader::read(Self, Slice[Byte]) -> (Int, IOError?)
+pub fn LimitedReader::read(Self, Slice[Byte]) -> (Int32, IOError?)
 pub impl Reader for LimitedReader
 
 type NopCloser
 pub fn NopCloser::close(Self) -> IOError?
 pub fn NopCloser::new(&Reader) -> Self
-pub fn NopCloser::read(Self, Slice[Byte]) -> (Int, IOError?)
+pub fn NopCloser::read(Self, Slice[Byte]) -> (Int32, IOError?)
 pub impl Closer for NopCloser
 pub impl Reader for NopCloser
 
 type OffsetWriter
 pub fn OffsetWriter::new(&WriterAt, Int64) -> Self
 pub fn OffsetWriter::seek(Self, Int64, Whence) -> (Int64, IOError?)
-pub fn OffsetWriter::write(Self, Slice[Byte]) -> (Int, IOError?)
-pub fn OffsetWriter::write_at(Self, Slice[Byte], Int64) -> (Int, IOError?)
+pub fn OffsetWriter::write(Self, Slice[Byte]) -> (Int32, IOError?)
+pub fn OffsetWriter::write_at(Self, Slice[Byte], Int64) -> (Int32, IOError?)
 
 type SectionReader
 pub fn SectionReader::new(&ReaderAt, Int64, Int64) -> Self
 pub fn SectionReader::outer(Self) -> (&ReaderAt, Int64, Int64)
-pub fn SectionReader::read(Self, Slice[Byte]) -> (Int, IOError?)
-pub fn SectionReader::read_at(Self, Slice[Byte], Int64) -> (Int, IOError?)
+pub fn SectionReader::read(Self, Slice[Byte]) -> (Int32, IOError?)
+pub fn SectionReader::read_at(Self, Slice[Byte], Int64) -> (Int32, IOError?)
 pub fn SectionReader::seek(Self, Int64, Whence) -> (Int64, IOError?)
 
 type Slice[T] derive(@debug.Debug)
 pub fn[T] Slice::append(Self[T], Self[T]) -> Self[T]
 pub fn[T] Slice::as_array_view(Self[T]) -> ArrayView[T]
-pub fn[T] Slice::cap(Self[T]) -> Int
+pub fn[T] Slice::cap(Self[T]) -> Int32
 pub fn[T] Slice::each(Self[T], (T) -> Unit) -> Unit
 pub fn[T : Eq] Slice::equal(Self[T], Self[T]) -> Bool
 pub fn[A, B] Slice::fold(Self[A], init~ : B, (B, A) -> B) -> B
-pub fn[A, B] Slice::foldi(Self[A], init~ : B, (Int, B, A) -> B) -> B
+pub fn[A, B] Slice::foldi(Self[A], init~ : B, (Int32, B, A) -> B) -> B
 #alias("_[_]")
-pub fn[T] Slice::get(Self[T], Int) -> T
+pub fn[T] Slice::get(Self[T], Int32) -> T
 pub fn[A] Slice::iter(Self[A]) -> Iter[A]
-pub fn[A] Slice::iter2(Self[A]) -> Iter2[Int, A]
-pub fn[T] Slice::length(Self[T]) -> Int
-pub fn[T] Slice::new(Array[T], start? : Int, end? : Int) -> Self[T]
+pub fn[A] Slice::iter2(Self[A]) -> Iter2[Int32, A]
+pub fn[T] Slice::length(Self[T]) -> Int32
+pub fn[T] Slice::new(Array[T], start? : Int32, end? : Int32) -> Self[T]
 pub fn[T] Slice::push(Self[T], T) -> Self[T]
 pub fn[A, B] Slice::rev_fold(Self[A], init~ : B, (B, A) -> B) -> B
-pub fn[A, B] Slice::rev_foldi(Self[A], init~ : B, (Int, B, A) -> B) -> B
+pub fn[A, B] Slice::rev_foldi(Self[A], init~ : B, (Int32, B, A) -> B) -> B
 pub fn[T] Slice::rev_inplace(Self[T]) -> Unit
 #alias("_[_]=_")
-pub fn[T] Slice::set(Self[T], Int, T) -> Unit
+pub fn[T] Slice::set(Self[T], Int32, T) -> Unit
 #alias("_[_:_]")
-pub fn[T] Slice::sub(Self[T], start? : Int, end? : Int) -> Self[T]
-pub fn[T] Slice::swap(Self[T], Int, Int) -> Unit
+pub fn[T] Slice::sub(Self[T], start? : Int32, end? : Int32) -> Self[T]
+pub fn[T] Slice::swap(Self[T], Int32, Int32) -> Unit
 pub fn Slice::to_bytes(Self[Byte]) -> Bytes
 pub fn[T : @debug.Debug] Slice::to_repr(Self[T]) -> @debug.Repr
 pub fn[X : Show] Slice::to_string(Self[X]) -> String
@@ -140,7 +140,7 @@ pub impl[X : Show] Show for Slice[X]
 
 type TeeReader
 pub fn TeeReader::new(&Reader, &Writer) -> Self
-pub fn TeeReader::read(Self, Slice[Byte]) -> (Int, IOError?)
+pub fn TeeReader::read(Self, Slice[Byte]) -> (Int32, IOError?)
 pub impl Reader for TeeReader
 
 pub(all) enum Whence {
@@ -187,11 +187,11 @@ pub(open) trait ReadWriter : Reader + Writer {
 }
 
 pub(open) trait Reader {
-  fn read(Self, Slice[Byte]) -> (Int, IOError?)
+  fn read(Self, Slice[Byte]) -> (Int32, IOError?)
 }
 
 pub(open) trait ReaderAt {
-  fn read_at(Self, Slice[Byte], Int64) -> (Int, IOError?)
+  fn read_at(Self, Slice[Byte], Int64) -> (Int32, IOError?)
 }
 
 pub(open) trait ReaderFrom {
@@ -209,11 +209,11 @@ pub(open) trait WriteSeeker : Writer + Seeker {
 }
 
 pub(open) trait Writer {
-  fn write(Self, Slice[Byte]) -> (Int, IOError?)
+  fn write(Self, Slice[Byte]) -> (Int32, IOError?)
 }
 
 pub(open) trait WriterAt {
-  fn write_at(Self, Slice[Byte], Int64) -> (Int, IOError?)
+  fn write_at(Self, Slice[Byte], Int64) -> (Int32, IOError?)
 }
 
 pub(open) trait WriterTo {

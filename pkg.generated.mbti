@@ -3,6 +3,7 @@ package "gmlewis/io"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
@@ -10,7 +11,7 @@ pub fn copy(&Writer, &Reader) -> (Int64, IOError?)
 
 pub fn copy_buffer(&Writer, &Reader, Slice[Byte]?) -> (Int64, IOError?)
 
-pub fn copy_json(&ByteReader) -> (Json, Int64, IOError?)
+pub fn copy_json(&ByteReader) -> (@json.Json, Int64, IOError?)
 
 pub fn copy_n(&Writer, &Reader, Int64) -> (Int64, IOError?)
 
@@ -41,9 +42,10 @@ pub fn read_all(&Reader) -> (Slice[Byte], IOError?)
 pub fn read_full(&Reader, Slice[Byte]) -> (Int32, IOError?)
 
 // Errors
+#derive(Eq, @debug.Debug)
 pub(all) suberror IOError {
   IOError(String)
-} derive(Eq, @debug.Debug)
+}
 pub fn IOError::equal(Self, Self) -> Bool
 pub fn IOError::to_repr(Self) -> @debug.Repr
 pub fn IOError::to_string(Self) -> String
@@ -109,7 +111,8 @@ pub fn SectionReader::read(Self, Slice[Byte]) -> (Int32, IOError?)
 pub fn SectionReader::read_at(Self, Slice[Byte], Int64) -> (Int32, IOError?)
 pub fn SectionReader::seek(Self, Int64, Whence) -> (Int64, IOError?)
 
-type Slice[T] derive(@debug.Debug)
+#derive(@debug.Debug)
+type Slice[T]
 pub fn[T] Slice::append(Self[T], Self[T]) -> Self[T]
 pub fn[T] Slice::as_array_view(Self[T]) -> ArrayView[T]
 pub fn[T] Slice::cap(Self[T]) -> Int32

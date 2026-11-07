@@ -27,9 +27,10 @@ pub(all) enum Whence {
 
 ///|
 /// An IOError can be tested with equality checks.
+#derive(Debug, Eq)
 pub(all) suberror IOError {
   IOError(String)
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend IOError with Eq::{equal}

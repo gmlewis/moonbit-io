@@ -26,9 +26,10 @@ pub fn copy_json(src : &ByteReader) -> (Json, Int64, IOError?) {
 }
 
 ///|
+#derive(Debug)
 priv suberror ParseError {
   ParseError(String)
-} derive(Debug)
+}
 
 ///|
 impl Show for ParseError with fn output(self, logger) {

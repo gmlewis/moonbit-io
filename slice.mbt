@@ -21,11 +21,12 @@
 /// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 /// See the License for the specific language governing permissions and
 /// limitations under the License.
+#derive(Debug)
 struct Slice[T] {
   buf : Array[T]
   start : Int32
   len : Int32
-} derive(Debug)
+}
 
 ///|
 /// `to_repr` is promoted explicitly because `derive(Debug)` promotes it
